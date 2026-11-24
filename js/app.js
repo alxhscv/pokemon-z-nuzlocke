@@ -125,7 +125,10 @@ function resetToAuth() {
 async function enterRun(r) {
   run = r;
   $("runName").textContent = r.name;
-  await db.from("players").upsert({ run_id: r.id, user_id: user.id }, { onConflict: "run_id,user_id", ignoreDuplicates: true });
+  // unirse (insert idempotente): el upsert ON CONFLICT falla con RLS cuando aún no eres miembro
+  // (la policy SELECT de players es is_member()); el insert normal pasa y el duplicado (23505) se ignora.
+  const { error: joinErr } = await db.from("players").insert({ run_id: r.id, user_id: user.id });
+  if (joinErr && joinErr.code !== "23505") return toast("No se pudo entrar en la partida", true);
   const { data: mine } = await db.from("players").select().eq("run_id", r.id).eq("user_id", user.id).maybeSingle();
   if (!mine) return toast("No se pudo entrar en la partida", true);
   myPlayer = mine;
