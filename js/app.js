@@ -4,6 +4,24 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES } from "./config.js";
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sprite = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 const $ = (id) => document.getElementById(id);
+
+// iconos SVG (presentación; sustituyen a los emojis)
+const SVG = {
+  box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>`,
+  team: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h6M15 12h6"/><circle cx="12" cy="12" r="3"/></svg>`,
+  dead: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 7v5M9.5 9.5h5"/></svg>`,
+};
+// estados de vacío con ilustración + texto con gracia
+const EMPTY = {
+  team: ["M5 3l4 4M19 3l-4 4M4 8h16l-1.5 11a2 2 0 01-2 1.7H7.5a2 2 0 01-2-1.7z", "Tu equipo está vacío. ¡A la hierba alta!"],
+  box: ["M3 4h18v5H3zM3 9h18v11H3zM10 13h4", "La caja está vacía. De momento."],
+  dead: ["M6 21V10a6 6 0 0112 0v11z|M12 7v5M9.5 9.5h5", "El cementerio está vacío. Que siga así."],
+};
+function emptyState(st) {
+  const [d, txt] = EMPTY[st] || ["", "Nada por aquí."];
+  const paths = d.split("|").map((p) => `<path d="${p}"/>`).join("");
+  return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">${paths}</svg><span>${txt}</span></div>`;
+}
 const uname2email = (u) => u.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "") + "@users.pokez";
 const normLoc = (s) => (s || "").trim().toLowerCase();
 const ROUTE_NORMS = new Set(ROUTES.map(normLoc));
@@ -33,7 +51,19 @@ function wireEvents() {
   $("authAvatar").oninput = updateAuthAvatarPreview;
   $("logoutBtn").onclick = () => db.auth.signOut();
   $("userChip").onclick = () => selectTab("perfil");
-  document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => selectTab(b.dataset.tab)));
+  $("themeToggle").onclick = toggleTheme;
+  applyThemeIcon();
+  const tabs = [...document.querySelectorAll(".tab")];
+  tabs.forEach((b, i) => {
+    b.onclick = () => selectTab(b.dataset.tab);
+    b.onkeydown = (e) => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      const n = tabs[(i + d + tabs.length) % tabs.length];
+      n.focus(); selectTab(n.dataset.tab);
+    };
+  });
   $("addBtn").onclick = () => openDialog();
   $("cancelBtn").onclick = () => $("entryDialog").close();
   $("deleteBtn").onclick = deleteEntry;
@@ -47,9 +77,55 @@ function wireEvents() {
 
 // pestañas
 function selectTab(name) {
-  document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tab").forEach((b) => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+  });
   document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
   if (name === "perfil") fillProfile();
+}
+
+// tema claro/oscuro (botón + prefers-color-scheme por defecto)
+function currentTheme() {
+  const set = document.documentElement.getAttribute("data-theme");
+  if (set) return set;
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function toggleTheme() {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("theme", next); } catch (e) {}
+  applyThemeIcon();
+}
+function applyThemeIcon() {
+  const dark = currentTheme() === "dark";
+  document.querySelector(".icon-moon")?.classList.toggle("hidden", dark);
+  document.querySelector(".icon-sun")?.classList.toggle("hidden", !dark);
+  $("themeToggle")?.setAttribute("aria-label", dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
+}
+
+// confeti dorado (medalla nueva)
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div");
+  box.className = "confetti";
+  for (let i = 0; i < 24; i++) {
+    const c = document.createElement("i");
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = i % 3 ? "var(--gold)" : "var(--red)";
+    c.style.animationDelay = Math.random() * .2 + "s";
+    c.style.borderRadius = i % 2 ? "50%" : "2px";
+    box.appendChild(c);
+  }
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 1400);
+}
+
+// skeletons mientras carga Supabase
+function showSkeletons() {
+  const sk = `<div class="skel skel-mon"></div>`.repeat(3);
+  for (const st of ["team", "box", "dead"]) $("list-" + st).innerHTML = sk;
 }
 
 // avatar/color del jugador: sprite si tiene avatar, si no un punto de color
@@ -140,6 +216,7 @@ async function enterRun(r) {
   if (!mine) return toast("No se pudo entrar en la partida", true);
   myPlayer = mine;
   show("app");
+  showSkeletons();
   await reload();
   subscribe();
 }
@@ -160,12 +237,20 @@ async function reload() {
 function subscribe() {
   channel?.unsubscribe();
   channel = db.channel(`run-${run.id}`)
-    .on("postgres_changes", { event: "*", schema: "public", table: "entries", filter: `run_id=eq.${run.id}` }, reload)
-    .on("postgres_changes", { event: "*", schema: "public", table: "players", filter: `run_id=eq.${run.id}` }, reload)
+    .on("postgres_changes", { event: "*", schema: "public", table: "entries", filter: `run_id=eq.${run.id}` }, onRealtime)
+    .on("postgres_changes", { event: "*", schema: "public", table: "players", filter: `run_id=eq.${run.id}` }, onRealtime)
     .subscribe();
 }
 
+// cambio en vivo: destello del punto verde + recarga
+function onRealtime() {
+  const dot = $("liveDot");
+  if (dot) { dot.classList.remove("on"); void dot.offsetWidth; dot.classList.add("on"); }
+  reload();
+}
+
 function render() {
+  if (profile?.color) document.documentElement.style.setProperty("--me-color", profile.color);
   $("userChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   $("meChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   renderRoutes();
@@ -179,7 +264,12 @@ function renderMyColumns() {
   for (const st of ["team", "box", "dead"]) {
     const items = mine.filter((e) => e.status === st);
     $("cnt-" + st).textContent = items.length;
-    $("list-" + st).innerHTML = items.map(monCard).join("") || `<span class="muted" style="font-size:.8rem">Vacío</span>`;
+    let html = items.map(monCard).join("") || emptyState(st);
+    // Equipo: huecos de pokéball hasta 6 (se ve que caben 6)
+    if (st === "team" && items.length > 0 && items.length < 6) {
+      html += `<div class="team-slots">${'<span class="slot"></span>'.repeat(6 - items.length)}</div>`;
+    }
+    $("list-" + st).innerHTML = html;
   }
   const cols = $("myColumns");
   cols.querySelectorAll(".movebtn").forEach((b) =>
@@ -188,33 +278,35 @@ function renderMyColumns() {
     (el.onclick = (ev) => { if (ev.target.closest(".movebtn")) return; openDialog(entries.find((e) => e.id === el.dataset.id)); }));
 }
 
-// estados a los que se puede mover: icono + etiqueta
-const MOVE = { box: ["📦", "A la caja"], team: ["⚔️", "Al equipo"], dead: ["⚰️", "Al cementerio"] };
+// estados a los que se puede mover: icono SVG + etiqueta
+const MOVE = { box: [SVG.box, "A la caja"], team: [SVG.team, "Al equipo"], dead: [SVG.dead, "Al cementerio"] };
 
-function monCard(e) {
+// partes comunes de la carta Pokédex (sprite en caja gris + nombre + Nº + Nv.)
+function monInner(e) {
   const p = byId.get(e.pokemon_id);
   const name = e.nickname || p?.es || "???";
-  const sub = [e.location, p && e.nickname ? p.es : null].filter(Boolean).join(" · ");
+  const species = e.nickname && p ? p.es : null;
+  const sub = [e.location, species].filter(Boolean).join(" · ");
+  const mark = e.status === "team" ? `<span class="state-mark pokeball"></span>`
+    : e.status === "dead" ? `<span class="state-mark">${SVG.dead}</span>` : "";
+  return `${mark}
+    <span class="sprite"><img src="${sprite(e.pokemon_id)}" alt="${esc(name)}" width="48" height="48" loading="lazy" onerror="this.style.visibility='hidden'"></span>
+    <div class="info">
+      <div class="nick">${esc(name)}</div>
+      <div class="sub">${esc(sub) || `<span class="dex">Nº ${String(e.pokemon_id).padStart(3, "0")}</span>`}</div>
+    </div>
+    ${e.level ? `<span class="lvl">Nv. ${e.level}</span>` : ""}`;
+}
+
+function monCard(e) {
   const moves = ["box", "team", "dead"].filter((s) => s !== e.status).map((s) =>
-    `<button class="movebtn" data-move="${s}" data-id="${e.id}" title="${MOVE[s][1]}">${MOVE[s][0]}</button>`).join("");
-  return `<div class="mon ${e.status}" data-id="${e.id}">
-    <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-    <div class="info"><div class="nick">${esc(name)}</div><div class="sub">${esc(sub) || "&nbsp;"}</div></div>
-    ${e.level ? `<span class="lvl">Lv ${e.level}</span>` : ""}
-    <div class="moves">${moves}</div>
-  </div>`;
+    `<button class="movebtn" data-move="${s}" data-id="${e.id}" title="${MOVE[s][1]}" aria-label="${MOVE[s][1]}">${MOVE[s][0]}</button>`).join("");
+  return `<div class="mon ${e.status}" data-id="${e.id}">${monInner(e)}<div class="moves">${moves}</div></div>`;
 }
 
 // tarjeta solo-lectura (para ver el equipo de otro payo)
 function monCardRO(e) {
-  const p = byId.get(e.pokemon_id);
-  const name = e.nickname || p?.es || "???";
-  const sub = [e.location, p && e.nickname ? p.es : null].filter(Boolean).join(" · ");
-  return `<div class="mon ro ${e.status}">
-    <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-    <div class="info"><div class="nick">${esc(name)}</div><div class="sub">${esc(sub) || "&nbsp;"}</div></div>
-    ${e.level ? `<span class="lvl">Lv ${e.level}</span>` : ""}
-  </div>`;
+  return `<div class="mon ro ${e.status}">${monInner(e)}</div>`;
 }
 
 async function updateStatus(id, status) {
@@ -241,10 +333,14 @@ function renderRoutes() {
   }
   const rows = [...ROUTES, ...extras];
 
-  const head = `<thead><tr><th class="rcorner">Ruta</th>${players.map((pl) =>
-    `<th><div class="rhead">${playerIcon(pl.profiles)}<span>${esc(pl.profiles?.display_name || "???")}</span></div></th>`).join("")}</tr></thead>`;
+  const head = `<thead><tr><th class="rcorner">Ruta</th>${players.map((pl) => {
+    const prof = pl.profiles || {};
+    const mine = pl.user_id === user.id;
+    return `<th class="${mine ? "mine" : ""}" style="--me-col:${esc(prof.color || "#888")}">
+      <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div></div></th>`;
+  }).join("")}</tr></thead>`;
 
-  const body = rows.map((route) => {
+  const body = rows.map((route, i) => {
     const cells = players.map((pl) => {
       const mine = pl.user_id === user.id;
       const es = entries.filter((e) => e.user_id === pl.user_id && normLoc(e.location) === normLoc(route));
@@ -255,7 +351,7 @@ function renderRoutes() {
       }).join("");
       return `<td class="${mine ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
     }).join("");
-    return `<tr><th class="rlabel">${esc(route)}</th>${cells}</tr>`;
+    return `<tr><th class="rlabel"><span class="rnum">Zona ${String(i + 1).padStart(2, "0")}</span>${esc(route)}</th>${cells}</tr>`;
   }).join("");
 
   $("routesTable").innerHTML = head + `<tbody>${body}</tbody>`;
@@ -279,13 +375,18 @@ function renderPayos() {
     const dead = es.filter((e) => e.status === "dead").length;
     const team = es.filter((e) => e.status === "team");
     const chips = team.map((e) =>
-      `<img src="${sprite(e.pokemon_id)}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
-      || `<span class="muted" style="font-size:.8rem">Sin equipo</span>`;
-    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="border-top-color:${prof.color}">
-      <div class="fname">${playerIcon(prof)}${esc(prof.display_name)}</div>
+      `<img src="${sprite(e.pokemon_id)}" alt="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
+      || `<span class="muted">Sin equipo</span>`;
+    const bigAv = prof.avatar
+      ? `<img class="favatar" src="${sprite(prof.avatar)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${prof.color}&quot;></span>'">`
+      : `<span class="favatar dot-av" style="background:${prof.color || "#888"}"></span>`;
+    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${esc(prof.color || "#888")}">
+      <div class="fhead"></div>
+      ${bigAv}
+      <div class="fname">${esc(prof.display_name)}</div>
       <div class="stats">
-        <span><b>${es.length - dead}</b> vivos</span>
-        <span><b>${dead}</b> muertos</span>
+        <span class="alive"><b>${es.length - dead}</b> vivos</span>
+        <span class="fallen"><b>${dead}</b> caídos</span>
       </div>
       <div class="medals-view">${medalsHTML(pl.badges)}</div>
       <div class="team">${chips}</div>
@@ -302,11 +403,11 @@ function openPayo(uid) {
   const sect = (icon, title, st) => {
     const arr = es.filter((e) => e.status === st);
     return `<h4>${icon} ${title} <span class="count">${arr.length}</span></h4>
-      <div class="list">${arr.map(monCardRO).join("") || '<span class="muted" style="font-size:.8rem">Vacío</span>'}</div>`;
+      <div class="list">${arr.map(monCardRO).join("") || emptyState(st)}</div>`;
   };
   $("payoName").innerHTML = `${playerIcon(prof)}${esc(prof.display_name)}`;
   $("payoMedals").innerHTML = medalsHTML(pl.badges);
-  $("payoBody").innerHTML = sect("⚔️", "Equipo", "team") + sect("📦", "Caja", "box") + sect("⚰️", "Cementerio", "dead");
+  $("payoBody").innerHTML = sect(SVG.team, "Equipo", "team") + sect(SVG.box, "Caja", "box") + sect(SVG.dead, "Cementerio", "dead");
   $("payoDialog").showModal();
 }
 
@@ -326,6 +427,10 @@ async function setBadges(n) {
   if (!myPlayer || n === myPlayer.badges) return;
   const prev = myPlayer.badges; myPlayer.badges = n;
   renderMedalsEdit(); renderPayos();
+  if (n > prev) {
+    confetti();
+    $("medalsEdit").querySelector(`.medal[data-n="${n}"]`)?.classList.add("just-on");
+  }
   const { error } = await db.from("players").update({ badges: n }).eq("id", myPlayer.id);
   if (error) { myPlayer.badges = prev; renderMedalsEdit(); renderPayos(); toast(error.message, true); }
 }
@@ -352,7 +457,7 @@ async function saveProfile() {
   const { error } = await db.from("profiles").update({ display_name: name, color: $("pColor").value, avatar }).eq("id", user.id);
   if (error) return toast(error.message, true);
   profile = { ...profile, display_name: name, color: $("pColor").value, avatar };
-  toast("Perfil guardado");
+  toast("Perfil guardado", false, true);
   await reload();
 }
 
@@ -396,6 +501,13 @@ async function saveEntry() {
     : await db.from("entries").insert({ ...row, status: "box" });
   if (error) return toast(error.message, true);
   $("entryDialog").close();
+  if (!id) {
+    const logo = document.querySelector(".topbar .logo");
+    if (logo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      logo.classList.remove("shake"); void logo.offsetWidth; logo.classList.add("shake");
+    }
+    toast("¡Pokémon capturado! Entra en la caja", false, true);
+  }
   await reload();
 }
 
@@ -412,7 +524,7 @@ async function deleteEntry() {
 function show(id) { for (const s of ["auth", "app"]) $(s).classList.toggle("hidden", s !== id); }
 function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 let toastT;
-function toast(msg, err = false) {
-  const t = $("toast"); t.textContent = msg; t.className = "toast" + (err ? " err" : "");
+function toast(msg, err = false, ok = false) {
+  const t = $("toast"); t.textContent = msg; t.className = "toast" + (err ? " err" : ok ? " ok" : "");
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hidden"), 2800);
 }

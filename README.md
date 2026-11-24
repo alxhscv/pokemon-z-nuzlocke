@@ -29,6 +29,10 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
 La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al login). En la tabla de
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta.
 
+La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
+botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
+pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** a pantalla completa.
+
 ---
 
 ## Stack
@@ -43,7 +47,7 @@ rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puest
 
 ```
 index.html            # una página (login · app con 4 pestañas: rutas/seguimiento/payos/perfil)
-css/styles.css        # estilos (tema oscuro)
+css/styles.css        # estilos (tema claro por defecto + oscuro, tokens CSS, estética Pokémon/Kalos)
 js/config.js          # URL + anon key + ROUTES (filas de la tabla de rutas)
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}

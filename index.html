@@ -2,21 +2,49 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Pokémon Z · Nuzlocke Tracker</title>
   <meta name="description" content="Seguimiento del Nuzlocke compartido de Pokémon Z: qué captura cada uno en cada ruta, en tiempo real." />
+  <meta name="theme-color" content="#E3350D" />
+
+  <!-- Tema (evita parpadeo: aplica data-theme antes de pintar) -->
+  <script>
+    try { var t = localStorage.getItem("theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Silkscreen&display=swap" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <span class="pokeball"></span>
-      <span>Pokémon&nbsp;Z <small id="runName">Nuzlocke Tracker</small></span>
+      <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
+        <path d="M2.5 24a21.5 21.5 0 0143 0z" fill="#E3350D"/>
+        <path d="M2.5 24h43" stroke="#1b1b1b" stroke-width="3"/>
+        <circle cx="24" cy="24" r="7.5" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
+        <circle cx="24" cy="24" r="3" fill="#1b1b1b"/>
+      </svg>
+      <span class="brand-text">
+        <b>Nuzlocke&nbsp;Z</b>
+        <small id="runName">Pokémon Z Tracker</small>
+      </span>
+      <span class="live-dot" id="liveDot" aria-hidden="true"></span>
     </div>
+
     <div id="userInfo" class="run-info hidden">
+      <button class="btn icon" id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        <svg class="icon-sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+      </button>
       <button class="me-chip small" id="userChip" title="Editar perfil"></button>
-      <button class="btn ghost" id="logoutBtn" title="Cerrar sesión">Salir</button>
+      <button class="btn ghost" id="logoutBtn" title="Cerrar sesión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/></svg>
+        <span>Salir</span>
+      </button>
     </div>
   </header>
 
@@ -24,6 +52,13 @@
     <!-- ───────── Login / registro ───────── -->
     <section id="auth" class="gate hidden">
       <div class="card auth-card">
+        <svg class="logo-big" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
+          <path d="M2.5 24a21.5 21.5 0 0143 0z" fill="#E3350D"/>
+          <path d="M2.5 24h43" stroke="#1b1b1b" stroke-width="3"/>
+          <circle cx="24" cy="24" r="7.5" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
+          <circle cx="24" cy="24" r="3" fill="#1b1b1b"/>
+        </svg>
         <h2 id="authTitle">Iniciar sesión</h2>
         <p class="muted" id="authSub">Entra con tu usuario y contraseña.</p>
         <label>Usuario<input id="authUser" placeholder="tu_usuario" maxlength="20" autocomplete="username" /></label>
@@ -42,38 +77,62 @@
 
     <!-- ───────── App principal ───────── -->
     <section id="app" class="hidden">
-      <nav class="tabs" id="tabs">
-        <button class="tab active" data-tab="rutas">🗺️ Rutas</button>
-        <button class="tab" data-tab="seg">🎒 Seguimiento</button>
-        <button class="tab" data-tab="payos">👥 Payos</button>
-        <button class="tab" data-tab="perfil">🧑 Perfil</button>
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="rutas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3L3 5v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16M15 5v16"/></svg>
+          <span>Rutas</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="seg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 8V6a3 3 0 013-3h6a3 3 0 013 3v2"/><rect x="4" y="8" width="16" height="13" rx="2"/><path d="M9 12h6"/></svg>
+          <span>Seguimiento</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="payos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 5.5a3 3 0 010 5.6M18 20a6 6 0 00-3-5.2"/></svg>
+          <span>Payos</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="perfil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0114 0"/></svg>
+          <span>Perfil</span>
+        </button>
       </nav>
 
       <!-- Rutas -->
-      <div class="panel active" id="panel-rutas">
+      <div class="panel active" id="panel-rutas" role="tabpanel" aria-label="Rutas" tabindex="0">
         <div class="routes-wrap"><table class="routes" id="routesTable"></table></div>
       </div>
 
       <!-- Seguimiento -->
-      <div class="panel" id="panel-seg">
+      <div class="panel" id="panel-seg" role="tabpanel" aria-label="Seguimiento" tabindex="0">
         <div class="me-bar">
           <span class="me-chip" id="meChip"></span>
-          <button class="btn primary" id="addBtn">+ Registrar Pokémon</button>
+          <button class="btn primary" id="addBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Registrar Pokémon</span>
+          </button>
         </div>
         <div class="columns" id="myColumns">
-          <div class="col" data-status="team"><h3>⚔️ Equipo <span class="count" id="cnt-team">0</span></h3><div class="list" id="list-team"></div></div>
-          <div class="col" data-status="box"><h3>📦 Caja <span class="count" id="cnt-box">0</span></h3><div class="list" id="list-box"></div></div>
-          <div class="col grave" data-status="dead"><h3>⚰️ Cementerio <span class="count" id="cnt-dead">0</span></h3><div class="list" id="list-dead"></div></div>
+          <div class="col team" data-status="team">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 3l4 4M19 3l-4 4M4 8h16l-1.5 11a2 2 0 01-2 1.7H7.5a2 2 0 01-2-1.7z"/></svg>Equipo <span class="count" id="cnt-team">0</span></h3>
+            <div class="list" id="list-team"></div>
+          </div>
+          <div class="col box" data-status="box">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>Caja <span class="count" id="cnt-box">0</span></h3>
+            <div class="list" id="list-box"></div>
+          </div>
+          <div class="col grave" data-status="dead">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 7v5M9.5 9.5h5"/></svg>Cementerio <span class="count" id="cnt-dead">0</span></h3>
+            <div class="list" id="list-dead"></div>
+          </div>
         </div>
       </div>
 
       <!-- Payos -->
-      <div class="panel" id="panel-payos">
+      <div class="panel" id="panel-payos" role="tabpanel" aria-label="Payos" tabindex="0">
         <div class="friends" id="friends"></div>
       </div>
 
       <!-- Perfil -->
-      <div class="panel" id="panel-perfil">
+      <div class="panel" id="panel-perfil" role="tabpanel" aria-label="Perfil" tabindex="0">
         <div class="card profile-card">
           <h2>Tu perfil</h2>
           <form id="profileForm">
@@ -89,7 +148,7 @@
             </div>
           </form>
           <hr>
-          <h3>Medallas</h3>
+          <h3 class="section-title">Medallas</h3>
           <div class="medals-edit" id="medalsEdit"></div>
         </div>
       </div>
@@ -97,7 +156,7 @@
   </main>
 
   <!-- ───────── Modal registrar/editar Pokémon ───────── -->
-  <dialog id="entryDialog">
+  <dialog id="entryDialog" closedby="any" aria-labelledby="entryTitle">
     <form method="dialog" id="entryForm">
       <h3 id="entryTitle">Registrar Pokémon</h3>
       <label>Pokémon
@@ -118,7 +177,7 @@
   </dialog>
 
   <!-- ───────── Modal ver payo ───────── -->
-  <dialog id="payoDialog">
+  <dialog id="payoDialog" closedby="any" aria-labelledby="payoName">
     <div class="payo">
       <div class="payo-head">
         <h3 id="payoName"></h3>
