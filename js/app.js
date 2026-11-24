@@ -30,6 +30,7 @@ function wireEvents() {
   $("authSubmit").onclick = doAuth;
   $("authPass").onkeydown = (e) => { if (e.key === "Enter") doAuth(); };
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
+  $("authAvatar").oninput = updateAuthAvatarPreview;
   $("logoutBtn").onclick = () => db.auth.signOut();
   $("userChip").onclick = openProfile;
   $("addBtn").onclick = () => openDialog();
@@ -56,11 +57,20 @@ function showAuth() { signupMode = false; applyAuthMode(); $("userInfo").classLi
 function toggleAuthMode() { signupMode = !signupMode; applyAuthMode(); }
 function applyAuthMode() {
   $("authTitle").textContent = signupMode ? "Crear cuenta" : "Iniciar sesión";
-  $("authSub").textContent = signupMode ? "Elige usuario, contraseña y color." : "Entra con tu usuario y contraseña.";
+  $("authSub").textContent = signupMode ? "Elige usuario, contraseña y tu avatar." : "Entra con tu usuario y contraseña.";
   $("authSubmit").textContent = signupMode ? "Crear cuenta" : "Entrar";
   $("switchText").textContent = signupMode ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
   $("switchMode").textContent = signupMode ? "Inicia sesión" : "Crear una";
-  $("colorField").classList.toggle("hidden", !signupMode);
+  $("avatarField").classList.toggle("hidden", !signupMode);
+  $("authAvatarPreview").classList.toggle("hidden", !signupMode);
+  if (signupMode) updateAuthAvatarPreview();
+}
+const PALETTE = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+function updateAuthAvatarPreview() {
+  const id = byName.get($("authAvatar").value.trim().toLowerCase());
+  $("authAvatarPreview").innerHTML = id
+    ? `<img src="${sprite(id)}" alt=""><span>${esc(byId.get(id).es)}</span>`
+    : `<span>Elige un Pokémon como avatar (opcional)</span>`;
 }
 
 async function doAuth() {
@@ -75,7 +85,9 @@ async function doAuth() {
       const { data, error } = await db.auth.signUp({ email, password: pass });
       if (error) return toast(traduceAuth(error.message), true);
       if (!data.session) return toast("Cuenta creada, ahora inicia sesión", true);
-      await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color: $("authColor").value });
+      const avatar = byName.get($("authAvatar").value.trim().toLowerCase()) || null;
+      const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+      await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color, avatar });
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password: pass });
       if (error) return toast(traduceAuth(error.message), true);

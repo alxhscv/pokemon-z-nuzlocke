@@ -28,9 +28,10 @@
         <p class="muted" id="authSub">Entra con tu usuario y contraseña.</p>
         <label>Usuario<input id="authUser" placeholder="tu_usuario" maxlength="20" autocomplete="username" /></label>
         <label>Contraseña<input id="authPass" type="password" placeholder="••••••" autocomplete="current-password" /></label>
-        <label id="colorField" class="hidden">Tu color
-          <input id="authColor" type="color" value="#ef4444" />
+        <label id="avatarField" class="hidden">Tu avatar (Pokémon)
+          <input id="authAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" />
         </label>
+        <div id="authAvatarPreview" class="preview hidden"></div>
         <button class="btn primary" id="authSubmit">Entrar</button>
         <p class="muted switch">
           <span id="switchText">¿No tienes cuenta?</span>
