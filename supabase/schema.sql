@@ -57,6 +57,9 @@ begin
     create policy anon_all on public.entries for all using (true) with check (true); end if;
 end $$;
 
+-- Permisos de tabla para el rol anónimo (RLS sigue controlando filas; esto da acceso a la tabla).
+grant select, insert, update, delete on public.runs, public.players, public.entries to anon, authenticated;
+
 -- ----- Tiempo real (para ver el progreso de los amigos al instante) -----
 alter publication supabase_realtime add table public.players;
 alter publication supabase_realtime add table public.entries;
