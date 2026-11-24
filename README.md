@@ -14,15 +14,20 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
 
 1. **Creas tu cuenta** (usuario + contraseña, sin verificación de email) o inicias sesión.
 2. Entras directo a la **partida compartida** (no hay que crear ni unirse: es una sola para todos).
-3. **Registras Pokémon**: Pokémon, mote, **zona de captura**, nivel, estado (⚔️ equipo / 📦 caja /
-   ⚰️ muerto) y notas. Llevas tus **medallas** (0–12). En tu **perfil** eliges nombre, color y un
-   **avatar** (cualquier Pokémon).
-4. Ves tres apartados: **🗺️ Capturas por ruta** (matriz de todos), **🎒 Tu seguimiento**
-   (equipo/caja/cementerio) y **👥 Jugadores** (stats de cada uno). Todo se actualiza solo
-   (Supabase Realtime). **Solo editas lo tuyo**.
+3. **Registras Pokémon** (Pokémon, mote, nivel y notas). El Pokémon entra en la **Caja** por defecto;
+   luego lo mueves entre ⚔️ Equipo / 📦 Caja / ⚰️ Cementerio con los botones de su tarjeta (está en un
+   único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
+   ruta. Llevas tus **medallas** (0–12). En tu **perfil** eliges nombre, color y un **avatar**.
+4. La app está en **4 pestañas**:
+   - **🗺️ Rutas** — matriz rutas × jugadores (qué capturó cada uno en cada ruta).
+   - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
+   - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
+   - **🧑 Perfil** — editas tu nombre, color, avatar y medallas (iconos 0–12).
 
-La sesión se recuerda en el dispositivo. En la tabla de rutas, al pulsar una de **tus** celdas se abre
-el registro con esa ruta ya puesta.
+   Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
+
+La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al login). En la tabla de
+rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta.
 
 ---
 
@@ -37,10 +42,10 @@ el registro con esa ruta ya puesta.
 ## Estructura de archivos
 
 ```
-index.html            # una página (login · app con rutas/seguimiento/jugadores)
+index.html            # una página (login · app con 4 pestañas: rutas/seguimiento/payos/perfil)
 css/styles.css        # estilos (tema oscuro)
 js/config.js          # URL + anon key + ROUTES (filas de la tabla de rutas)
-js/app.js             # lógica (auth, run única, realtime, tabla de rutas, perfil, diálogos)
+js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (se aplica una vez)
 scripts/build_pokemon_json.py  # regenera data/pokemon.json desde los CSV de PokéAPI
@@ -89,7 +94,7 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 | `user_id` | uuid **FK→profiles** | dueño (permisos) |
 | `pokemon_id` | int | id nacional (`data/pokemon.json`) |
 | `nickname` | text | mote (opcional) |
-| `location` | text | **zona de captura** (agrupa la tabla de rutas) |
+| `location` | text | **zona de captura** (agrupa la tabla de rutas; se pone desde la celda de ruta, no hay campo) |
 | `level` | int | nivel |
 | `status` | text | `team` · `box` · `dead` |
 | `notes` | text | notas (opcional) |
