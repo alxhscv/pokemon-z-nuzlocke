@@ -104,6 +104,31 @@ hr{border:none;border-top:1px solid var(--line);margin:18px 0}
 .mon.dead .nick{text-decoration:line-through;color:var(--muted)}
 .lvl{font-size:.72rem;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--muted)}
 
+/* Avatares (sprite redondo en vez del punto de color) */
+.avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;image-rendering:pixelated;
+  background:#2a344e;border:2px solid var(--line);flex:0 0 auto;vertical-align:middle}
+.me-chip .avatar{width:26px;height:26px}
+.me-chip.small .avatar{width:22px;height:22px}
+button.me-chip{font:inherit;color:var(--txt)}
+#userChip{cursor:pointer}
+
+/* Tabla de rutas */
+.routes-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg2)}
+table.routes{border-collapse:collapse;width:100%;font-size:.9rem}
+table.routes th,table.routes td{border:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:middle}
+table.routes thead th{background:var(--card2);position:sticky;top:0;z-index:2}
+.rhead{display:flex;align-items:center;gap:6px;justify-content:center;white-space:nowrap;font-weight:700}
+.rlabel,.rcorner{background:var(--card);text-align:left !important;font-weight:600;position:sticky;left:0;z-index:1;white-space:nowrap}
+.rcorner{z-index:3}
+td.addable{cursor:pointer}
+td.addable:hover{background:#ffffff0d}
+.routes .empty{color:var(--grave)}
+.rmon{display:inline-flex;flex-direction:column;align-items:center;width:52px;cursor:pointer;vertical-align:top}
+.rmon img{width:40px;height:40px;image-rendering:pixelated}
+.rmon em{font-style:normal;font-size:.68rem;color:var(--muted);max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmon.dead img{filter:grayscale(1) brightness(.55)}
+.rmon.dead em{text-decoration:line-through}
+
 /* Friends */
 .section-title{margin:34px 0 14px;border-bottom:1px solid var(--line);padding-bottom:8px}
 .friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}

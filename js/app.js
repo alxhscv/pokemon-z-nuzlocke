@@ -1,11 +1,12 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, LOCATIONS } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES } from "./config.js";
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sprite = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 const $ = (id) => document.getElementById(id);
-// El "usuario" es local: internamente se mapea a un email sintético (sin verificación).
 const uname2email = (u) => u.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "") + "@users.pokez";
+const normLoc = (s) => (s || "").trim().toLowerCase();
+const ROUTE_NORMS = new Set(ROUTES.map(normLoc));
 
 // ---- estado ----
 let POKE = [];
@@ -18,7 +19,7 @@ async function init() {
   POKE = await fetch("data/pokemon.json").then((r) => r.json());
   for (const p of POKE) { byId.set(p.id, p); byName.set(p.es.toLowerCase(), p.id); byName.set(p.en.toLowerCase(), p.id); }
   $("pokeList").innerHTML = POKE.map((p) => `<option value="${p.es}">`).join("");
-  $("locList").innerHTML = LOCATIONS.map((l) => `<option value="${l}">`).join("");
+  $("locList").innerHTML = ROUTES.map((l) => `<option value="${l}">`).join("");
   wireEvents();
   db.auth.onAuthStateChange((event) => { if (event === "SIGNED_OUT") resetToAuth(); });
   const { data } = await db.auth.getSession();
@@ -30,10 +31,7 @@ function wireEvents() {
   $("authPass").onkeydown = (e) => { if (e.key === "Enter") doAuth(); };
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("logoutBtn").onclick = () => db.auth.signOut();
-  $("createRunBtn").onclick = createRun;
-  $("joinRunBtn").onclick = () => joinByCode($("joinCode").value);
-  $("leaveBtn").onclick = backToGate;
-  $("copyCodeBtn").onclick = () => { navigator.clipboard?.writeText(run.code); toast("Código copiado"); };
+  $("userChip").onclick = openProfile;
   $("addBtn").onclick = () => openDialog();
   $("badgePlus").onclick = () => setBadges(myPlayer.badges + 1);
   $("badgeMinus").onclick = () => setBadges(myPlayer.badges - 1);
@@ -41,6 +39,16 @@ function wireEvents() {
   $("deleteBtn").onclick = deleteEntry;
   $("entryForm").onsubmit = (e) => { e.preventDefault(); saveEntry(); };
   $("fPokemon").oninput = updatePreview;
+  $("pCancel").onclick = () => $("profileDialog").close();
+  $("pClear").onclick = () => { $("pAvatar").value = ""; updateAvatarPreview(); };
+  $("pAvatar").oninput = updateAvatarPreview;
+  $("profileForm").onsubmit = (e) => { e.preventDefault(); saveProfile(); };
+}
+
+// avatar/color del jugador: sprite si tiene avatar, si no un punto de color
+function playerIcon(prof) {
+  if (prof?.avatar) return `<img class="avatar" src="${sprite(prof.avatar)}" alt="" onerror="this.outerHTML='<span class=&quot;dot&quot; style=&quot;background:${prof.color}&quot;></span>'">`;
+  return `<span class="dot" style="background:${prof?.color || "#888"}"></span>`;
 }
 
 // ===================== auth =====================
@@ -86,90 +94,29 @@ function traduceAuth(m) {
 async function afterLogin() {
   const { data } = await db.auth.getUser();
   user = data.user;
-  // garantiza perfil (por si se creó la cuenta sin él)
   let { data: prof } = await db.from("profiles").select().eq("id", user.id).maybeSingle();
-  if (!prof) {
-    const name = user.email.split("@")[0];
-    ({ data: prof } = await db.from("profiles").insert({ id: user.id, display_name: name }).select().single());
-  }
+  if (!prof) ({ data: prof } = await db.from("profiles").insert({ id: user.id, display_name: user.email.split("@")[0] }).select().single());
   profile = prof;
-  $("userChip").innerHTML = `<span class="dot" style="background:${profile.color}"></span>${esc(profile.display_name)}`;
   $("userInfo").classList.remove("hidden");
-  await routeAfterLogin();
-}
-
-async function routeAfterLogin() {
-  const code = localStorage.getItem("pz_run_code");
-  if (code) {
-    const { data } = await db.from("runs").select().eq("code", code).maybeSingle();
-    if (data) return enterRun(data, false);
-    localStorage.removeItem("pz_run_code");
-  }
-  backToGate();
+  // run única compartida
+  const { data: r } = await db.from("runs").select().limit(1).maybeSingle();
+  if (!r) return toast("La partida no está creada en la base de datos", true);
+  await enterRun(r);
 }
 
 function resetToAuth() {
   channel?.unsubscribe();
   user = profile = run = myPlayer = null; players = []; entries = [];
-  localStorage.removeItem("pz_run_code");
   showAuth();
 }
 
-// ===================== partidas =====================
-async function backToGate() {
-  channel?.unsubscribe(); channel = null;
-  run = myPlayer = null;
-  localStorage.removeItem("pz_run_code");
-  $("runCodeWrap").classList.add("hidden");
-  await loadMyRuns();
-  show("gate");
-}
-
-async function loadMyRuns() {
-  const { data } = await db.from("players").select("badges, runs(*)").eq("user_id", user.id);
-  const runs = (data || []).map((r) => r.runs).filter(Boolean);
-  $("myRunsCard").classList.toggle("hidden", runs.length === 0);
-  $("myRuns").innerHTML = runs.map((r) =>
-    `<button class="player-pick" data-code="${r.code}">${esc(r.name)} <span class="muted">· ${r.code}</span></button>`).join("");
-  $("myRuns").querySelectorAll(".player-pick").forEach((b) =>
-    (b.onclick = async () => {
-      const { data } = await db.from("runs").select().eq("code", b.dataset.code).maybeSingle();
-      if (data) enterRun(data);
-    }));
-}
-
-async function createRun() {
-  const name = $("newRunName").value.trim();
-  if (!name) return toast("Ponle nombre a la partida", true);
-  const mode = $("newRunMode").value;
-  for (let i = 0; i < 5; i++) {
-    const code = randomCode();
-    const { data, error } = await db.from("runs").insert({ code, name, mode, owner_id: user.id }).select().single();
-    if (!error) return enterRun(data);
-    if (error.code !== "23505") return toast(error.message, true);
-  }
-  toast("No se pudo generar un código, reintenta", true);
-}
-
-async function joinByCode(raw) {
-  const code = (raw || "").trim().toUpperCase();
-  if (!code) return toast("Escribe un código", true);
-  const { data, error } = await db.from("runs").select().eq("code", code).maybeSingle();
-  if (error) return toast(error.message, true);
-  if (!data) return toast("No existe ninguna partida con ese código", true);
-  enterRun(data);
-}
-
-async function enterRun(r, join = true) {
+async function enterRun(r) {
   run = r;
-  // asegura que soy miembro (me añado a mí mismo)
+  $("runName").textContent = r.name;
   await db.from("players").upsert({ run_id: r.id, user_id: user.id }, { onConflict: "run_id,user_id", ignoreDuplicates: true });
   const { data: mine } = await db.from("players").select().eq("run_id", r.id).eq("user_id", user.id).maybeSingle();
   if (!mine) return toast("No se pudo entrar en la partida", true);
   myPlayer = mine;
-  localStorage.setItem("pz_run_code", r.code);
-  $("runCodeLabel").textContent = r.code;
-  $("runCodeWrap").classList.remove("hidden");
   show("app");
   await reload();
   subscribe();
@@ -178,11 +125,13 @@ async function enterRun(r, join = true) {
 // ===================== datos + render =====================
 async function reload() {
   const [{ data: pl }, { data: en }] = await Promise.all([
-    db.from("players").select("id, user_id, badges, profiles(display_name, color)").eq("run_id", run.id).order("created_at"),
+    db.from("players").select("id, user_id, badges, profiles(display_name, color, avatar)").eq("run_id", run.id).order("created_at"),
     db.from("entries").select().eq("run_id", run.id).order("created_at"),
   ]);
   players = pl || []; entries = en || [];
   myPlayer = players.find((p) => p.user_id === user.id) || myPlayer;
+  const mp = players.find((p) => p.user_id === user.id);
+  if (mp?.profiles) profile = mp.profiles;
   render();
 }
 
@@ -195,8 +144,15 @@ function subscribe() {
 }
 
 function render() {
-  $("meChip").innerHTML = `<span class="dot" style="background:${profile.color}"></span>${esc(profile.display_name)}`;
+  $("userChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
+  $("meChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   $("badgeCount").textContent = myPlayer?.badges ?? 0;
+  renderRoutes();
+  renderMyColumns();
+  renderFriends();
+}
+
+function renderMyColumns() {
   const mine = entries.filter((e) => e.user_id === user.id);
   for (const st of ["team", "box", "dead"]) {
     const items = mine.filter((e) => e.status === st);
@@ -205,7 +161,6 @@ function render() {
   }
   $("myColumns").querySelectorAll(".mon").forEach((el) =>
     (el.onclick = () => openDialog(entries.find((e) => e.id === el.dataset.id))));
-  renderFriends();
 }
 
 function monCard(e) {
@@ -219,6 +174,47 @@ function monCard(e) {
   </div>`;
 }
 
+// Tabla de rutas × jugadores
+function renderRoutes() {
+  // filas: ROUTES + zonas usadas que no estén en ROUTES
+  const extras = [];
+  const seen = new Set();
+  for (const e of entries) {
+    const n = normLoc(e.location);
+    if (e.location && !ROUTE_NORMS.has(n) && !seen.has(n)) { seen.add(n); extras.push(e.location.trim()); }
+  }
+  const rows = [...ROUTES, ...extras];
+
+  const head = `<thead><tr><th class="rcorner">Ruta</th>${players.map((pl) =>
+    `<th><div class="rhead">${playerIcon(pl.profiles)}<span>${esc(pl.profiles?.display_name || "???")}</span></div></th>`).join("")}</tr></thead>`;
+
+  const body = rows.map((route) => {
+    const cells = players.map((pl) => {
+      const mine = pl.user_id === user.id;
+      const es = entries.filter((e) => e.user_id === pl.user_id && normLoc(e.location) === normLoc(route));
+      const content = es.map((e) => {
+        const nm = e.nickname || byId.get(e.pokemon_id)?.es || "";
+        return `<span class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
+          <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></span>`;
+      }).join("");
+      return `<td class="${mine ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
+    }).join("");
+    return `<tr><th class="rlabel">${esc(route)}</th>${cells}</tr>`;
+  }).join("");
+
+  $("routesTable").innerHTML = head + `<tbody>${body}</tbody>`;
+
+  // editar un Pokémon propio desde su celda
+  $("routesTable").querySelectorAll(".rmon").forEach((el) => (el.onclick = (ev) => {
+    ev.stopPropagation(); openDialog(entries.find((e) => e.id === el.dataset.id));
+  }));
+  // click en mi celda vacía → registrar con esa ruta
+  $("routesTable").querySelectorAll("td.addable").forEach((td) => (td.onclick = (ev) => {
+    if (ev.target.closest(".rmon")) return;
+    openDialog(null, td.dataset.route);
+  }));
+}
+
 function renderFriends() {
   $("friends").innerHTML = players.map((pl) => {
     const prof = pl.profiles || { display_name: "???", color: "#888" };
@@ -229,7 +225,7 @@ function renderFriends() {
       `<img src="${sprite(e.pokemon_id)}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
       || `<span class="muted" style="font-size:.8rem">Sin equipo</span>`;
     return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" style="border-top-color:${prof.color}">
-      <div class="fname"><span class="dot" style="background:${prof.color}"></span>${esc(prof.display_name)}</div>
+      <div class="fname">${playerIcon(prof)}${esc(prof.display_name)}</div>
       <div class="stats">
         <span><b>${es.length - dead.length}</b> vivos</span>
         <span><b>${dead.length}</b> muertos</span>
@@ -248,15 +244,39 @@ async function setBadges(n) {
   if (error) { myPlayer.badges = prev; $("badgeCount").textContent = prev; toast(error.message, true); }
 }
 
-// ===================== diálogo =====================
-function openDialog(entry = null) {
-  const own = !entry || entry.user_id === user.id;
-  if (entry && !own) return;                       // no se editan Pokémon de otros
+// ===================== perfil =====================
+function openProfile() {
+  $("pName").value = profile.display_name;
+  $("pColor").value = profile.color || "#ef4444";
+  $("pAvatar").value = profile.avatar ? byId.get(profile.avatar)?.es || "" : "";
+  updateAvatarPreview();
+  $("profileDialog").showModal();
+}
+function updateAvatarPreview() {
+  const id = byName.get($("pAvatar").value.trim().toLowerCase());
+  $("avatarPreview").innerHTML = id
+    ? `<img src="${sprite(id)}" alt=""><span>${esc(byId.get(id).es)}</span>`
+    : `<span>Sin avatar (se usará tu color)</span>`;
+}
+async function saveProfile() {
+  const name = $("pName").value.trim();
+  if (!name) return toast("Escribe un nombre", true);
+  const avatar = byName.get($("pAvatar").value.trim().toLowerCase()) || null;
+  const { error } = await db.from("profiles").update({ display_name: name, color: $("pColor").value, avatar }).eq("id", user.id);
+  if (error) return toast(error.message, true);
+  profile = { ...profile, display_name: name, color: $("pColor").value, avatar };
+  $("profileDialog").close();
+  await reload();
+}
+
+// ===================== diálogo Pokémon =====================
+function openDialog(entry = null, presetRoute = null) {
+  if (entry && entry.user_id !== user.id) return;   // no se editan Pokémon de otros
   $("entryTitle").textContent = entry ? "Editar Pokémon" : "Registrar Pokémon";
   $("fId").value = entry?.id || "";
   $("fPokemon").value = entry ? byId.get(entry.pokemon_id)?.es || "" : "";
   $("fNickname").value = entry?.nickname || "";
-  $("fLocation").value = entry?.location || "";
+  $("fLocation").value = entry?.location || presetRoute || "";
   $("fLevel").value = entry?.level || "";
   $("fStatus").value = entry?.status || "team";
   $("fNotes").value = entry?.notes || "";
@@ -303,8 +323,7 @@ async function deleteEntry() {
 }
 
 // ===================== utilidades =====================
-function show(id) { for (const s of ["auth", "gate", "app"]) $(s).classList.toggle("hidden", s !== id); }
-function randomCode() { const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return Array.from({ length: 4 }, () => a[Math.floor(Math.random() * a.length)]).join(""); }
+function show(id) { for (const s of ["auth", "app"]) $(s).classList.toggle("hidden", s !== id); }
 function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 let toastT;
 function toast(msg, err = false) {

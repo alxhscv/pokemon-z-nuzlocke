@@ -4,20 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pokémon Z · Nuzlocke Tracker</title>
-  <meta name="description" content="Sigue tu Nuzlocke de Pokémon Z y el de tus amigos en tiempo real." />
+  <meta name="description" content="Seguimiento del Nuzlocke compartido de Pokémon Z: qué captura cada uno en cada ruta, en tiempo real." />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="pokeball"></span> Pokémon&nbsp;Z <small>Nuzlocke Tracker</small></div>
+    <div class="brand">
+      <span class="pokeball"></span>
+      <span>Pokémon&nbsp;Z <small id="runName">Nuzlocke Tracker</small></span>
+    </div>
     <div id="userInfo" class="run-info hidden">
-      <span id="runCodeWrap" class="hidden">
-        <span class="run-code" id="runCodeLabel"></span>
-        <button class="btn ghost" id="copyCodeBtn" title="Copiar código">⧉</button>
-        <button class="btn ghost" id="leaveBtn" title="Cambiar de partida">Partidas</button>
-      </span>
-      <span class="me-chip small" id="userChip"></span>
+      <button class="me-chip small" id="userChip" title="Editar perfil"></button>
       <button class="btn ghost" id="logoutBtn" title="Cerrar sesión">Salir</button>
     </div>
   </header>
@@ -41,35 +39,16 @@
       </div>
     </section>
 
-    <!-- ───────── Crear / unirse a partida ───────── -->
-    <section id="gate" class="gate hidden">
-      <div class="card">
-        <h2>Crear partida</h2>
-        <p class="muted">Empieza una aventura y comparte el código con tus amigos.</p>
-        <label>Nombre de la partida<input id="newRunName" placeholder="La gran guerra de Kalos" maxlength="40" /></label>
-        <label>Modo
-          <select id="newRunMode">
-            <option value="nuzlocke">Nuzlocke</option>
-            <option value="random">Random</option>
-            <option value="monotype">Monotype</option>
-          </select>
-        </label>
-        <button class="btn primary" id="createRunBtn">Crear</button>
-      </div>
-      <div class="card">
-        <h2>Unirse a una partida</h2>
-        <p class="muted">¿Un amigo ya la creó? Pega su código.</p>
-        <label>Código<input id="joinCode" placeholder="EJ: KX7P" maxlength="8" style="text-transform:uppercase" /></label>
-        <button class="btn" id="joinRunBtn">Unirse</button>
-      </div>
-      <div class="card hidden" id="myRunsCard">
-        <h2>Tus partidas</h2>
-        <div id="myRuns" class="player-picker"></div>
-      </div>
-    </section>
-
     <!-- ───────── App principal ───────── -->
     <section id="app" class="hidden">
+      <!-- Tabla de rutas -->
+      <h2 class="section-title">🗺️ Capturas por ruta</h2>
+      <div class="routes-wrap">
+        <table class="routes" id="routesTable"></table>
+      </div>
+
+      <!-- Tu seguimiento -->
+      <h2 class="section-title">🎒 Tu seguimiento</h2>
       <div class="me-bar">
         <span class="me-chip" id="meChip"></span>
         <div class="badges">
@@ -80,19 +59,19 @@
         </div>
         <button class="btn primary" id="addBtn">+ Registrar Pokémon</button>
       </div>
-
       <div class="columns" id="myColumns">
         <div class="col" data-status="team"><h3>⚔️ Equipo <span class="count" id="cnt-team">0</span></h3><div class="list" id="list-team"></div></div>
         <div class="col" data-status="box"><h3>📦 Caja <span class="count" id="cnt-box">0</span></h3><div class="list" id="list-box"></div></div>
         <div class="col grave" data-status="dead"><h3>⚰️ Cementerio <span class="count" id="cnt-dead">0</span></h3><div class="list" id="list-dead"></div></div>
       </div>
 
-      <h2 class="section-title">👥 Progreso de la partida</h2>
+      <!-- Stats por jugador -->
+      <h2 class="section-title">👥 Jugadores</h2>
       <div class="friends" id="friends"></div>
     </section>
   </main>
 
-  <!-- ───────── Modal registrar/editar ───────── -->
+  <!-- ───────── Modal registrar/editar Pokémon ───────── -->
   <dialog id="entryDialog">
     <form method="dialog" id="entryForm">
       <h3 id="entryTitle">Registrar Pokémon</h3>
@@ -120,6 +99,26 @@
       <menu>
         <button type="button" class="btn danger left hidden" id="deleteBtn">Borrar</button>
         <button type="button" class="btn ghost" id="cancelBtn">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- ───────── Modal perfil ───────── -->
+  <dialog id="profileDialog">
+    <form method="dialog" id="profileForm">
+      <h3>Tu perfil</h3>
+      <label>Nombre visible<input id="pName" maxlength="20" /></label>
+      <div class="row2">
+        <label>Color<input id="pColor" type="color" /></label>
+        <label>Avatar (Pokémon)
+          <input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" />
+        </label>
+      </div>
+      <div class="preview" id="avatarPreview"></div>
+      <menu>
+        <button type="button" class="btn ghost left" id="pClear">Sin avatar</button>
+        <button type="button" class="btn ghost" id="pCancel">Cancelar</button>
         <button type="submit" class="btn primary">Guardar</button>
       </menu>
     </form>

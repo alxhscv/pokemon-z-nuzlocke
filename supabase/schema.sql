@@ -18,16 +18,17 @@ create table public.profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
   display_name  text not null,
   color         text not null default '#ef4444',
+  avatar        int,                                   -- id nacional del Pokémon-avatar (opcional)
   created_at    timestamptz not null default now()
 );
 
--- Partidas (se entra con un código; owner_id = quien la creó)
+-- Partida (el grupo usa UNA sola run compartida; la siembra el admin al final de este script)
 create table public.runs (
   id          uuid primary key default gen_random_uuid(),
   code        text unique not null,
   name        text not null,
   mode        text not null default 'nuzlocke',      -- nuzlocke | random | monotype
-  owner_id    uuid not null references auth.users(id) on delete cascade,
+  owner_id    uuid references auth.users(id) on delete set null,
   created_at  timestamptz not null default now()
 );
 
@@ -77,11 +78,8 @@ create policy profiles_read   on public.profiles for select to authenticated usi
 create policy profiles_insert on public.profiles for insert to authenticated with check (id = auth.uid());
 create policy profiles_update on public.profiles for update to authenticated using (id = auth.uid());
 
--- runs: puedes buscar por código; creas con tu owner_id; solo el dueño modifica/borra la partida
-create policy runs_read   on public.runs for select to authenticated using (true);
-create policy runs_insert on public.runs for insert to authenticated with check (owner_id = auth.uid());
-create policy runs_update on public.runs for update to authenticated using (owner_id = auth.uid());
-create policy runs_delete on public.runs for delete to authenticated using (owner_id = auth.uid());
+-- runs: la run es única y fija; los usuarios solo la leen (nadie crea/borra runs desde la web)
+create policy runs_read on public.runs for select to authenticated using (true);
 
 -- players: te unes añadiéndote a TI mismo; ves a los miembros de tus partidas; editas tu fila
 create policy players_read   on public.players for select to authenticated using (public.is_member(run_id));
@@ -102,3 +100,9 @@ grant select, insert, update, delete
 -- ---------- TIEMPO REAL ----------
 alter publication supabase_realtime add table public.players;
 alter publication supabase_realtime add table public.entries;
+
+-- ---------- RUN ÚNICA ----------
+-- El grupo comparte una sola partida. Se crea aquí si aún no hay ninguna.
+insert into public.runs (code, name, mode, owner_id)
+select 'MAIN', 'Nuzlocke de Pokémon Z', 'nuzlocke', null
+where not exists (select 1 from public.runs);
