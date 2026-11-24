@@ -11,19 +11,41 @@
 <body>
   <header class="topbar">
     <div class="brand"><span class="pokeball"></span> Pokémon&nbsp;Z <small>Nuzlocke Tracker</small></div>
-    <div id="runInfo" class="run-info hidden">
-      <span class="run-code" id="runCodeLabel"></span>
-      <button class="btn ghost" id="copyCodeBtn" title="Copiar código">⧉ Copiar</button>
-      <button class="btn ghost" id="leaveBtn" title="Salir de la partida">Salir</button>
+    <div id="userInfo" class="run-info hidden">
+      <span id="runCodeWrap" class="hidden">
+        <span class="run-code" id="runCodeLabel"></span>
+        <button class="btn ghost" id="copyCodeBtn" title="Copiar código">⧉</button>
+        <button class="btn ghost" id="leaveBtn" title="Cambiar de partida">Partidas</button>
+      </span>
+      <span class="me-chip small" id="userChip"></span>
+      <button class="btn ghost" id="logoutBtn" title="Cerrar sesión">Salir</button>
     </div>
   </header>
 
   <main class="wrap">
-    <!-- ───────── Puerta: crear / unirse ───────── -->
-    <section id="gate" class="gate">
+    <!-- ───────── Login / registro ───────── -->
+    <section id="auth" class="gate hidden">
+      <div class="card auth-card">
+        <h2 id="authTitle">Iniciar sesión</h2>
+        <p class="muted" id="authSub">Entra con tu usuario y contraseña.</p>
+        <label>Usuario<input id="authUser" placeholder="tu_usuario" maxlength="20" autocomplete="username" /></label>
+        <label>Contraseña<input id="authPass" type="password" placeholder="••••••" autocomplete="current-password" /></label>
+        <label id="colorField" class="hidden">Tu color
+          <input id="authColor" type="color" value="#ef4444" />
+        </label>
+        <button class="btn primary" id="authSubmit">Entrar</button>
+        <p class="muted switch">
+          <span id="switchText">¿No tienes cuenta?</span>
+          <a href="#" id="switchMode">Crear una</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Crear / unirse a partida ───────── -->
+    <section id="gate" class="gate hidden">
       <div class="card">
         <h2>Crear partida</h2>
-        <p class="muted">Empieza una nueva aventura y comparte el código con tus amigos.</p>
+        <p class="muted">Empieza una aventura y comparte el código con tus amigos.</p>
         <label>Nombre de la partida<input id="newRunName" placeholder="La gran guerra de Kalos" maxlength="40" /></label>
         <label>Modo
           <select id="newRunMode">
@@ -36,24 +58,13 @@
       </div>
       <div class="card">
         <h2>Unirse a una partida</h2>
-        <p class="muted">¿Un amigo ya creó la partida? Pega su código.</p>
+        <p class="muted">¿Un amigo ya la creó? Pega su código.</p>
         <label>Código<input id="joinCode" placeholder="EJ: KX7P" maxlength="8" style="text-transform:uppercase" /></label>
         <button class="btn" id="joinRunBtn">Unirse</button>
       </div>
-    </section>
-
-    <!-- ───────── Elegir jugador ───────── -->
-    <section id="setup" class="gate hidden">
-      <div class="card">
-        <h2>¿Quién eres?</h2>
-        <p class="muted">Elige tu entrenador o crea uno nuevo en <strong id="setupRunName"></strong>.</p>
-        <div id="playerPicker" class="player-picker"></div>
-        <hr/>
-        <label>Nuevo entrenador<input id="newPlayerName" placeholder="Tu nombre" maxlength="20" /></label>
-        <label>Color
-          <input id="newPlayerColor" type="color" value="#ef4444" />
-        </label>
-        <button class="btn primary" id="createPlayerBtn">Entrar</button>
+      <div class="card hidden" id="myRunsCard">
+        <h2>Tus partidas</h2>
+        <div id="myRuns" class="player-picker"></div>
       </div>
     </section>
 
