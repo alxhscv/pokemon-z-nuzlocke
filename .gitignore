@@ -1,0 +1,4 @@
+# CSVs intermedios de PokéAPI (data/pokemon.json ya está generado y versionado)
+scripts/*.csv
+.DS_Store
+Thumbs.db

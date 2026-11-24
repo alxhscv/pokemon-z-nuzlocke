@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pokémon Z · Nuzlocke Tracker</title>
+  <meta name="description" content="Sigue tu Nuzlocke de Pokémon Z y el de tus amigos en tiempo real." />
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="pokeball"></span> Pokémon&nbsp;Z <small>Nuzlocke Tracker</small></div>
+    <div id="runInfo" class="run-info hidden">
+      <span class="run-code" id="runCodeLabel"></span>
+      <button class="btn ghost" id="copyCodeBtn" title="Copiar código">⧉ Copiar</button>
+      <button class="btn ghost" id="leaveBtn" title="Salir de la partida">Salir</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ───────── Puerta: crear / unirse ───────── -->
+    <section id="gate" class="gate">
+      <div class="card">
+        <h2>Crear partida</h2>
+        <p class="muted">Empieza una nueva aventura y comparte el código con tus amigos.</p>
+        <label>Nombre de la partida<input id="newRunName" placeholder="La gran guerra de Kalos" maxlength="40" /></label>
+        <label>Modo
+          <select id="newRunMode">
+            <option value="nuzlocke">Nuzlocke</option>
+            <option value="random">Random</option>
+            <option value="monotype">Monotype</option>
+          </select>
+        </label>
+        <button class="btn primary" id="createRunBtn">Crear</button>
+      </div>
+      <div class="card">
+        <h2>Unirse a una partida</h2>
+        <p class="muted">¿Un amigo ya creó la partida? Pega su código.</p>
+        <label>Código<input id="joinCode" placeholder="EJ: KX7P" maxlength="8" style="text-transform:uppercase" /></label>
+        <button class="btn" id="joinRunBtn">Unirse</button>
+      </div>
+    </section>
+
+    <!-- ───────── Elegir jugador ───────── -->
+    <section id="setup" class="gate hidden">
+      <div class="card">
+        <h2>¿Quién eres?</h2>
+        <p class="muted">Elige tu entrenador o crea uno nuevo en <strong id="setupRunName"></strong>.</p>
+        <div id="playerPicker" class="player-picker"></div>
+        <hr/>
+        <label>Nuevo entrenador<input id="newPlayerName" placeholder="Tu nombre" maxlength="20" /></label>
+        <label>Color
+          <input id="newPlayerColor" type="color" value="#ef4444" />
+        </label>
+        <button class="btn primary" id="createPlayerBtn">Entrar</button>
+      </div>
+    </section>
+
+    <!-- ───────── App principal ───────── -->
+    <section id="app" class="hidden">
+      <div class="me-bar">
+        <span class="me-chip" id="meChip"></span>
+        <div class="badges">
+          <span>Medallas</span>
+          <button class="btn ghost round" id="badgeMinus">−</button>
+          <strong id="badgeCount">0</strong><span class="muted">/12</span>
+          <button class="btn ghost round" id="badgePlus">+</button>
+        </div>
+        <button class="btn primary" id="addBtn">+ Registrar Pokémon</button>
+      </div>
+
+      <div class="columns" id="myColumns">
+        <div class="col" data-status="team"><h3>⚔️ Equipo <span class="count" id="cnt-team">0</span></h3><div class="list" id="list-team"></div></div>
+        <div class="col" data-status="box"><h3>📦 Caja <span class="count" id="cnt-box">0</span></h3><div class="list" id="list-box"></div></div>
+        <div class="col grave" data-status="dead"><h3>⚰️ Cementerio <span class="count" id="cnt-dead">0</span></h3><div class="list" id="list-dead"></div></div>
+      </div>
+
+      <h2 class="section-title">👥 Progreso de la partida</h2>
+      <div class="friends" id="friends"></div>
+    </section>
+  </main>
+
+  <!-- ───────── Modal registrar/editar ───────── -->
+  <dialog id="entryDialog">
+    <form method="dialog" id="entryForm">
+      <h3 id="entryTitle">Registrar Pokémon</h3>
+      <label>Pokémon
+        <input id="fPokemon" list="pokeList" placeholder="Busca por nombre…" autocomplete="off" required />
+        <datalist id="pokeList"></datalist>
+      </label>
+      <div class="preview" id="pokePreview"></div>
+      <label>Mote<input id="fNickname" placeholder="Opcional" maxlength="20" /></label>
+      <div class="row2">
+        <label>Zona de captura<input id="fLocation" list="locList" placeholder="Ruta, ciudad…" />
+          <datalist id="locList"></datalist>
+        </label>
+        <label>Nivel<input id="fLevel" type="number" min="1" max="100" placeholder="Lv" /></label>
+      </div>
+      <label>Estado
+        <select id="fStatus">
+          <option value="team">⚔️ En el equipo</option>
+          <option value="box">📦 En la caja</option>
+          <option value="dead">⚰️ Muerto</option>
+        </select>
+      </label>
+      <label>Notas<textarea id="fNotes" rows="2" maxlength="200" placeholder="Opcional"></textarea></label>
+      <input type="hidden" id="fId" />
+      <menu>
+        <button type="button" class="btn danger left hidden" id="deleteBtn">Borrar</button>
+        <button type="button" class="btn ghost" id="cancelBtn">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
