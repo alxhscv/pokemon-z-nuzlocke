@@ -13,13 +13,13 @@ let POKE = [];
 const byId = new Map(), byName = new Map();
 let user = null, profile = null, run = null, myPlayer = null;
 let players = [], entries = [], channel = null, signupMode = false;
+let currentLoc = null;   // zona del Pokémon en edición (viene de la celda de ruta; ya no hay campo)
 
 init();
 async function init() {
   POKE = await fetch("data/pokemon.json").then((r) => r.json());
   for (const p of POKE) { byId.set(p.id, p); byName.set(p.es.toLowerCase(), p.id); byName.set(p.en.toLowerCase(), p.id); }
   $("pokeList").innerHTML = POKE.map((p) => `<option value="${p.es}">`).join("");
-  $("locList").innerHTML = ROUTES.map((l) => `<option value="${l}">`).join("");
   wireEvents();
   db.auth.onAuthStateChange((event) => { if (event === "SIGNED_OUT") resetToAuth(); });
   const { data } = await db.auth.getSession();
@@ -363,7 +363,7 @@ function openDialog(entry = null, presetRoute = null) {
   $("fId").value = entry?.id || "";
   $("fPokemon").value = entry ? byId.get(entry.pokemon_id)?.es || "" : "";
   $("fNickname").value = entry?.nickname || "";
-  $("fLocation").value = entry?.location || presetRoute || "";
+  currentLoc = entry?.location || presetRoute || null;   // zona: de la ruta clicada o la que ya tenía
   $("fLevel").value = entry?.level || "";
   $("fNotes").value = entry?.notes || "";
   $("deleteBtn").classList.toggle("hidden", !entry);
@@ -384,7 +384,7 @@ async function saveEntry() {
   const row = {
     run_id: run.id, player_id: myPlayer.id, user_id: user.id, pokemon_id: pid,
     nickname: $("fNickname").value.trim() || null,
-    location: $("fLocation").value.trim() || null,
+    location: currentLoc,
     level: parseInt($("fLevel").value) || null,
     notes: $("fNotes").value.trim() || null,
     updated_at: new Date().toISOString(),
