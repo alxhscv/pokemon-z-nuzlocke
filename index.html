@@ -42,33 +42,57 @@
 
     <!-- ───────── App principal ───────── -->
     <section id="app" class="hidden">
-      <!-- Tabla de rutas -->
-      <h2 class="section-title">🗺️ Capturas por ruta</h2>
-      <div class="routes-wrap">
-        <table class="routes" id="routesTable"></table>
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-tab="rutas">🗺️ Rutas</button>
+        <button class="tab" data-tab="seg">🎒 Seguimiento</button>
+        <button class="tab" data-tab="payos">👥 Payos</button>
+        <button class="tab" data-tab="perfil">🧑 Perfil</button>
+      </nav>
+
+      <!-- Rutas -->
+      <div class="panel active" id="panel-rutas">
+        <div class="routes-wrap"><table class="routes" id="routesTable"></table></div>
       </div>
 
-      <!-- Tu seguimiento -->
-      <h2 class="section-title">🎒 Tu seguimiento</h2>
-      <div class="me-bar">
-        <span class="me-chip" id="meChip"></span>
-        <div class="badges">
-          <span>Medallas</span>
-          <button class="btn ghost round" id="badgeMinus">−</button>
-          <strong id="badgeCount">0</strong><span class="muted">/12</span>
-          <button class="btn ghost round" id="badgePlus">+</button>
+      <!-- Seguimiento -->
+      <div class="panel" id="panel-seg">
+        <div class="me-bar">
+          <span class="me-chip" id="meChip"></span>
+          <button class="btn primary" id="addBtn">+ Registrar Pokémon</button>
         </div>
-        <button class="btn primary" id="addBtn">+ Registrar Pokémon</button>
-      </div>
-      <div class="columns" id="myColumns">
-        <div class="col" data-status="team"><h3>⚔️ Equipo <span class="count" id="cnt-team">0</span></h3><div class="list" id="list-team"></div></div>
-        <div class="col" data-status="box"><h3>📦 Caja <span class="count" id="cnt-box">0</span></h3><div class="list" id="list-box"></div></div>
-        <div class="col grave" data-status="dead"><h3>⚰️ Cementerio <span class="count" id="cnt-dead">0</span></h3><div class="list" id="list-dead"></div></div>
+        <div class="columns" id="myColumns">
+          <div class="col" data-status="team"><h3>⚔️ Equipo <span class="count" id="cnt-team">0</span></h3><div class="list" id="list-team"></div></div>
+          <div class="col" data-status="box"><h3>📦 Caja <span class="count" id="cnt-box">0</span></h3><div class="list" id="list-box"></div></div>
+          <div class="col grave" data-status="dead"><h3>⚰️ Cementerio <span class="count" id="cnt-dead">0</span></h3><div class="list" id="list-dead"></div></div>
+        </div>
       </div>
 
-      <!-- Stats por jugador -->
-      <h2 class="section-title">👥 Jugadores</h2>
-      <div class="friends" id="friends"></div>
+      <!-- Payos -->
+      <div class="panel" id="panel-payos">
+        <div class="friends" id="friends"></div>
+      </div>
+
+      <!-- Perfil -->
+      <div class="panel" id="panel-perfil">
+        <div class="card profile-card">
+          <h2>Tu perfil</h2>
+          <form id="profileForm">
+            <label>Nombre visible<input id="pName" maxlength="20" /></label>
+            <div class="row2">
+              <label>Color<input id="pColor" type="color" /></label>
+              <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
+            </div>
+            <div class="preview" id="avatarPreview"></div>
+            <div class="form-actions">
+              <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
+              <button type="submit" class="btn primary">Guardar perfil</button>
+            </div>
+          </form>
+          <hr>
+          <h3>Medallas</h3>
+          <div class="medals-edit" id="medalsEdit"></div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -88,13 +112,6 @@
         </label>
         <label>Nivel<input id="fLevel" type="number" min="1" max="100" placeholder="Lv" /></label>
       </div>
-      <label>Estado
-        <select id="fStatus">
-          <option value="team">⚔️ En el equipo</option>
-          <option value="box">📦 En la caja</option>
-          <option value="dead">⚰️ Muerto</option>
-        </select>
-      </label>
       <label>Notas<textarea id="fNotes" rows="2" maxlength="200" placeholder="Opcional"></textarea></label>
       <input type="hidden" id="fId" />
       <menu>
@@ -105,24 +122,16 @@
     </form>
   </dialog>
 
-  <!-- ───────── Modal perfil ───────── -->
-  <dialog id="profileDialog">
-    <form method="dialog" id="profileForm">
-      <h3>Tu perfil</h3>
-      <label>Nombre visible<input id="pName" maxlength="20" /></label>
-      <div class="row2">
-        <label>Color<input id="pColor" type="color" /></label>
-        <label>Avatar (Pokémon)
-          <input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" />
-        </label>
+  <!-- ───────── Modal ver payo ───────── -->
+  <dialog id="payoDialog">
+    <div class="payo">
+      <div class="payo-head">
+        <h3 id="payoName"></h3>
+        <button type="button" class="btn ghost" id="payoClose">Cerrar</button>
       </div>
-      <div class="preview" id="avatarPreview"></div>
-      <menu>
-        <button type="button" class="btn ghost left" id="pClear">Sin avatar</button>
-        <button type="button" class="btn ghost" id="pCancel">Cancelar</button>
-        <button type="submit" class="btn primary">Guardar</button>
-      </menu>
-    </form>
+      <div id="payoMedals" class="medals-view"></div>
+      <div id="payoBody" class="payo-body"></div>
+    </div>
   </dialog>
 
   <div id="toast" class="toast hidden"></div>

@@ -32,18 +32,24 @@ function wireEvents() {
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("authAvatar").oninput = updateAuthAvatarPreview;
   $("logoutBtn").onclick = () => db.auth.signOut();
-  $("userChip").onclick = openProfile;
+  $("userChip").onclick = () => selectTab("perfil");
+  document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => selectTab(b.dataset.tab)));
   $("addBtn").onclick = () => openDialog();
-  $("badgePlus").onclick = () => setBadges(myPlayer.badges + 1);
-  $("badgeMinus").onclick = () => setBadges(myPlayer.badges - 1);
   $("cancelBtn").onclick = () => $("entryDialog").close();
   $("deleteBtn").onclick = deleteEntry;
   $("entryForm").onsubmit = (e) => { e.preventDefault(); saveEntry(); };
   $("fPokemon").oninput = updatePreview;
-  $("pCancel").onclick = () => $("profileDialog").close();
   $("pClear").onclick = () => { $("pAvatar").value = ""; updateAvatarPreview(); };
   $("pAvatar").oninput = updateAvatarPreview;
   $("profileForm").onsubmit = (e) => { e.preventDefault(); saveProfile(); };
+  $("payoClose").onclick = () => $("payoDialog").close();
+}
+
+// pestañas
+function selectTab(name) {
+  document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
+  if (name === "perfil") fillProfile();
 }
 
 // avatar/color del jugador: sprite si tiene avatar, si no un punto de color
@@ -162,10 +168,10 @@ function subscribe() {
 function render() {
   $("userChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   $("meChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
-  $("badgeCount").textContent = myPlayer?.badges ?? 0;
   renderRoutes();
   renderMyColumns();
-  renderFriends();
+  renderPayos();
+  renderMedalsEdit();
 }
 
 function renderMyColumns() {
@@ -175,19 +181,53 @@ function renderMyColumns() {
     $("cnt-" + st).textContent = items.length;
     $("list-" + st).innerHTML = items.map(monCard).join("") || `<span class="muted" style="font-size:.8rem">Vacío</span>`;
   }
-  $("myColumns").querySelectorAll(".mon").forEach((el) =>
-    (el.onclick = () => openDialog(entries.find((e) => e.id === el.dataset.id))));
+  const cols = $("myColumns");
+  cols.querySelectorAll(".movebtn").forEach((b) =>
+    (b.onclick = (ev) => { ev.stopPropagation(); updateStatus(b.dataset.id, b.dataset.move); }));
+  cols.querySelectorAll(".mon").forEach((el) =>
+    (el.onclick = (ev) => { if (ev.target.closest(".movebtn")) return; openDialog(entries.find((e) => e.id === el.dataset.id)); }));
 }
+
+// estados a los que se puede mover: icono + etiqueta
+const MOVE = { box: ["📦", "A la caja"], team: ["⚔️", "Al equipo"], dead: ["⚰️", "Al cementerio"] };
 
 function monCard(e) {
   const p = byId.get(e.pokemon_id);
   const name = e.nickname || p?.es || "???";
   const sub = [e.location, p && e.nickname ? p.es : null].filter(Boolean).join(" · ");
+  const moves = ["box", "team", "dead"].filter((s) => s !== e.status).map((s) =>
+    `<button class="movebtn" data-move="${s}" data-id="${e.id}" title="${MOVE[s][1]}">${MOVE[s][0]}</button>`).join("");
   return `<div class="mon ${e.status}" data-id="${e.id}">
     <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
     <div class="info"><div class="nick">${esc(name)}</div><div class="sub">${esc(sub) || "&nbsp;"}</div></div>
     ${e.level ? `<span class="lvl">Lv ${e.level}</span>` : ""}
+    <div class="moves">${moves}</div>
   </div>`;
+}
+
+// tarjeta solo-lectura (para ver el equipo de otro payo)
+function monCardRO(e) {
+  const p = byId.get(e.pokemon_id);
+  const name = e.nickname || p?.es || "???";
+  const sub = [e.location, p && e.nickname ? p.es : null].filter(Boolean).join(" · ");
+  return `<div class="mon ro ${e.status}">
+    <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+    <div class="info"><div class="nick">${esc(name)}</div><div class="sub">${esc(sub) || "&nbsp;"}</div></div>
+    ${e.level ? `<span class="lvl">Lv ${e.level}</span>` : ""}
+  </div>`;
+}
+
+async function updateStatus(id, status) {
+  const { error } = await db.from("entries").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) return toast(error.message, true);
+  await reload();
+}
+
+// medallas visuales (12 iconos); n encendidas
+function medalsHTML(n) {
+  let s = "";
+  for (let i = 1; i <= 12; i++) s += `<span class="medal ${i <= (n || 0) ? "on" : ""}"></span>`;
+  return s;
 }
 
 // Tabla de rutas × jugadores
@@ -231,42 +271,73 @@ function renderRoutes() {
   }));
 }
 
-function renderFriends() {
+// Payos: todas las cuentas; clic en una abre su perfil
+function renderPayos() {
   $("friends").innerHTML = players.map((pl) => {
     const prof = pl.profiles || { display_name: "???", color: "#888" };
     const es = entries.filter((e) => e.user_id === pl.user_id);
-    const dead = es.filter((e) => e.status === "dead");
+    const dead = es.filter((e) => e.status === "dead").length;
     const team = es.filter((e) => e.status === "team");
     const chips = team.map((e) =>
       `<img src="${sprite(e.pokemon_id)}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
       || `<span class="muted" style="font-size:.8rem">Sin equipo</span>`;
-    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" style="border-top-color:${prof.color}">
+    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="border-top-color:${prof.color}">
       <div class="fname">${playerIcon(prof)}${esc(prof.display_name)}</div>
       <div class="stats">
-        <span><b>${es.length - dead.length}</b> vivos</span>
-        <span><b>${dead.length}</b> muertos</span>
-        <span><b>${pl.badges}</b>/12 medallas</span>
+        <span><b>${es.length - dead}</b> vivos</span>
+        <span><b>${dead}</b> muertos</span>
       </div>
+      <div class="medals-view">${medalsHTML(pl.badges)}</div>
       <div class="team">${chips}</div>
     </div>`;
   }).join("");
+  $("friends").querySelectorAll(".friend").forEach((c) => (c.onclick = () => openPayo(c.dataset.user)));
+}
+
+function openPayo(uid) {
+  const pl = players.find((p) => p.user_id === uid);
+  if (!pl) return;
+  const prof = pl.profiles || { display_name: "???", color: "#888" };
+  const es = entries.filter((e) => e.user_id === uid);
+  const sect = (icon, title, st) => {
+    const arr = es.filter((e) => e.status === st);
+    return `<h4>${icon} ${title} <span class="count">${arr.length}</span></h4>
+      <div class="list">${arr.map(monCardRO).join("") || '<span class="muted" style="font-size:.8rem">Vacío</span>'}</div>`;
+  };
+  $("payoName").innerHTML = `${playerIcon(prof)}${esc(prof.display_name)}`;
+  $("payoMedals").innerHTML = medalsHTML(pl.badges);
+  $("payoBody").innerHTML = sect("⚔️", "Equipo", "team") + sect("📦", "Caja", "box") + sect("⚰️", "Cementerio", "dead");
+  $("payoDialog").showModal();
+}
+
+// editor de medallas (pestaña Perfil): clic en la medalla i fija el total en i (o i-1 si ya estaba)
+function renderMedalsEdit() {
+  if (!myPlayer) return;
+  const n = myPlayer.badges || 0;
+  let s = "";
+  for (let i = 1; i <= 12; i++) s += `<button type="button" class="medal ${i <= n ? "on" : ""}" data-n="${i}"></button>`;
+  $("medalsEdit").innerHTML = `<div class="medals-count"><b>${n}</b>/12</div><div class="medals-view edit">${s}</div>`;
+  $("medalsEdit").querySelectorAll(".medal").forEach((b) =>
+    (b.onclick = () => { const i = +b.dataset.n; setBadges(i === myPlayer.badges ? i - 1 : i); }));
 }
 
 async function setBadges(n) {
   n = Math.max(0, Math.min(12, n));
   if (!myPlayer || n === myPlayer.badges) return;
-  const prev = myPlayer.badges; myPlayer.badges = n; $("badgeCount").textContent = n;
+  const prev = myPlayer.badges; myPlayer.badges = n;
+  renderMedalsEdit(); renderPayos();
   const { error } = await db.from("players").update({ badges: n }).eq("id", myPlayer.id);
-  if (error) { myPlayer.badges = prev; $("badgeCount").textContent = prev; toast(error.message, true); }
+  if (error) { myPlayer.badges = prev; renderMedalsEdit(); renderPayos(); toast(error.message, true); }
 }
 
 // ===================== perfil =====================
-function openProfile() {
+function fillProfile() {
+  if (!profile) return;
   $("pName").value = profile.display_name;
   $("pColor").value = profile.color || "#ef4444";
   $("pAvatar").value = profile.avatar ? byId.get(profile.avatar)?.es || "" : "";
   updateAvatarPreview();
-  $("profileDialog").showModal();
+  renderMedalsEdit();
 }
 function updateAvatarPreview() {
   const id = byName.get($("pAvatar").value.trim().toLowerCase());
@@ -281,7 +352,7 @@ async function saveProfile() {
   const { error } = await db.from("profiles").update({ display_name: name, color: $("pColor").value, avatar }).eq("id", user.id);
   if (error) return toast(error.message, true);
   profile = { ...profile, display_name: name, color: $("pColor").value, avatar };
-  $("profileDialog").close();
+  toast("Perfil guardado");
   await reload();
 }
 
@@ -294,7 +365,6 @@ function openDialog(entry = null, presetRoute = null) {
   $("fNickname").value = entry?.nickname || "";
   $("fLocation").value = entry?.location || presetRoute || "";
   $("fLevel").value = entry?.level || "";
-  $("fStatus").value = entry?.status || "team";
   $("fNotes").value = entry?.notes || "";
   $("deleteBtn").classList.toggle("hidden", !entry);
   updatePreview();
@@ -316,14 +386,14 @@ async function saveEntry() {
     nickname: $("fNickname").value.trim() || null,
     location: $("fLocation").value.trim() || null,
     level: parseInt($("fLevel").value) || null,
-    status: $("fStatus").value,
     notes: $("fNotes").value.trim() || null,
     updated_at: new Date().toISOString(),
   };
   const id = $("fId").value;
+  // nuevo Pokémon entra en la Caja; luego se mueve con los botones de la tarjeta
   const { error } = id
     ? await db.from("entries").update(row).eq("id", id)
-    : await db.from("entries").insert(row);
+    : await db.from("entries").insert({ ...row, status: "box" });
   if (error) return toast(error.message, true);
   $("entryDialog").close();
   await reload();
