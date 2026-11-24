@@ -106,6 +106,7 @@ function traduceAuth(m) {
 async function afterLogin() {
   const { data } = await db.auth.getUser();
   user = data.user;
+  if (!user) { await db.auth.signOut(); return showAuth(); }   // sesión caducada/ inválida → al login
   let { data: prof } = await db.from("profiles").select().eq("id", user.id).maybeSingle();
   if (!prof) ({ data: prof } = await db.from("profiles").insert({ id: user.id, display_name: user.email.split("@")[0] }).select().single());
   profile = prof;
