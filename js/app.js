@@ -22,6 +22,14 @@ function emptyState(st) {
   const paths = d.split("|").map((p) => `<path d="${p}"/>`).join("");
   return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">${paths}</svg><span>${txt}</span></div>`;
 }
+
+// color de jugador: ahora fijo (verde Zygarde) para todos
+const GREEN = "#2BB673";
+// medallas con nombre (8 de Kalos reales + 4 extra temáticas de Z)
+const MEDALS = ["Bicho", "Muro", "Lucha", "Planta", "Voltaje", "Hada", "Psíquica", "Iceberg", "Núcleo", "Célula", "Orden", "Zygarde"];
+// avatar: un número = Pokémon por id; cualquier otra cosa = URL de imagen
+function avatarSrc(av) { if (av == null || av === "") return null; av = String(av); return /^\d+$/.test(av) ? sprite(av) : av; }
+function isPhoto(av) { return av != null && av !== "" && !/^\d+$/.test(String(av)); }
 const uname2email = (u) => u.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "") + "@users.pokez";
 const normLoc = (s) => (s || "").trim().toLowerCase();
 const ROUTE_NORMS = new Set(ROUTES.map(normLoc));
@@ -69,8 +77,9 @@ function wireEvents() {
   $("deleteBtn").onclick = deleteEntry;
   $("entryForm").onsubmit = (e) => { e.preventDefault(); saveEntry(); };
   $("fPokemon").oninput = updatePreview;
-  $("pClear").onclick = () => { $("pAvatar").value = ""; updateAvatarPreview(); };
+  $("pClear").onclick = () => { $("pAvatar").value = ""; $("pAvatarUrl").value = ""; updateAvatarPreview(); };
   $("pAvatar").oninput = updateAvatarPreview;
+  $("pAvatarUrl").oninput = updateAvatarPreview;
   $("profileForm").onsubmit = (e) => { e.preventDefault(); saveProfile(); };
   $("payoClose").onclick = () => $("payoDialog").close();
 }
@@ -128,10 +137,12 @@ function showSkeletons() {
   for (const st of ["team", "box", "dead"]) $("list-" + st).innerHTML = sk;
 }
 
-// avatar/color del jugador: sprite si tiene avatar, si no un punto de color
+// avatar del jugador: sprite/imagen si tiene avatar, si no un punto verde
 function playerIcon(prof) {
-  if (prof?.avatar) return `<img class="avatar" src="${sprite(prof.avatar)}" alt="" onerror="this.outerHTML='<span class=&quot;dot&quot; style=&quot;background:${prof.color}&quot;></span>'">`;
-  return `<span class="dot" style="background:${prof?.color || "#888"}"></span>`;
+  const src = avatarSrc(prof?.avatar);
+  const dot = `<span class="dot" style="background:${GREEN}"></span>`;
+  if (src) return `<img class="avatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${src}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;dot&quot; style=&quot;background:${GREEN}&quot;></span>'">`;
+  return dot;
 }
 
 // ===================== auth =====================
@@ -147,7 +158,6 @@ function applyAuthMode() {
   $("authAvatarPreview").classList.toggle("hidden", !signupMode);
   if (signupMode) updateAuthAvatarPreview();
 }
-const PALETTE = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
 function updateAuthAvatarPreview() {
   const id = byName.get($("authAvatar").value.trim().toLowerCase());
   $("authAvatarPreview").innerHTML = id
@@ -167,9 +177,8 @@ async function doAuth() {
       const { data, error } = await db.auth.signUp({ email, password: pass });
       if (error) return toast(traduceAuth(error.message), true);
       if (!data.session) return toast("Cuenta creada, ahora inicia sesión", true);
-      const avatar = byName.get($("authAvatar").value.trim().toLowerCase()) || null;
-      const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-      await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color, avatar });
+      const pid = byName.get($("authAvatar").value.trim().toLowerCase());
+      await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color: GREEN, avatar: pid ? String(pid) : null });
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password: pass });
       if (error) return toast(traduceAuth(error.message), true);
@@ -256,7 +265,35 @@ function render() {
   renderRoutes();
   renderMyColumns();
   renderPayos();
+  renderGraveyard();
   renderMedalsEdit();
+}
+
+// Cementerio global: todos los muertos de todos, con dueño, nivel y "último suspiro"
+function renderGraveyard() {
+  const dead = entries.filter((e) => e.status === "dead");
+  if (!dead.length) { $("graveWall").innerHTML = emptyState("dead"); return; }
+  const nameOf = (uid) => players.find((p) => p.user_id === uid)?.profiles?.display_name || "???";
+  $("graveWall").innerHTML = dead.map((e) => {
+    const p = byId.get(e.pokemon_id);
+    const nick = e.nickname || p?.es || "???";
+    const species = e.nickname && p ? p.es : null;
+    const mine = e.user_id === user.id;
+    const note = e.notes
+      ? `<div class="epitaph">«${esc(e.notes)}»</div>`
+      : `<div class="epitaph none">${mine ? "Añade su último suspiro…" : "Sin últimas palabras."}</div>`;
+    return `<div class="grave-card ${mine ? "mine" : ""}" data-id="${esc(e.id)}">
+      <span class="cross">${SVG.dead}</span>
+      <span class="sprite"><img src="${sprite(e.pokemon_id)}" alt="${esc(nick)}" width="72" height="72" loading="lazy" onerror="this.style.visibility='hidden'"></span>
+      <div class="gname">${esc(nick)}</div>
+      <div class="gmeta">${species ? esc(species) + " · " : ""}de <b>${esc(nameOf(e.user_id))}</b></div>
+      ${e.level ? `<span class="glvl">Cayó a Nv. ${e.level}</span>` : ""}
+      ${note}
+    </div>`;
+  }).join("");
+  // editar las tuyas (apodo, nivel y último suspiro) desde su lápida
+  $("graveWall").querySelectorAll(".grave-card.mine").forEach((c) =>
+    (c.onclick = () => openDialog(entries.find((e) => e.id === c.dataset.id))));
 }
 
 function renderMyColumns() {
@@ -318,7 +355,10 @@ async function updateStatus(id, status) {
 // medallas visuales (12 iconos); n encendidas
 function medalsHTML(n) {
   let s = "";
-  for (let i = 1; i <= 12; i++) s += `<span class="medal ${i <= (n || 0) ? "on" : ""}"></span>`;
+  for (let i = 1; i <= 12; i++) {
+    const on = i <= (n || 0);
+    s += `<span class="medal ${on ? "on" : ""}" title="Medalla ${MEDALS[i - 1]}${on ? " ✓" : ""}" aria-label="Medalla ${MEDALS[i - 1]} ${on ? "conseguida" : "pendiente"}"></span>`;
+  }
   return s;
 }
 
@@ -377,10 +417,11 @@ function renderPayos() {
     const chips = team.map((e) =>
       `<img src="${sprite(e.pokemon_id)}" alt="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
       || `<span class="muted">Sin equipo</span>`;
-    const bigAv = prof.avatar
-      ? `<img class="favatar" src="${sprite(prof.avatar)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${prof.color}&quot;></span>'">`
-      : `<span class="favatar dot-av" style="background:${prof.color || "#888"}"></span>`;
-    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${esc(prof.color || "#888")}">
+    const av = avatarSrc(prof.avatar);
+    const bigAv = av
+      ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${GREEN}&quot;></span>'">`
+      : `<span class="favatar dot-av" style="background:${GREEN}"></span>`;
+    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${GREEN}">
       <div class="fhead"></div>
       ${bigAv}
       <div class="fname">${esc(prof.display_name)}</div>
@@ -416,7 +457,10 @@ function renderMedalsEdit() {
   if (!myPlayer) return;
   const n = myPlayer.badges || 0;
   let s = "";
-  for (let i = 1; i <= 12; i++) s += `<button type="button" class="medal ${i <= n ? "on" : ""}" data-n="${i}"></button>`;
+  for (let i = 1; i <= 12; i++) {
+    const on = i <= n;
+    s += `<button type="button" class="medal ${on ? "on" : ""}" data-n="${i}" title="Medalla ${MEDALS[i - 1]}" aria-label="Medalla ${MEDALS[i - 1]} ${on ? "conseguida, clic para quitar" : "pendiente, clic para conseguir"}"></button>`;
+  }
   $("medalsEdit").innerHTML = `<div class="medals-count"><b>${n}</b>/12</div><div class="medals-view edit">${s}</div>`;
   $("medalsEdit").querySelectorAll(".medal").forEach((b) =>
     (b.onclick = () => { const i = +b.dataset.n; setBadges(i === myPlayer.badges ? i - 1 : i); }));
@@ -439,24 +483,28 @@ async function setBadges(n) {
 function fillProfile() {
   if (!profile) return;
   $("pName").value = profile.display_name;
-  $("pColor").value = profile.color || "#ef4444";
-  $("pAvatar").value = profile.avatar ? byId.get(profile.avatar)?.es || "" : "";
+  const av = profile.avatar;
+  if (isPhoto(av)) { $("pAvatarUrl").value = av; $("pAvatar").value = ""; }
+  else { $("pAvatar").value = av ? byId.get(+av)?.es || "" : ""; $("pAvatarUrl").value = ""; }
   updateAvatarPreview();
   renderMedalsEdit();
 }
 function updateAvatarPreview() {
+  const url = $("pAvatarUrl").value.trim();
   const id = byName.get($("pAvatar").value.trim().toLowerCase());
-  $("avatarPreview").innerHTML = id
-    ? `<img src="${sprite(id)}" alt=""><span>${esc(byId.get(id).es)}</span>`
-    : `<span>Sin avatar (se usará tu color)</span>`;
+  if (url) $("avatarPreview").innerHTML = `<img class="photo" src="${esc(url)}" alt="" onerror="this.style.display='none'"><span>Avatar por URL</span>`;
+  else if (id) $("avatarPreview").innerHTML = `<img src="${sprite(id)}" alt=""><span>${esc(byId.get(id).es)}</span>`;
+  else $("avatarPreview").innerHTML = `<span>Sin avatar (se usará un punto verde)</span>`;
 }
 async function saveProfile() {
   const name = $("pName").value.trim();
   if (!name) return toast("Escribe un nombre", true);
-  const avatar = byName.get($("pAvatar").value.trim().toLowerCase()) || null;
-  const { error } = await db.from("profiles").update({ display_name: name, color: $("pColor").value, avatar }).eq("id", user.id);
+  const url = $("pAvatarUrl").value.trim();
+  const pid = byName.get($("pAvatar").value.trim().toLowerCase());
+  const avatar = url || (pid ? String(pid) : null);
+  const { error } = await db.from("profiles").update({ display_name: name, color: GREEN, avatar }).eq("id", user.id);
   if (error) return toast(error.message, true);
-  profile = { ...profile, display_name: name, color: $("pColor").value, avatar };
+  profile = { ...profile, display_name: name, color: GREEN, avatar };
   toast("Perfil guardado", false, true);
   await reload();
 }

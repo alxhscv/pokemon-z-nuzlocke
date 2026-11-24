@@ -22,7 +22,7 @@
   --title:var(--navy);
   --ok:var(--zygarde); --warn:var(--gold); --danger:var(--red);
   --link:var(--blue);
-  --me-color:var(--red);         /* color del jugador actual (lo fija el JS) */
+  --me-color:var(--zygarde);     /* color de jugador (ahora fijo: verde Zygarde para todos) */
 
   /* Tipos (por si se muestran píldoras de tipo) */
   --t-normal:#A8A77A; --t-fire:#EE8130; --t-water:#6390F0; --t-electric:#F7D02C;
@@ -165,6 +165,7 @@ h4{font-size:var(--fs-md);font-weight:700}
   background:var(--surface2);border:2px solid var(--line);flex:0 0 auto;vertical-align:middle}
 .me-chip .avatar{border-color:var(--me-color)}
 .me-chip.small .avatar{width:22px;height:22px}
+.avatar.photo,.favatar.photo{image-rendering:auto}
 .dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
 
 /* --- Pestañas --- */
@@ -265,9 +266,9 @@ table.routes tbody tr:nth-child(even) td.addable{background:color-mix(in srgb,va
 td.addable:hover{background:color-mix(in srgb,var(--me-color) 14%,var(--surface))}
 /* celda vacía propia → afford "+"; ajena → "—" neutro */
 .routes .empty{color:var(--dex)}
-td.addable .empty{font-size:0;display:inline-grid;place-items:center;width:30px;height:30px;margin:auto;
+td.addable .empty{font-size:0;display:grid;place-items:center;width:32px;height:32px;margin:0 auto;
   border:2px dashed color-mix(in srgb,var(--me-color) 55%,var(--line));border-radius:10px}
-td.addable .empty::after{content:"+";font-size:1.1rem;color:var(--me-color);font-weight:800;line-height:1}
+td.addable .empty::after{content:"+";font:800 20px/1 var(--sans);color:var(--me-color)}
 
 /* mini-tarjeta dentro de la celda */
 .rmon{display:inline-flex;flex-direction:column;align-items:center;width:56px;cursor:pointer;vertical-align:top;
@@ -285,11 +286,12 @@ td.addable .empty::after{content:"+";font-size:1.1rem;color:var(--me-color);font
 /* --- Payos (cartas de entrenador) --- */
 .friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
 .friend{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
-  overflow:hidden;cursor:pointer;box-shadow:var(--sh1);transition:transform var(--t),box-shadow var(--t);padding:0 18px 18px}
+  cursor:pointer;box-shadow:var(--sh1);transition:transform var(--t),box-shadow var(--t);padding:0 18px 18px}
 .friend:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
-.friend .fhead{margin:0 -18px 44px;height:64px;background:var(--fc,var(--red));position:relative}
+.friend .fhead{margin:0 -18px 44px;height:64px;background:var(--fc,var(--zygarde));position:relative;
+  overflow:hidden;border-radius:var(--r-lg) var(--r-lg) 0 0}
 .friend .fhead::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.14}
-.friend .favatar{position:absolute;left:18px;bottom:-26px;width:60px;height:60px;border-radius:50%;
+.friend .favatar{position:absolute;left:18px;top:34px;width:60px;height:60px;border-radius:50%;
   border:3px solid var(--surface);background:var(--surface2);object-fit:cover;image-rendering:pixelated;box-shadow:var(--sh1)}
 .friend .favatar.dot-av{display:grid;place-items:center}
 .friend .fname{font-weight:800;font-size:var(--fs-lg);display:flex;align-items:center;gap:8px}
@@ -310,16 +312,44 @@ button.medal{cursor:pointer}
 button.medal:hover{transform:scale(1.18)}
 .medal.on{background:radial-gradient(circle at 50% 30%,#FFE79A,var(--gold) 70%);box-shadow:0 0 8px rgba(255,203,5,.55)}
 .medal.just-on{animation:medal-pop .5s var(--ease)}
-/* formas distintas por posición (hex, rombo, escudo, estrella, círculo, flor) */
-.medal:nth-child(6n+1){clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)} /* hex */
-.medal:nth-child(6n+2){clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}               /* rombo */
-.medal:nth-child(6n+3){clip-path:polygon(50% 0,100% 35%,82% 100%,18% 100%,0 35%)}      /* escudo */
-.medal:nth-child(6n+4){clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)} /* estrella */
-.medal:nth-child(6n+5){border-radius:50%}                                             /* círculo */
-.medal:nth-child(6n+6){clip-path:polygon(50% 0,65% 25%,95% 25%,72% 50%,95% 75%,65% 75%,50% 100%,35% 75%,5% 75%,28% 50%,5% 25%,35% 25%)} /* flor */
+/* 12 formas distintas (una por medalla) */
+.medal:nth-child(1){clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}    /* hex */
+.medal:nth-child(2){clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}                    /* rombo */
+.medal:nth-child(3){clip-path:polygon(50% 0,100% 20%,100% 60%,50% 100%,0 60%,0 20%)}     /* escudo */
+.medal:nth-child(4){clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)} /* estrella */
+.medal:nth-child(5){border-radius:50%}                                                   /* círculo */
+.medal:nth-child(6){clip-path:polygon(50% 0,65% 25%,95% 25%,72% 50%,95% 75%,65% 75%,50% 100%,35% 75%,5% 75%,28% 50%,5% 25%,35% 25%)} /* flor */
+.medal:nth-child(7){clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)} /* octágono */
+.medal:nth-child(8){clip-path:polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%)} /* cruz */
+.medal:nth-child(9){clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)}           /* pentágono */
+.medal:nth-child(10){clip-path:polygon(50% 5%,95% 95%,5% 95%)}                           /* triángulo */
+.medal:nth-child(11){clip-path:polygon(0 25%,50% 0,100% 25%,100% 75%,50% 100%,0 75%)}    /* hex plano */
+.medal:nth-child(12){clip-path:polygon(45% 0,100% 0,55% 42%,100% 42%,20% 100%,45% 54%,0 54%)} /* rayo */
 .medals-count{color:var(--muted);margin-bottom:6px;font-weight:700}
 .medals-count b{color:var(--gold);font-size:1.4rem;font-family:var(--retro)}
 .medals-edit .medal{width:26px;height:26px}
+.medal[title]{position:relative}
+
+/* --- Cementerio (pestaña global) --- */
+.grave-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.grave-card{position:relative;background:color-mix(in srgb,var(--grave) 9%,var(--surface));
+  border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 16px;box-shadow:var(--sh1);
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;transition:transform var(--t),box-shadow var(--t)}
+.grave-card.mine{cursor:pointer}
+.grave-card.mine:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.grave-card .cross{width:20px;height:20px;color:var(--grave);opacity:.75}
+.grave-card .cross svg{width:100%;height:100%}
+.grave-card .sprite{width:86px;height:86px;display:grid;place-items:center;border-radius:50%;
+  background:color-mix(in srgb,var(--grave) 14%,var(--surface2))}
+.grave-card .sprite img{width:72px;height:72px;image-rendering:pixelated;filter:grayscale(1) brightness(.72)}
+.grave-card .gname{font-weight:800;font-size:var(--fs-lg)}
+.grave-card .gmeta{font-size:var(--fs-xs);color:var(--muted)}
+.grave-card .gmeta b{color:var(--txt)}
+.grave-card .glvl{font-family:var(--retro);font-size:.58rem;color:var(--grave);background:var(--surface2);
+  border:1px solid var(--line);border-radius:var(--pill);padding:3px 9px}
+.grave-card .epitaph{margin-top:6px;font-style:italic;color:var(--muted);font-size:var(--fs-sm);
+  border-top:1px solid var(--line);padding-top:10px;width:100%}
+.grave-card .epitaph.none{opacity:.55}
 
 /* --- Formularios / inputs --- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(18px,4vw,26px);box-shadow:var(--sh1)}
@@ -333,6 +363,7 @@ hr{border:none;border-top:1px solid var(--line);margin:20px 0}
 .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
 .preview{display:flex;align-items:center;gap:12px;min-height:56px;margin-top:10px;color:var(--muted);font-size:var(--fs-sm)}
 .preview img{width:56px;height:56px;image-rendering:pixelated;background:var(--surface2);border-radius:10px}
+.preview img.photo{image-rendering:auto;object-fit:cover}
 
 /* --- Modales (dialog) --- */
 dialog{border:none;border-radius:var(--r-lg);background:var(--surface);color:var(--txt);
@@ -344,12 +375,12 @@ dialog[open]{animation:dialog-in .22s var(--ease)}
 #entryForm{padding:24px}
 #entryForm h3{margin:0 0 6px}
 dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px 0 0;flex-wrap:wrap}
-#payoDialog{max-width:540px;width:min(94vw,540px)}
-.payo{padding:0 24px 24px}
+#payoDialog{max-width:540px;width:min(94vw,540px);max-height:min(88svh,680px);display:flex;flex-direction:column}
+.payo{display:flex;flex-direction:column;min-height:0;padding:0 24px 24px}
 .payo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;
   background:var(--surface);padding:22px 0 10px;z-index:1}
 .payo-head h3{display:flex;align-items:center;gap:8px}
-.payo-body{max-height:min(60vh,520px);overflow:auto}
+.payo-body{flex:1;min-height:0;overflow:auto}
 .payo-body h4{margin:18px 0 8px;display:flex;align-items:center;gap:8px}
 .payo-body h4 svg{width:18px;height:18px;color:var(--muted)}
 .payo-body h4 .count{margin-left:0}
@@ -442,9 +473,10 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
   /* pestañas → barra inferior fija tipo app */
   .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;border-radius:0;border:0;border-top:1px solid var(--line);
     padding:6px 6px calc(6px + env(safe-area-inset-bottom));margin:0;gap:2px;box-shadow:0 -2px 12px rgba(27,42,74,.1)}
-  .tab{flex-direction:column;gap:2px;font-size:.62rem;padding:6px 2px;font-weight:700}
+  .tab{flex-direction:column;gap:2px;font-size:.55rem;padding:6px 1px;font-weight:700;min-width:0}
+  .tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tab.active,.tab[aria-selected="true"]{background:transparent;color:var(--red)}
-  .tab svg{width:22px;height:22px}
+  .tab svg{width:21px;height:21px}
   .wrap{padding-bottom:84px}
 
   /* modales → bottom sheet a pantalla completa */

@@ -18,11 +18,14 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    luego lo mueves entre ⚔️ Equipo / 📦 Caja / ⚰️ Cementerio con los botones de su tarjeta (está en un
    único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
    ruta. Llevas tus **medallas** (0–12). En tu **perfil** eliges nombre, color y un **avatar**.
-4. La app está en **4 pestañas**:
+4. La app está en **5 pestañas**:
    - **🗺️ Rutas** — matriz rutas × jugadores (qué capturó cada uno en cada ruta).
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
-   - **🧑 Perfil** — editas tu nombre, color, avatar y medallas (iconos 0–12).
+   - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
+     muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
+   - **🧑 Perfil** — editas tu nombre, avatar y medallas (iconos 0–12). El **color es fijo (verde
+     Zygarde)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
 
@@ -32,6 +35,10 @@ rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puest
 La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
 pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** a pantalla completa.
+
+> **Avatar por URL:** el campo `profiles.avatar` pasó de número a texto (admite id de Pokémon o una URL
+> de imagen). En una base de datos ya creada, ejecuta una vez en Supabase → SQL Editor:
+> `alter table public.profiles alter column avatar type text using avatar::text;`
 
 ---
 

@@ -90,6 +90,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 5.5a3 3 0 010 5.6M18 20a6 6 0 00-3-5.2"/></svg>
           <span>Payos</span>
         </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="cementerio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 7v5M9.5 9.5h5"/></svg>
+          <span>Cementerio</span>
+        </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="perfil">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0114 0"/></svg>
           <span>Perfil</span>
@@ -131,16 +135,19 @@
         <div class="friends" id="friends"></div>
       </div>
 
+      <!-- Cementerio (global) -->
+      <div class="panel" id="panel-cementerio" role="tabpanel" aria-label="Cementerio" tabindex="0">
+        <div class="grave-wall" id="graveWall"></div>
+      </div>
+
       <!-- Perfil -->
       <div class="panel" id="panel-perfil" role="tabpanel" aria-label="Perfil" tabindex="0">
         <div class="card profile-card">
           <h2>Tu perfil</h2>
           <form id="profileForm">
             <label>Nombre visible<input id="pName" maxlength="20" /></label>
-            <div class="row2">
-              <label>Color<input id="pColor" type="color" /></label>
-              <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
-            </div>
+            <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
+            <label>…o avatar por URL de imagen<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label>
             <div class="preview" id="avatarPreview"></div>
             <div class="form-actions">
               <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
