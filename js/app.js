@@ -83,6 +83,17 @@ function wireEvents() {
   $("pAvatarUrl").oninput = updateAvatarPreview;
   $("profileForm").onsubmit = (e) => { e.preventDefault(); saveProfile(); };
   $("payoClose").onclick = () => $("payoDialog").close();
+  document.querySelectorAll(".clock-toggle").forEach((b) => (b.onclick = toggleClock));
+  $("missionForm").onsubmit = (e) => { e.preventDefault(); saveMission(); };
+  $("mCancel").onclick = () => $("missionDialog").close();
+  $("mDelete").onclick = deleteMission;
+  $("mItem").innerHTML = `<option value="">Sin icono</option>` + REWARD_ITEMS.map(([v, n]) => `<option value="${v}">${n}</option>`).join("");
+  $("missionList").onclick = (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.done) completeMission(b.dataset.done);
+    if (b.dataset.edit) openMission(missions.find((m) => m.id === b.dataset.edit));
+  };
+  $("missionsHead").onclick = (e) => { if (e.target.closest("#newMissionBtn")) openMission(); };
 }
 
 // pestañas
@@ -94,6 +105,7 @@ function selectTab(name) {
   });
   document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
   if (name === "perfil") fillProfile();
+  if (name === "misiones") loadMissions();
 }
 
 // tema claro/oscuro (botón + prefers-color-scheme por defecto)
@@ -244,6 +256,80 @@ async function enterRun(r) {
   startPresence();
 }
 
+// ===================== misiones =====================
+// La recompensa vive en otra tabla (mission_rewards) con RLS: el servidor solo la entrega al completar la misión.
+const REWARD_ITEMS = [["poke-ball", "Poké Ball"], ["great-ball", "Super Ball"], ["ultra-ball", "Ultra Ball"], ["master-ball", "Master Ball"], ["premier-ball", "Honor Ball"], ["potion", "Poción"], ["revive", "Revivir"], ["rare-candy", "Caramelo Raro"], ["exp-share", "Repartir Exp."], ["lucky-egg", "Huevo Suerte"], ["tm-normal", "MT"], ["escape-rope", "Cuerda Huida"], ["sun-stone", "Piedra Solar"], ["old-amber", "Ámbar Viejo"], ["town-map", "Mapa"]];
+const LOCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>`;
+let missions = [], rewards = new Map(), completions = [], missionId = null;
+async function loadMissions() {
+  const [m, r, c] = await Promise.all([
+    db.from("missions").select("id,title,description").order("created_at"),
+    db.from("mission_rewards").select("mission_id,reward_text,reward_item"),
+    db.from("mission_completions").select("mission_id,user_id"),
+  ]);
+  if (m.error) return toast("No se pudieron cargar las misiones", true);
+  missions = m.data || []; rewards = new Map((r.data || []).map((x) => [x.mission_id, x])); completions = c.data || [];
+  renderMissions();
+}
+function renderMissions() {
+  const mine = new Set(completions.filter((c) => c.user_id === user.id).map((c) => c.mission_id));
+  const total = missions.length;
+  $("missionsHead").innerHTML = isAdmin
+    ? `<button class="btn primary" id="newMissionBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Nueva misión</span></button>`
+    : `<div class="mprogress"><span><b>${mine.size}</b>/${total} completadas</span><div class="bar"><i style="width:${total ? (mine.size / total) * 100 : 0}%"></i></div></div>`;
+  $("missionList").innerHTML = missions.map((m) => {
+    const done = mine.has(m.id), rw = rewards.get(m.id);
+    const n = completions.filter((c) => c.mission_id === m.id).length;
+    const reward = rw
+      ? `<div class="reward open">${rw.reward_item ? itemTag(rw.reward_item) : ""}<div><small>Recompensa</small><b>${esc(rw.reward_text)}</b></div></div>`
+      : `<div class="reward locked">${LOCK}<div><small>Recompensa</small><b>Oculta hasta completar</b></div></div>`;
+    const action = isAdmin ? `<button class="btn ghost" data-edit="${esc(m.id)}">Editar</button>`
+      : done ? `<span class="done-tag">Completada</span>`
+      : `<button class="btn primary" data-done="${esc(m.id)}">Marcar completada</button>`;
+    return `<article class="card mission${done ? " done" : ""}">
+      <h3>${esc(m.title)}</h3>
+      ${m.description ? `<p class="muted">${esc(m.description)}</p>` : ""}
+      ${reward}
+      <footer><span class="muted">${n} jugador${n === 1 ? "" : "es"} la ${n === 1 ? "completó" : "completaron"}</span>${action}</footer>
+    </article>`;
+  }).join("") || `<div class="empty-state">${itemTag("tm-normal")}<span>${isAdmin ? "Aún no hay misiones. Crea la primera." : "No hay misiones por ahora."}</span></div>`;
+}
+async function completeMission(id) {
+  const m = missions.find((x) => x.id === id);
+  if (!m || !confirm(`¿Marcar «${m.title}» como completada? Se revelará la recompensa y no se puede deshacer.`)) return;
+  const { error } = await db.from("mission_completions").insert({ mission_id: id, user_id: user.id });
+  if (error && error.code !== "23505") return toast(error.message, true);
+  await loadMissions();
+  confetti(); toast("¡Misión completada!", false, true);
+}
+function openMission(m = null) {
+  missionId = m?.id || null;
+  const rw = m && rewards.get(m.id);
+  $("missionTitle").textContent = m ? "Editar misión" : "Nueva misión";
+  $("mTitle").value = m?.title || ""; $("mDesc").value = m?.description || "";
+  $("mReward").value = rw?.reward_text || ""; $("mItem").value = rw?.reward_item || "";
+  $("mDelete").classList.toggle("hidden", !m);
+  $("missionDialog").showModal();
+}
+async function saveMission() {
+  const title = $("mTitle").value.trim(), reward = $("mReward").value.trim();
+  if (!title || !reward) return toast("Título y recompensa son obligatorios", true);
+  const row = { title, description: $("mDesc").value.trim() || null };
+  let id = missionId;
+  if (id) { const { error } = await db.from("missions").update(row).eq("id", id); if (error) return toast(error.message, true); }
+  else { const { data, error } = await db.from("missions").insert(row).select("id").single(); if (error) return toast(error.message, true); id = data.id; }
+  const { error } = await db.from("mission_rewards").upsert({ mission_id: id, reward_text: reward, reward_item: $("mItem").value || null });
+  if (error) return toast(error.message, true);
+  $("missionDialog").close(); toast("Misión guardada", false, true);
+  await loadMissions();
+}
+async function deleteMission() {
+  if (!missionId || !confirm("¿Borrar esta misión? Se pierden también las completadas.")) return;
+  const { error } = await db.from("missions").delete().eq("id", missionId);
+  if (error) return toast(error.message, true);
+  $("missionDialog").close(); await loadMissions();
+}
+
 // ===================== fichaje =====================
 // latido cada 30 s (clock_ping); 90 s sin latido = desconectado. Ver supabase/presence.sql
 let presence = new Map(), pingT, pollT, tickT;
@@ -254,7 +340,7 @@ function fmtDur(s) {
 }
 async function startPresence() {
   stopPresence();
-  if (!isAdmin) { const ping = () => db.rpc("clock_ping"); ping(); pingT = setInterval(ping, 30000); }
+  pingT = setInterval(ping, 30000);
   await loadPresence();
   pollT = setInterval(loadPresence, 30000);
   tickT = setInterval(() => document.querySelectorAll("[data-since]").forEach((el) => {
@@ -268,7 +354,38 @@ async function stopPresence(out = false) {
 async function loadPresence() {
   const { data } = await db.rpc("presence_summary");
   presence = new Map((data || []).map((r) => [r.user_id, r]));
-  renderConectados(); renderPayos(); fillHours();
+  clocked = !isAdmin && !!presence.get(user?.id)?.online;   // la verdad la tiene el servidor
+  renderConectados(); renderPayos(); fillHours(); updateClockUI();
+}
+
+// fichaje manual: sin fichar no cuentas horas ni sales como conectado
+let clocked = false;
+async function ping() {
+  if (!clocked) return;
+  const { data, error } = await db.rpc("clock_ping");
+  if (!error && data === false) { clocked = false; updateClockUI(); toast("Tu fichaje caducó, ficha de nuevo", true); }
+}
+async function toggleClock() {
+  if (isAdmin) return;
+  document.querySelectorAll(".clock-toggle").forEach((b) => (b.disabled = true));
+  const { error } = await db.rpc(clocked ? "clock_out" : "clock_in");
+  document.querySelectorAll(".clock-toggle").forEach((b) => (b.disabled = false));
+  if (error) return toast(error.message, true);
+  const was = clocked;
+  await loadPresence();
+  toast(was ? "Fichaje de salida registrado" : "Fichaje de entrada registrado", false, true);
+}
+function updateClockUI() {
+  const on = clocked, start = presence.get(user?.id)?.session_start;
+  document.querySelectorAll(".clock-toggle").forEach((b) => {
+    b.classList.toggle("on", on); b.classList.toggle("hidden", isAdmin); b.setAttribute("aria-pressed", on);
+    if (b.dataset.full) { b.classList.toggle("danger", on); b.classList.toggle("primary", !on); }
+    b.querySelector(".clock-label").textContent = b.dataset.full ? (on ? "Fichar salida" : "Fichar entrada") : (on ? "Fichado" : "Fichar");
+  });
+  $("clockCard").classList.toggle("hidden", isAdmin);
+  $("clockDot").classList.toggle("on", on);
+  $("clockState").textContent = on ? "Fichado" : "Sin fichar";
+  $("clockSince").innerHTML = on && start ? ` · lleva <b data-since="${esc(start)}">${fmtDur((Date.now() - new Date(start)) / 1000)}</b>` : "";
 }
 function fillHours() {
   if (user && $("pHours")) $("pHours").textContent = fmtDur(presence.get(user.id)?.total_seconds || 0);

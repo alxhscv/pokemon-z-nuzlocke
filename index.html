@@ -36,6 +36,9 @@
     </div>
 
     <div id="userInfo" class="run-info hidden">
+      <button class="btn ghost clock-toggle" id="clockBtn" aria-pressed="false" title="Fichar entrada / salida">
+        <span class="online-dot"></span><span class="clock-label">Fichar</span>
+      </button>
       <button class="btn icon" id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
         <svg class="icon-sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
@@ -94,6 +97,10 @@
           <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lucky-egg.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Conectados</span>
         </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="misiones">
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
+          <span>Misiones</span>
+        </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="cementerio">
           <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/old-amber.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Cementerio</span>
@@ -141,7 +148,17 @@
 
       <!-- Conectados -->
       <div class="panel" id="panel-conectados" role="tabpanel" aria-label="Conectados" tabindex="0">
+        <div class="card clock-card" id="clockCard">
+          <div class="clock-info"><span class="online-dot" id="clockDot"></span><b id="clockState">Sin fichar</b><span class="muted" id="clockSince"></span></div>
+          <button class="btn primary clock-toggle" data-full="1" aria-pressed="false"><span class="clock-label">Fichar entrada</span></button>
+        </div>
         <div class="friends" id="onlineList"></div>
+      </div>
+
+      <!-- Misiones -->
+      <div class="panel" id="panel-misiones" role="tabpanel" aria-label="Misiones" tabindex="0">
+        <div class="missions-head" id="missionsHead"></div>
+        <div class="missions" id="missionList"></div>
       </div>
 
       <!-- Cementerio (global) -->
@@ -190,6 +207,22 @@
       <menu>
         <button type="button" class="btn danger left hidden" id="deleteBtn">Borrar</button>
         <button type="button" class="btn ghost" id="cancelBtn">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- ───────── Modal misión (admin) ───────── -->
+  <dialog id="missionDialog" closedby="any" aria-labelledby="missionTitle">
+    <form method="dialog" id="missionForm">
+      <h3 id="missionTitle">Nueva misión</h3>
+      <label>Título<input id="mTitle" maxlength="80" required /></label>
+      <label>Descripción<textarea id="mDesc" rows="3" maxlength="300" placeholder="Opcional"></textarea></label>
+      <label>Recompensa (oculta hasta completar)<input id="mReward" maxlength="80" placeholder="Ej. Caramelo Raro x3" required /></label>
+      <label>Icono de la recompensa<select id="mItem"></select></label>
+      <menu>
+        <button type="button" class="btn danger left hidden" id="mDelete">Borrar</button>
+        <button type="button" class="btn ghost" id="mCancel">Cancelar</button>
         <button type="submit" class="btn primary">Guardar</button>
       </menu>
     </form>

@@ -20,21 +20,32 @@ drop policy if exists sessions_select on public.sessions;
 create policy sessions_select on public.sessions for select to authenticated using (true);
 -- sin políticas de escritura: solo se escribe con las funciones de abajo
 
--- latido: renueva mi sesión abierta o abre una nueva (el admin no tiene perfil: se ignora)
-create or replace function public.clock_ping()
+-- fichaje MANUAL: clock_in abre (o renueva) tu sesión; clock_ping solo renueva y dice si sigue abierta
+drop function if exists public.clock_ping();
+create or replace function public.clock_in()
 returns void language plpgsql security definer set search_path = public as $$
-declare n int;
 begin
   if auth.uid() is null or not exists (select 1 from profiles where id = auth.uid()) then return; end if;
-  update sessions set last_seen = now()
-   where user_id = auth.uid() and ended_at is null and last_seen > now() - interval '90 seconds';
-  get diagnostics n = row_count;
-  if n = 0 then
-    update sessions set ended_at = last_seen where user_id = auth.uid() and ended_at is null;
+  update sessions set ended_at = last_seen
+   where user_id = auth.uid() and ended_at is null and last_seen <= now() - interval '90 seconds';
+  update sessions set last_seen = now() where user_id = auth.uid() and ended_at is null;
+  if not found then
     insert into sessions (user_id) values (auth.uid()) on conflict (user_id) where ended_at is null do nothing;
   end if;
 end;
 $$;
+
+create or replace function public.clock_ping()
+returns boolean language plpgsql security definer set search_path = public as $$
+begin
+  update sessions set last_seen = now()
+   where user_id = auth.uid() and ended_at is null and last_seen > now() - interval '90 seconds';
+  return found;
+end;
+$$;
+
+revoke all on function public.clock_in(), public.clock_ping() from public, anon;
+grant execute on function public.clock_in(), public.clock_ping() to authenticated;
 
 -- salida limpia (cerrar sesión)
 create or replace function public.clock_out()
@@ -53,5 +64,5 @@ language sql stable set search_path = public as $$
     from sessions s group by s.user_id;
 $$;
 
-revoke all on function public.clock_ping(), public.clock_out(), public.presence_summary() from public, anon;
-grant execute on function public.clock_ping(), public.clock_out(), public.presence_summary() to authenticated;
+revoke all on function public.clock_out(), public.presence_summary() from public, anon;
+grant execute on function public.clock_out(), public.presence_summary() to authenticated;
