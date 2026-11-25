@@ -26,7 +26,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    - **🟢 Conectados** — **fichaje manual** (botón Fichar entrada/salida, también en la barra superior): solo cuentas horas y sales online si has fichado. Arriba **tu fichaje** (en otro color, con «entrada a las HH:MM» y cronómetro en vivo; el botón pasa a «Fichar salida»); debajo los **conectados ahora** con su tiempo y las **últimas conexiones** de los demás (hace cuánto y cuánto duró). En Payos cada cuenta lleva un punto verde/gris.
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
-   - **🧑 Perfil** — editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
+   - **🧑 Perfil** — eliges tu **banner** (26 temas: tipos, Kalos, Mega, Zygarde, shiny…; cada uno lleva un **título** que ven los demás en Payos; el admin puede cambiar el de cualquiera), editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
 
@@ -63,6 +63,7 @@ js/config.js          # URL + anon key + ROUTES (filas de la tabla) + MEDALS (no
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (seguro de re-ejecutar: no borra datos; incluye checks e índices)
+supabase/banners.sql  # columna profiles.banner (temas de banner de perfil; seguro de re-ejecutar)
 supabase/routes.sql   # estados de ruta (sin encuentro / fallido) por jugador (seguro de re-ejecutar)
 supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible al completar; seguro de re-ejecutar)
 supabase/presence.sql # fichaje: tabla `sessions` + funciones clock_ping/clock_out/presence_summary (seguro de re-ejecutar)
@@ -121,6 +122,8 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 
 **Relaciones:** `profiles 1—N players N—1 runs`; cada `entry` pertenece a la run, a un `player` y a un
 `user`. Borrar una cuenta arrastra en cascada sus `players` y `entries` (la run permanece).
+
+**Perfil**: `profiles.banner` (id del tema, `null` = clásico; la lista de temas vive en `config.js → BANNERS`).
 
 **Rutas**: `route_status(user_id, route, status none|failed)`; «capturado» se deduce de `entries` y «pendiente» es no tener nada.
 
@@ -192,6 +195,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
+- **Banners de perfil** con 26 temas y título visible en Payos (`supabase/banners.sql`; sin él la web funciona con el banner clásico).
 - **Fase 1 de rediseño:** cabecera móvil en una fila con menú de usuario (Salir dentro), tema con estado e icono, iconos de pestañas propios, contenido centrado, errores de promesas con aviso amable y Rutas con estados/zonas/progreso/filtros (`supabase/routes.sql`).
 - **Fichaje manual y Misiones** (`supabase/missions.sql` y `supabase/presence.sql`).
 - **BD endurecida:** `schema.sql` ya no borra tablas; checks de `status`/`level`/`badges`, índices de claves foráneas y políticas con `(select auth.uid())`. 

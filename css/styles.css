@@ -610,3 +610,29 @@ td:not(.addable).c-pending .cs{opacity:.45}
 /* pestañas con sprites de objetos de PokéAPI: más legibles cuando están inactivas */
 .tab .ticon{filter:grayscale(.35);opacity:.85}
 .tab:hover .ticon,.tab.active .ticon,.tab[aria-selected="true"] .ticon{filter:none;opacity:1}
+
+/* ───────── Banners de perfil ───────── */
+.banner{position:relative;overflow:hidden;background:linear-gradient(120deg,var(--b1),var(--b2));color:#fff}
+.banner::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.16;pointer-events:none}
+.banner .bart{position:absolute;right:6px;bottom:-10px;height:80px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.28))}
+.banner .btitle{position:absolute;left:12px;top:8px;max-width:calc(100% - 100px);padding:2px 9px;border-radius:99px;
+  background:rgba(0,0,0,.38);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.friend .fhead.banner{height:84px;margin-bottom:44px;background:linear-gradient(120deg,var(--b1),var(--b2))}
+.friend .favatar{top:54px}
+.payo-banner{height:96px;margin:0 -24px;border-bottom:2px solid var(--edge)}
+.payo-admin select{width:auto;margin:0;padding:8px 10px}
+.banner-card{grid-column:1/-1}
+.banner-card p{margin:2px 0 14px}
+.banner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.btile{appearance:none;position:relative;overflow:hidden;height:84px;padding:10px 12px;text-align:left;cursor:pointer;
+  border:2px solid var(--edge);border-radius:var(--r);font:inherit;transition:transform var(--t),box-shadow var(--t)}
+.btile:hover{transform:translateY(-2px);box-shadow:0 3px 0 var(--edge)}
+.btile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btile.on{outline:3px solid var(--accent);outline-offset:2px}
+.btile.on::after{content:"✓";position:absolute;right:8px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--accent);
+  color:#fff;display:grid;place-items:center;font-weight:900;font-size:.8rem;z-index:2}
+.btile .bname{position:relative;display:block;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.btile .btitle{position:static;display:block;max-width:62%;margin-top:2px;padding:0;background:none;text-shadow:0 1px 2px rgba(0,0,0,.5);
+  white-space:normal;font-weight:600}
+.btile .bart{height:72px;bottom:-8px}
+@media (prefers-reduced-motion:reduce){.btile{transition:none}}

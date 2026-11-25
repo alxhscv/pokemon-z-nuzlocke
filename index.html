@@ -199,6 +199,11 @@
           <div class="card medals-card">
             <div id="medalsEdit"></div>
           </div>
+          <div class="card banner-card">
+            <h3>Banner</h3>
+            <p class="muted">Se ve en tu tarjeta de Payos, con su título. Elige el que más te represente.</p>
+            <div class="banner-grid" id="bannerGrid" role="radiogroup" aria-label="Banner"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -259,6 +264,7 @@
   <!-- ───────── Modal ver payo ───────── -->
   <dialog id="payoDialog" closedby="any" aria-labelledby="payoName">
     <div class="payo">
+      <div id="payoBanner"></div>
       <div class="payo-head">
         <h3 id="payoName"></h3>
         <button type="button" class="btn ghost" id="payoClose">Cerrar</button>
@@ -271,6 +277,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=8"></script>
+  <script type="module" src="js/app.js?v=9"></script>
 </body>
 </html>

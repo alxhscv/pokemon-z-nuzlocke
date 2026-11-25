@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, ROUTE_ZONES, MEDALS } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, ROUTE_ZONES, MEDALS, BANNERS } from "./config.js";
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sprite = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -20,6 +20,16 @@ function emptyState(st) {
   return `<div class="empty-state">${{ team: SVG.team, box: SVG.box, dead: SVG.dead }[st] || ""}<span>${txt}</span></div>`;
 }
 
+// banners de perfil
+const bannerOf = (prof) => BANNERS.find((b) => b.id === prof?.banner) || BANNERS[0];
+const bannerArt = (b) => b.item ? itemImg(b.item)
+  : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.shiny ? "shiny/" : ""}${b.pk}.png`;
+const bannerVars = (b) => `--b1:${b.c1};--b2:${b.c2}`;
+function bannerHTML(prof, cls = "fhead") {
+  const b = bannerOf(prof);
+  return `<div class="${cls} banner" style="${bannerVars(b)}"><img class="bart" src="${bannerArt(b)}" alt="" loading="lazy" onerror="this.style.display='none'"><span class="btitle">${esc(b.title)}</span></div>`;
+}
+
 // color de jugador: ahora fijo (rojo) para todos
 const BRAND = "#E3350D";
 // medallas: `players.badges` es una máscara de bits (bit i-1 = medalla i), así se marcan sueltas
@@ -38,7 +48,8 @@ const ROUTE_NORMS = new Set(ROUTES.map(normLoc));
 let POKE = [];
 const byId = new Map(), byName = new Map();
 let user = null, profile = null, run = null, myPlayer = null;
-let players = [], entries = [], routeStatus = [], channel = null, rsChannel = null, signupMode = false;
+let hasBanner = true;
+let players = [], entries = [], routeStatus = [], channel = null, rsChannel = null, pfChannel = null, signupMode = false;
 let isAdmin = false, payoUid = null, dialogOwner = null;
 let currentLoc = null;   // zona del Pokémon en edición (viene de la celda de ruta; ya no hay campo)
 
@@ -240,7 +251,7 @@ async function afterLogin() {
 }
 
 function resetToAuth() {
-  channel?.unsubscribe(); rsChannel?.unsubscribe();
+  channel?.unsubscribe(); rsChannel?.unsubscribe(); pfChannel?.unsubscribe();
   stopPresence();
   presence = new Map();
   user = profile = run = myPlayer = null; isAdmin = false; payoUid = null; players = []; entries = [];
@@ -447,12 +458,15 @@ function renderConectados() {
 
 // ===================== datos + render =====================
 async function reload() {
-  const [{ data: pl }, { data: en }, { data: rs }] = await Promise.all([
-    db.from("players").select("id, user_id, badges, profiles(display_name, color, avatar)").eq("run_id", run.id).order("created_at"),
+  const qPlayers = (withBanner) => db.from("players").select(`id, user_id, badges, profiles(display_name, color, avatar${withBanner ? ", banner" : ""})`).eq("run_id", run.id).order("created_at");
+  let [plr, { data: en }, { data: rs }] = await Promise.all([
+    qPlayers(hasBanner),
     db.from("entries").select().eq("run_id", run.id).order("created_at"),
     db.from("route_status").select("user_id,route,status"),   // si routes.sql aún no está aplicado, error → vacío
   ]);
+  if (plr.error && hasBanner) { hasBanner = false; plr = await qPlayers(false); }   // banners.sql aún no aplicado
   if (!user || !run) return;   // se cerró sesión mientras cargaba
+  const pl = plr.data;
   players = pl || []; entries = en || []; routeStatus = rs || [];
   myPlayer = players.find((p) => p.user_id === user.id) || myPlayer;
   const mp = players.find((p) => p.user_id === user.id);
@@ -467,6 +481,8 @@ function subscribe() {
     .on("postgres_changes", { event: "*", schema: "public", table: "players", filter: `run_id=eq.${run.id}` }, onRealtime)
     .subscribe();
   rsChannel?.unsubscribe();
+  pfChannel?.unsubscribe();
+  pfChannel = db.channel("profiles-ch").on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, onRealtime).subscribe();
   rsChannel = db.channel("route-status").on("postgres_changes", { event: "*", schema: "public", table: "route_status" }, onRealtime).subscribe();
 }
 
@@ -487,6 +503,7 @@ function render() {
   renderConectados();
   renderGraveyard();
   renderMedalsEdit();
+  renderBannerGrid();
   refreshPayo();
 }
 
@@ -718,7 +735,7 @@ function renderPayos() {
       ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${BRAND}&quot;></span>'">`
       : `<span class="favatar dot-av" style="background:${BRAND}"></span>`;
     return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${BRAND}">
-      <div class="fhead"></div>
+      ${bannerHTML(prof)}
       ${bigAv}
       <div class="fname"><span class="online-dot${presence.get(pl.user_id)?.online ? " on" : ""}" title="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}"></span>${esc(prof.display_name)}</div>
       <div class="stats">
@@ -742,7 +759,10 @@ function openPayo(uid) {
     const name = pl.profiles?.display_name || "";
     admin.innerHTML = `<input id="payoRename" maxlength="20" value="${esc(name)}" aria-label="Nombre visible">
       <button type="button" class="btn ghost" id="payoRenameBtn">Renombrar</button>
+      <select id="payoBannerSel" aria-label="Banner">${BANNERS.map((b) => `<option value="${b.id}">${esc(b.name)}</option>`).join("")}</select>
       <button type="button" class="btn danger" id="payoDelBtn">Eliminar usuario</button>`;
+    $("payoBannerSel").value = bannerOf(pl.profiles).id;
+    $("payoBannerSel").onchange = (e) => setBanner(uid, e.target.value);
     $("payoRenameBtn").onclick = () => renamePlayer(uid);
     $("payoDelBtn").onclick = () => deletePlayer(uid);
   }
@@ -765,6 +785,7 @@ function fillPayo(pl) {
       <div class="list">${arr.map(isAdmin ? monCard : monCardRO).join("") || emptyState(st)}</div>`;
   };
   $("payoName").innerHTML = `${playerIcon(prof)}${esc(prof.display_name)}`;
+  $("payoBanner").innerHTML = bannerHTML(prof, "payo-banner");
   if (isAdmin) { $("payoMedals").innerHTML = medalTilesHTML(pl.badges); wireMedalTiles($("payoMedals"), pl); }
   else $("payoMedals").innerHTML = medalsHTML(pl.badges);
   $("payoBody").innerHTML = sect(SVG.team, "Equipo", "team") + sect(SVG.box, "Caja", "box") + sect(SVG.dead, "Cementerio", "dead");
@@ -817,6 +838,25 @@ async function toggleMedal(pl, i, root) {
   }
   const { error } = await db.from("players").update({ badges: next }).eq("id", pl.id);
   if (error) { pl.badges = prev; redraw(); toast(error.message, true); }
+}
+
+// ===================== banners =====================
+function renderBannerGrid() {
+  const grid = $("bannerGrid");
+  if (!grid || !profile || isAdmin) return;
+  const cur = bannerOf(profile).id;
+  grid.innerHTML = BANNERS.map((b) => `<button type="button" role="radio" aria-checked="${b.id === cur}" class="btile banner${b.id === cur ? " on" : ""}" data-b="${b.id}" style="${bannerVars(b)}" title="${esc(b.title)}">
+    <img class="bart" src="${bannerArt(b)}" alt="" loading="lazy" onerror="this.style.display='none'">
+    <span class="bname">${esc(b.name)}</span><span class="btitle">${esc(b.title)}</span></button>`).join("");
+  grid.querySelectorAll(".btile").forEach((t) => (t.onclick = () => setBanner(user.id, t.dataset.b)));
+}
+async function setBanner(uid, id) {
+  const banner = id === BANNERS[0].id ? null : id;
+  const { error } = await db.from("profiles").update({ banner }).eq("id", uid);
+  if (error) return toast(/banner|schema cache/i.test(error.message) ? "Falta aplicar supabase/banners.sql en Supabase" : error.message, true);
+  if (uid === user.id) profile = { ...profile, banner };
+  toast(`Banner: ${BANNERS.find((b) => b.id === id)?.name || "Clásico"}`, false, true);
+  await reload();
 }
 
 // ===================== perfil =====================
