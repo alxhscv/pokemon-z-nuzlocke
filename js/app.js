@@ -342,6 +342,7 @@ function fmtAgo(ms) {
   const h = Math.floor(m / 60);
   return h < 24 ? `${h} h` : `${Math.floor(h / 24)} d`;
 }
+const hhmm = (d) => new Date(d).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 const clockSpan = (start) => `<span data-clock="${esc(start)}">${fmtClock((Date.now() - new Date(start)) / 1000)}</span>`;
 function fmtDur(s) {
   s = Math.max(0, Math.floor(s));
@@ -388,7 +389,8 @@ async function toggleClock() {
   if (error) return toast(error.message, true);
   const was = clocked;
   await loadPresence();
-  toast(was ? "Fichaje de salida registrado" : "Fichaje de entrada registrado", false, true);
+  const st = presence.get(user.id)?.session_start;
+  toast(was ? `Salida registrada a las ${hhmm(Date.now())}` : `Entrada registrada a las ${hhmm(st || Date.now())}`, false, true);
 }
 function updateClockUI() {
   const on = clocked, start = presence.get(user?.id)?.session_start, live = on && start;
@@ -396,12 +398,12 @@ function updateClockUI() {
     b.classList.toggle("on", on); b.classList.toggle("hidden", isAdmin); b.setAttribute("aria-pressed", on);
     if (b.dataset.full) { b.classList.toggle("danger", on); b.classList.toggle("primary", !on); }
     // barra superior: al fichar pasa de «Fichar» a un cronómetro en marcha
-    b.querySelector(".clock-label").innerHTML = b.dataset.full ? (on ? "Fichar salida" : "Fichar entrada") : (live ? clockSpan(start) : on ? "Fichado" : "Fichar");
+    b.querySelector(".clock-label").innerHTML = b.dataset.full ? (on ? "Fichar salida" : "Fichar entrada") : (on ? `<span class="lbl">Fichar salida</span>${live ? `<span class="clock-mini">${clockSpan(start)}</span>` : ""}` : "Fichar entrada");
   });
   const card = $("clockCard");
   card.classList.toggle("hidden", isAdmin); card.classList.toggle("on", on);
   $("clockDot").classList.toggle("on", on);
-  $("clockState").textContent = on ? "Fichado" : "Sin fichar";
+  $("clockState").textContent = live ? `Fichado · entrada a las ${hhmm(start)}` : on ? "Fichado" : "Sin fichar";
   $("clockBig").classList.toggle("hidden", !live);
   $("clockBig").innerHTML = live ? clockSpan(start) : "";
   const total = presence.get(user?.id)?.total_seconds;

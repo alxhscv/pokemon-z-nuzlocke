@@ -23,7 +23,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
    - **📋 Misiones** — las crea el admin; cada jugador marca las suyas y solo entonces se revela la recompensa (guardada en otra tabla con RLS: el servidor no la entrega antes).
-   - **🟢 Conectados** — **fichaje manual** (botón Fichar entrada/salida, también en la barra superior): solo cuentas horas y sales online si has fichado. Arriba **tu fichaje** (en otro color, con cronómetro en vivo al fichar); debajo los **conectados ahora** con su tiempo y las **últimas conexiones** de los demás (hace cuánto y cuánto duró). En Payos cada cuenta lleva un punto verde/gris.
+   - **🟢 Conectados** — **fichaje manual** (botón Fichar entrada/salida, también en la barra superior): solo cuentas horas y sales online si has fichado. Arriba **tu fichaje** (en otro color, con «entrada a las HH:MM» y cronómetro en vivo; el botón pasa a «Fichar salida»); debajo los **conectados ahora** con su tiempo y las **últimas conexiones** de los demás (hace cuánto y cuánto duró). En Payos cada cuenta lleva un punto verde/gris.
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
    - **🧑 Perfil** — editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).

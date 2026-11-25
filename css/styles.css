@@ -516,3 +516,8 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);
 .online-row.off{opacity:.8}
 .online-row.off .fname{font-weight:600}
 .online-row .since b{color:var(--ok);font-variant-numeric:tabular-nums}
+
+/* botón de fichar en la barra: «Fichar salida» + cronómetro */
+.clock-mini{font-variant-numeric:tabular-nums;font-weight:800;color:var(--ok);margin-left:8px}
+.topbar .clock-toggle.on{border-color:var(--ok)}
+@media (max-width:560px){.clock-toggle:not([data-full]) .lbl{display:none}.clock-toggle .clock-mini{margin-left:0}}
