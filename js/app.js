@@ -363,10 +363,11 @@ async function stopPresence(out = false) {
   if (out && !isAdmin) await db.rpc("clock_out");
 }
 async function loadPresence() {
-  const [{ data }, { data: ses }] = await Promise.all([
+  const [{ data, error }, { data: ses }] = await Promise.all([
     db.rpc("presence_summary"),
     db.from("sessions").select("user_id,started_at,last_seen,ended_at").order("last_seen", { ascending: false }).limit(300),
   ]);
+  if (error) return toast("No se pudo leer el fichaje: " + error.message, true);   // sin tocar el estado local
   presence = new Map((data || []).map((r) => [r.user_id, r]));
   lastConn = new Map();
   for (const s of ses || []) if (!lastConn.has(s.user_id)) lastConn.set(s.user_id, s);   // la más reciente de cada uno
@@ -375,7 +376,7 @@ async function loadPresence() {
 }
 
 // fichaje manual: sin fichar no cuentas horas ni sales como conectado
-let clocked = false;
+let clocked = false, localStart = null;   // localStart: entrada según este navegador, por si la lectura falla
 async function ping() {
   if (!clocked) return;
   const { data, error } = await db.rpc("clock_ping");
@@ -388,12 +389,13 @@ async function toggleClock() {
   document.querySelectorAll(".clock-toggle").forEach((b) => (b.disabled = false));
   if (error) return toast(error.message, true);
   const was = clocked;
+  clocked = !was; localStart = clocked ? new Date().toISOString() : null;
+  updateClockUI();   // la interfaz cambia al instante; luego se concilia con el servidor
+  toast(was ? `Salida registrada a las ${hhmm(Date.now())}` : `Entrada registrada a las ${hhmm(localStart)}`, false, true);
   await loadPresence();
-  const st = presence.get(user.id)?.session_start;
-  toast(was ? `Salida registrada a las ${hhmm(Date.now())}` : `Entrada registrada a las ${hhmm(st || Date.now())}`, false, true);
 }
 function updateClockUI() {
-  const on = clocked, start = presence.get(user?.id)?.session_start, live = on && start;
+  const on = clocked, start = presence.get(user?.id)?.session_start || (on ? localStart : null), live = on && start;
   document.querySelectorAll(".clock-toggle").forEach((b) => {
     b.classList.toggle("on", on); b.classList.toggle("hidden", isAdmin); b.setAttribute("aria-pressed", on);
     if (b.dataset.full) { b.classList.toggle("danger", on); b.classList.toggle("primary", !on); }

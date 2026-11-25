@@ -15,6 +15,7 @@ create table if not exists public.sessions (
 );
 create unique index if not exists sessions_one_open on public.sessions (user_id) where ended_at is null;
 
+grant select on public.sessions to authenticated;   -- sin este grant la web no puede leer el fichaje
 alter table public.sessions enable row level security;
 drop policy if exists sessions_select on public.sessions;
 create policy sessions_select on public.sessions for select to authenticated using (true);
