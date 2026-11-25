@@ -33,6 +33,8 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
+**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento verde Zygarde, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex.
+
 La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
 pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** a pantalla completa.
@@ -177,6 +179,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
+- **Rediseño visual** (menos plantilla, más menú de juego): ver «Estilo». Nombre de ruta alineado a la izquierda y sin numeración de adorno; «Cayó a Nv.» ya no usa la fuente pixel (no tiene acentos).
 - **Cuenta admin** (oculta, edita todo y borra usuarios): ver «Cuenta admin».
 - El modal de un payo ahora se actualiza en vivo si cambian sus datos.
 - **Medallas rediseñadas:** imágenes oficiales, editor en tarjeta a la derecha del perfil y selección independiente (máscara de bits en `players.badges`, sin cambios de esquema).

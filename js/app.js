@@ -393,7 +393,7 @@ function renderRoutes() {
       <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div></div></th>`;
   }).join("")}</tr></thead>`;
 
-  const body = rows.map((route, i) => {
+  const body = rows.map((route) => {
     const cells = players.map((pl) => {
       const mine = pl.user_id === user.id;
       const es = entries.filter((e) => e.user_id === pl.user_id && normLoc(e.location) === normLoc(route));
@@ -404,7 +404,7 @@ function renderRoutes() {
       }).join("");
       return `<td class="${mine || isAdmin ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
     }).join("");
-    return `<tr><th class="rlabel"><span class="rnum">Zona ${String(i + 1).padStart(2, "0")}</span>${esc(route) || "Sin zona"}</th>${cells}</tr>`;
+    return `<tr><th class="rlabel">${esc(route) || "Sin zona"}</th>${cells}</tr>`;
   }).join("");
 
   $("routesTable").innerHTML = head + `<tbody>${body}</tbody>`;
