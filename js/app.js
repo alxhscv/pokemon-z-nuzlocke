@@ -28,7 +28,7 @@ const GREEN = "#2BB673";
 // medallas con nombre (8 de Kalos reales + 4 extra temáticas de Z)
 const MEDALS = ["Bicho", "Muro", "Lucha", "Planta", "Voltaje", "Hada", "Psíquica", "Iceberg", "Núcleo", "Célula", "Orden", "Zygarde"];
 // avatar: un número = Pokémon por id; cualquier otra cosa = URL de imagen
-function avatarSrc(av) { if (av == null || av === "") return null; av = String(av); return /^\d+$/.test(av) ? sprite(av) : av; }
+function avatarSrc(av) { if (av == null || av === "") return null; av = String(av); return /^\d+$/.test(av) ? sprite(av) : esc(av); }  // URL escapada: se interpola en atributos HTML
 function isPhoto(av) { return av != null && av !== "" && !/^\d+$/.test(String(av)); }
 const uname2email = (u) => u.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "") + "@users.pokez";
 const normLoc = (s) => (s || "").trim().toLowerCase();
@@ -54,11 +54,11 @@ async function init() {
 
 function wireEvents() {
   $("authSubmit").onclick = doAuth;
-  $("authPass").onkeydown = (e) => { if (e.key === "Enter") doAuth(); };
+  $("authPass").onkeydown = $("authUser").onkeydown = (e) => { if (e.key === "Enter") doAuth(); };
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("authAvatar").oninput = updateAuthAvatarPreview;
   $("logoutBtn").onclick = () => db.auth.signOut();
-  $("userChip").onclick = () => selectTab("perfil");
+  $("userChip").onclick = $("meChip").onclick = () => selectTab("perfil");
   $("themeToggle").onclick = toggleTheme;
   applyThemeIcon();
   const tabs = [...document.querySelectorAll(".tab")];
@@ -259,7 +259,6 @@ function onRealtime() {
 }
 
 function render() {
-  if (profile?.color) document.documentElement.style.setProperty("--me-color", profile.color);
   $("userChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   $("meChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   renderRoutes();
@@ -371,12 +370,13 @@ function renderRoutes() {
     const n = normLoc(e.location);
     if (e.location && !ROUTE_NORMS.has(n) && !seen.has(n)) { seen.add(n); extras.push(e.location.trim()); }
   }
+  if (entries.some((e) => !e.location)) extras.push("");   // registrados sin zona (botón «Registrar»)
   const rows = [...ROUTES, ...extras];
 
   const head = `<thead><tr><th class="rcorner">Ruta</th>${players.map((pl) => {
     const prof = pl.profiles || {};
     const mine = pl.user_id === user.id;
-    return `<th class="${mine ? "mine" : ""}" style="--me-col:${esc(prof.color || "#888")}">
+    return `<th class="${mine ? "mine" : ""}" style="--me-col:${GREEN}">
       <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div></div></th>`;
   }).join("")}</tr></thead>`;
 
@@ -391,7 +391,7 @@ function renderRoutes() {
       }).join("");
       return `<td class="${mine ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
     }).join("");
-    return `<tr><th class="rlabel"><span class="rnum">Zona ${String(i + 1).padStart(2, "0")}</span>${esc(route)}</th>${cells}</tr>`;
+    return `<tr><th class="rlabel"><span class="rnum">Zona ${String(i + 1).padStart(2, "0")}</span>${esc(route) || "Sin zona"}</th>${cells}</tr>`;
   }).join("");
 
   $("routesTable").innerHTML = head + `<tbody>${body}</tbody>`;

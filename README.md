@@ -17,7 +17,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
 3. **Registras Pokémon** (Pokémon, mote, nivel y notas). El Pokémon entra en la **Caja** por defecto;
    luego lo mueves entre ⚔️ Equipo / 📦 Caja / ⚰️ Cementerio con los botones de su tarjeta (está en un
    único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
-   ruta. Llevas tus **medallas** (0–12). En tu **perfil** eliges nombre, color y un **avatar**.
+   ruta. Llevas tus **medallas** (0–12). En tu **perfil** eliges nombre y un **avatar**.
 4. La app está en **5 pestañas**:
    - **🗺️ Rutas** — matriz rutas × jugadores (qué capturó cada uno en cada ruta).
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
@@ -30,7 +30,8 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
 
 La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al login). En la tabla de
-rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta.
+rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
+botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
 La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
@@ -53,7 +54,7 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ## Estructura de archivos
 
 ```
-index.html            # una página (login · app con 4 pestañas: rutas/seguimiento/payos/perfil)
+index.html            # una página (login · app con 5 pestañas: rutas/seguimiento/payos/cementerio/perfil)
 css/styles.css        # estilos (tema claro por defecto + oscuro, tokens CSS, estética Pokémon/Kalos)
 js/config.js          # URL + anon key + ROUTES (filas de la tabla de rutas)
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
@@ -73,8 +74,8 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 |---|---|---|
 | `id` | uuid **PK** | = `auth.users.id` (cascade) |
 | `display_name` | text | nombre visible |
-| `color` | text | color del jugador (hex) |
-| `avatar` | int | id nacional del Pokémon-avatar (opcional) |
+| `color` | text | en desuso: todos usan verde Zygarde |
+| `avatar` | text | id del Pokémon-avatar **o** URL de imagen (opcional) |
 | `created_at` | timestamptz | |
 
 ### `runs` — la partida (única y compartida)
@@ -154,3 +155,17 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
   fiables. Las zonas nuevas se añaden solas, así que no bloquea.
 - **Pokédex:** 9 generaciones completas (National Dex), no filtrada a los Pokémon concretos del juego.
 - **Sin histórico/undo:** editar o borrar es inmediato y definitivo.
+
+---
+
+## Registro de arreglos
+
+- **Botón «Cerrar» suelto** en todas las pestañas: el modal de payo (`#payoDialog`) tenía
+  `display:flex` fijo, que anula el `display:none` de un `<dialog>` cerrado. Ahora solo aplica con `[open]`.
+- **Avatar por URL sin escapar** al pintarlo en `src="…"` (podía inyectar HTML a los demás): ahora se escapa.
+- El **color** de cada cuenta ya no depende de lo guardado en BD (siempre verde Zygarde).
+- Pokémon registrados **sin ruta** ya no desaparecen de la tabla (fila «Sin zona»).
+- Modal de payo en móvil: ocupa todo el ancho como el resto de hojas inferiores.
+- Aviso (toast) en móvil ya no queda tapado por la barra de pestañas.
+- `Enter` en el campo usuario envía el login; el chip de usuario de Seguimiento lleva al Perfil.
+- Cuadrícula de la Caja (nunca se veía) simplificada a fondo liso.

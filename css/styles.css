@@ -223,11 +223,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .col{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;min-height:140px;box-shadow:var(--sh1)}
 .col>h3{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:var(--fs-md)}
 .col>h3 svg{width:20px;height:20px;flex:0 0 auto;color:var(--muted)}
-.col.box{background:
-  linear-gradient(var(--surface2) 0 0) padding-box,
-  repeating-linear-gradient(0deg,transparent 0 23px,var(--line) 23px 24px),
-  repeating-linear-gradient(90deg,transparent 0 23px,var(--line) 23px 24px);
-  background-blend-mode:normal}
+.col.box{background:var(--surface2)}
 .col.grave{background:color-mix(in srgb,var(--grave) 7%,var(--surface))}
 .count{margin-left:auto;background:var(--surface2);border:1px solid var(--line);border-radius:var(--pill);
   padding:1px 10px;font-size:var(--fs-xs);color:var(--muted);font-weight:700}
@@ -268,7 +264,9 @@ td.addable:hover{background:color-mix(in srgb,var(--me-color) 14%,var(--surface)
 .routes .empty{color:var(--dex)}
 td.addable .empty{font-size:0;display:grid;place-items:center;width:32px;height:32px;margin:0 auto;
   border:2px dashed color-mix(in srgb,var(--me-color) 55%,var(--line));border-radius:10px}
-td.addable .empty::after{content:"+";font:800 20px/1 var(--sans);color:var(--me-color)}
+td.addable .empty::after{content:"";width:14px;height:14px;
+  background:linear-gradient(var(--me-color),var(--me-color)) center/100% 2.5px no-repeat,
+             linear-gradient(var(--me-color),var(--me-color)) center/2.5px 100% no-repeat}
 
 /* mini-tarjeta dentro de la celda */
 .rmon{display:inline-flex;flex-direction:column;align-items:center;width:56px;cursor:pointer;vertical-align:top;
@@ -375,7 +373,8 @@ dialog[open]{animation:dialog-in .22s var(--ease)}
 #entryForm{padding:24px}
 #entryForm h3{margin:0 0 6px}
 dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px 0 0;flex-wrap:wrap}
-#payoDialog{max-width:540px;width:min(94vw,540px);max-height:min(88svh,680px);display:flex;flex-direction:column}
+#payoDialog{max-width:540px;width:min(94vw,540px);max-height:min(88svh,680px)}
+#payoDialog[open]{display:flex;flex-direction:column}  /* solo abierto: si no, pisa el display:none y se ve el botón Cerrar suelto */
 .payo{display:flex;flex-direction:column;min-height:0;padding:0 24px 24px}
 .payo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;
   background:var(--surface);padding:22px 0 10px;z-index:1}
@@ -483,6 +482,8 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
   dialog{max-width:100vw;width:100vw;margin:0;margin-top:auto;border-radius:var(--r-lg) var(--r-lg) 0 0;
     max-height:92svh}
   dialog[open]{animation:sheet-in .25s var(--ease)}
+  #payoDialog{width:100vw;max-width:100vw;max-height:92svh}
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom))}   /* por encima de la barra de pestañas */
   .rlabel{min-width:92px;max-width:120px;font-size:var(--fs-xs)}
 }
 @keyframes sheet-in{from{transform:translateY(100%)}}
