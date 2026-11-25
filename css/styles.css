@@ -262,9 +262,9 @@ table.routes tbody tr:nth-child(even) td.addable{background:color-mix(in srgb,va
 td.addable:hover{background:color-mix(in srgb,var(--me-color) 14%,var(--surface))}
 /* celda vacía propia → afford "+"; ajena → "—" neutro */
 .routes .empty{color:var(--dex)}
-td.addable .empty{font-size:0;display:grid;place-items:center;width:32px;height:32px;margin:0 auto;
+td.addable .empty{font-size:0;display:block;position:relative;width:32px;height:32px;margin:0 auto;
   border:2px dashed color-mix(in srgb,var(--me-color) 55%,var(--line));border-radius:10px}
-td.addable .empty::after{content:"";width:14px;height:14px;
+td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:14px;height:14px;
   background:linear-gradient(var(--me-color),var(--me-color)) center/100% 2.5px no-repeat,
              linear-gradient(var(--me-color),var(--me-color)) center/2.5px 100% no-repeat}
 
