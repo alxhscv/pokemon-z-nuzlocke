@@ -142,21 +142,23 @@
 
       <!-- Perfil -->
       <div class="panel" id="panel-perfil" role="tabpanel" aria-label="Perfil" tabindex="0">
-        <div class="card profile-card">
-          <h2>Tu perfil</h2>
-          <form id="profileForm">
-            <label>Nombre visible<input id="pName" maxlength="20" /></label>
-            <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
-            <label>…o avatar por URL de imagen<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label>
-            <div class="preview" id="avatarPreview"></div>
-            <div class="form-actions">
-              <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
-              <button type="submit" class="btn primary">Guardar perfil</button>
-            </div>
-          </form>
-          <hr>
-          <h3 class="section-title">Medallas</h3>
-          <div class="medals-edit" id="medalsEdit"></div>
+        <div class="profile-layout">
+          <div class="card profile-card">
+            <h2>Tu perfil</h2>
+            <form id="profileForm">
+              <label>Nombre visible<input id="pName" maxlength="20" /></label>
+              <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
+              <label>…o avatar por URL de imagen<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label>
+              <div class="preview" id="avatarPreview"></div>
+              <div class="form-actions">
+                <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
+                <button type="submit" class="btn primary">Guardar perfil</button>
+              </div>
+            </form>
+          </div>
+          <div class="card medals-card">
+            <div id="medalsEdit"></div>
+          </div>
         </div>
       </div>
     </section>

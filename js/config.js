@@ -38,3 +38,12 @@ export const ROUTES = [
   "Intercambio",
   "Huevo",
 ];
+
+// Medallas (12). `img` = nº de PokeAPI/sprites/badges (43–50 = las 8 reales de Kalos).
+// Las 4 últimas usan otras medallas oficiales como marcador: cámbialas por las de los gimnasios de Z.
+export const MEDALS = [
+  { name: "Bicho",   img: 43 }, { name: "Muro",    img: 44 }, { name: "Lucha",   img: 45 },
+  { name: "Planta",  img: 46 }, { name: "Voltaje", img: 47 }, { name: "Hada",    img: 48 },
+  { name: "Psíquica",img: 49 }, { name: "Iceberg", img: 50 }, { name: "Núcleo",  img: 64 },
+  { name: "Célula",  img: 65 }, { name: "Orden",   img: 62 }, { name: "Zygarde", img: 63 },
+];

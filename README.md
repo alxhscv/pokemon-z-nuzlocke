@@ -17,14 +17,14 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
 3. **Registras Pokémon** (Pokémon, mote, nivel y notas). El Pokémon entra en la **Caja** por defecto;
    luego lo mueves entre ⚔️ Equipo / 📦 Caja / ⚰️ Cementerio con los botones de su tarjeta (está en un
    único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
-   ruta. Llevas tus **medallas** (0–12). En tu **perfil** eliges nombre y un **avatar**.
+   ruta. Llevas tus **medallas** (12, marcadas una a una). En tu **perfil** eliges nombre y un **avatar**.
 4. La app está en **5 pestañas**:
    - **🗺️ Rutas** — matriz rutas × jugadores (qué capturó cada uno en cada ruta).
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
-   - **🧑 Perfil** — editas tu nombre, avatar y medallas (iconos 0–12). El **color es fijo (verde
+   - **🧑 Perfil** — editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (verde
      Zygarde)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
@@ -56,7 +56,7 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ```
 index.html            # una página (login · app con 5 pestañas: rutas/seguimiento/payos/cementerio/perfil)
 css/styles.css        # estilos (tema claro por defecto + oscuro, tokens CSS, estética Pokémon/Kalos)
-js/config.js          # URL + anon key + ROUTES (filas de la tabla de rutas)
+js/config.js          # URL + anon key + ROUTES (filas de la tabla) + MEDALS (nombre + imagen de cada medalla)
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (se aplica una vez)
@@ -94,7 +94,7 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 | `id` | uuid **PK** | |
 | `run_id` | uuid **FK→runs** | cascade |
 | `user_id` | uuid **FK→profiles** | cascade |
-| `badges` | int | medallas (0–12) |
+| `badges` | int | **máscara de bits** de medallas (bit *i*-1 = medalla *i*; 0–4095). Antes era un contador: valores antiguos se verán como otras medallas, se corrigen marcándolas de nuevo |
 | `created_at` | timestamptz | **unique(`run_id`,`user_id`)** |
 
 ### `entries` — Pokémon registrados
@@ -135,6 +135,10 @@ Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
 Las filas de la tabla de rutas están en `js/config.js → ROUTES` (lista ordenada y editable). Si alguien
 registra una zona que no esté en la lista, aparece igualmente al final de la tabla.
 
+### Editar las medallas
+`js/config.js → MEDALS`: nombre e `img` (nº de [PokeAPI/sprites/badges](https://github.com/PokeAPI/sprites/tree/master/sprites/badges)).
+Las 8 primeras son las reales de Kalos (43–50); las 4 últimas son imágenes oficiales de relleno hasta poner las de los gimnasios de Z.
+
 ### Regenerar la lista de Pokémon (opcional)
 ```bash
 curl -s -o scripts/species_names.csv https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species_names.csv
@@ -160,6 +164,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
+- **Medallas rediseñadas:** imágenes oficiales, editor en tarjeta a la derecha del perfil y selección independiente (máscara de bits en `players.badges`, sin cambios de esquema).
 - **Botón «Cerrar» suelto** en todas las pestañas: el modal de payo (`#payoDialog`) tenía
   `display:flex` fijo, que anula el `display:none` de un `<dialog>` cerrado. Ahora solo aplica con `[open]`.
 - **Avatar por URL sin escapar** al pintarlo en `src="…"` (podía inyectar HTML a los demás): ahora se escapa.

@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, MEDALS } from "./config.js";
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sprite = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -25,8 +25,10 @@ function emptyState(st) {
 
 // color de jugador: ahora fijo (verde Zygarde) para todos
 const GREEN = "#2BB673";
-// medallas con nombre (8 de Kalos reales + 4 extra temáticas de Z)
-const MEDALS = ["Bicho", "Muro", "Lucha", "Planta", "Voltaje", "Hada", "Psíquica", "Iceberg", "Núcleo", "Célula", "Orden", "Zygarde"];
+// medallas: `players.badges` es una máscara de bits (bit i-1 = medalla i), así se marcan sueltas
+const medalImg = (m) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/badges/${m.img}.png`;
+const hasMedal = (mask, i) => ((mask || 0) >> (i - 1)) & 1;
+const countMedals = (mask) => MEDALS.reduce((n, _, k) => n + hasMedal(mask, k + 1), 0);
 // avatar: un número = Pokémon por id; cualquier otra cosa = URL de imagen
 function avatarSrc(av) { if (av == null || av === "") return null; av = String(av); return /^\d+$/.test(av) ? sprite(av) : esc(av); }  // URL escapada: se interpola en atributos HTML
 function isPhoto(av) { return av != null && av !== "" && !/^\d+$/.test(String(av)); }
@@ -351,14 +353,12 @@ async function updateStatus(id, status) {
   await reload();
 }
 
-// medallas visuales (12 iconos); n encendidas
-function medalsHTML(n) {
-  let s = "";
-  for (let i = 1; i <= 12; i++) {
-    const on = i <= (n || 0);
-    s += `<span class="medal ${on ? "on" : ""}" title="Medalla ${MEDALS[i - 1]}${on ? " ✓" : ""}" aria-label="Medalla ${MEDALS[i - 1]} ${on ? "conseguida" : "pendiente"}"></span>`;
-  }
-  return s;
+// medallas visuales (solo lectura): las conseguidas en color, el resto en gris
+function medalsHTML(mask) {
+  return MEDALS.map((m, k) => {
+    const on = hasMedal(mask, k + 1);
+    return `<span class="medal ${on ? "on" : "off"}" title="Medalla ${esc(m.name)}${on ? " ✓" : ""}" aria-label="Medalla ${esc(m.name)} ${on ? "conseguida" : "pendiente"}"><img src="${medalImg(m)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></span>`;
+  }).join("");
 }
 
 // Tabla de rutas × jugadores
@@ -452,30 +452,29 @@ function openPayo(uid) {
   $("payoDialog").showModal();
 }
 
-// editor de medallas (pestaña Perfil): clic en la medalla i fija el total en i (o i-1 si ya estaba)
+// editor de medallas (pestaña Perfil): cada ficha se activa/desactiva por separado
 function renderMedalsEdit() {
   if (!myPlayer) return;
-  const n = myPlayer.badges || 0;
-  let s = "";
-  for (let i = 1; i <= 12; i++) {
-    const on = i <= n;
-    s += `<button type="button" class="medal ${on ? "on" : ""}" data-n="${i}" title="Medalla ${MEDALS[i - 1]}" aria-label="Medalla ${MEDALS[i - 1]} ${on ? "conseguida, clic para quitar" : "pendiente, clic para conseguir"}"></button>`;
-  }
-  $("medalsEdit").innerHTML = `<div class="medals-count"><b>${n}</b>/12</div><div class="medals-view edit">${s}</div>`;
-  $("medalsEdit").querySelectorAll(".medal").forEach((b) =>
-    (b.onclick = () => { const i = +b.dataset.n; setBadges(i === myPlayer.badges ? i - 1 : i); }));
+  const mask = myPlayer.badges || 0;
+  const tiles = MEDALS.map((m, k) => {
+    const on = hasMedal(mask, k + 1);
+    return `<button type="button" class="medal-tile ${on ? "on" : ""}" data-n="${k + 1}" aria-pressed="${on}" title="Medalla ${esc(m.name)}">
+      <img src="${medalImg(m)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${esc(m.name)}</span></button>`;
+  }).join("");
+  $("medalsEdit").innerHTML = `<div class="medals-head"><h3>Medallas</h3><span class="medals-count"><b>${countMedals(mask)}</b>/${MEDALS.length}</span></div><div class="medal-grid">${tiles}</div>`;
+  $("medalsEdit").querySelectorAll(".medal-tile").forEach((b) => (b.onclick = () => toggleMedal(+b.dataset.n)));
 }
 
-async function setBadges(n) {
-  n = Math.max(0, Math.min(12, n));
-  if (!myPlayer || n === myPlayer.badges) return;
-  const prev = myPlayer.badges; myPlayer.badges = n;
+async function toggleMedal(i) {
+  if (!myPlayer) return;
+  const prev = myPlayer.badges || 0, next = prev ^ (1 << (i - 1));
+  myPlayer.badges = next;
   renderMedalsEdit(); renderPayos();
-  if (n > prev) {
+  if (next > prev) {
     confetti();
-    $("medalsEdit").querySelector(`.medal[data-n="${n}"]`)?.classList.add("just-on");
+    $("medalsEdit").querySelector(`.medal-tile[data-n="${i}"]`)?.classList.add("just-on");
   }
-  const { error } = await db.from("players").update({ badges: n }).eq("id", myPlayer.id);
+  const { error } = await db.from("players").update({ badges: next }).eq("id", myPlayer.id);
   if (error) { myPlayer.badges = prev; renderMedalsEdit(); renderPayos(); toast(error.message, true); }
 }
 
