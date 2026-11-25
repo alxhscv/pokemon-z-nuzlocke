@@ -149,10 +149,17 @@
       <!-- Conectados -->
       <div class="panel" id="panel-conectados" role="tabpanel" aria-label="Conectados" tabindex="0">
         <div class="card clock-card" id="clockCard">
-          <div class="clock-info"><span class="online-dot" id="clockDot"></span><b id="clockState">Sin fichar</b><span class="muted" id="clockSince"></span></div>
+          <div class="clock-info">
+            <span class="online-dot" id="clockDot"></span>
+            <div><b id="clockState">Sin fichar</b><div class="muted" id="clockTotal"></div></div>
+          </div>
+          <span class="clock-big hidden" id="clockBig"></span>
           <button class="btn primary clock-toggle" data-full="1" aria-pressed="false"><span class="clock-label">Fichar entrada</span></button>
         </div>
+        <h3 class="sect">Conectados ahora <span class="count" id="cntOnline">0</span></h3>
         <div class="friends" id="onlineList"></div>
+        <h3 class="sect">Últimas conexiones</h3>
+        <div class="friends" id="recentList"></div>
       </div>
 
       <!-- Misiones -->

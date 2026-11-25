@@ -504,3 +504,15 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .reward.open{border-style:solid;border-color:var(--gold)}
 .reward.open .iimg{width:40px;height:40px}
 select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);border-radius:var(--r-sm);font-size:1rem;font-family:inherit;background:var(--surface);color:var(--txt)}
+
+/* Conectados: tu fichaje arriba (color propio), luego conectados y últimas conexiones */
+.clock-card{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));transition:background var(--t),border-color var(--t)}
+.clock-card.on{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--surface))}
+.clock-info b{font-size:var(--fs-lg)}
+.clock-big{font-family:var(--retro);font-size:2rem;font-variant-numeric:tabular-nums;letter-spacing:.04em;color:var(--ok)}
+.clock-toggle.on .clock-label{font-variant-numeric:tabular-nums}
+@media (max-width:560px){.clock-toggle.on:not(.clock-card .clock-toggle){width:auto;padding:0 10px}.clock-toggle.on .clock-label{display:inline;font-size:var(--fs-sm)}.clock-big{font-size:1.6rem}}
+.sect{margin:22px 0 10px;font-size:var(--fs-lg);display:flex;align-items:center;gap:8px}
+.online-row.off{opacity:.8}
+.online-row.off .fname{font-weight:600}
+.online-row .since b{color:var(--ok);font-variant-numeric:tabular-nums}

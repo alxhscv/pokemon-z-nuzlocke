@@ -332,7 +332,17 @@ async function deleteMission() {
 
 // ===================== fichaje =====================
 // latido cada 30 s (clock_ping); 90 s sin latido = desconectado. Ver supabase/presence.sql
-let presence = new Map(), pingT, pollT, tickT;
+let presence = new Map(), lastConn = new Map(), pingT, pollT, tickT;
+const p2 = (n) => String(n).padStart(2, "0");
+function fmtClock(s) { s = Math.max(0, Math.floor(s)); return `${p2(Math.floor(s / 3600))}:${p2(Math.floor((s % 3600) / 60))}:${p2(s % 60)}`; }
+function fmtAgo(ms) {
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "un momento";
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  return h < 24 ? `${h} h` : `${Math.floor(h / 24)} d`;
+}
+const clockSpan = (start) => `<span data-clock="${esc(start)}">${fmtClock((Date.now() - new Date(start)) / 1000)}</span>`;
 function fmtDur(s) {
   s = Math.max(0, Math.floor(s));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
@@ -343,8 +353,8 @@ async function startPresence() {
   pingT = setInterval(ping, 30000);
   await loadPresence();
   pollT = setInterval(loadPresence, 30000);
-  tickT = setInterval(() => document.querySelectorAll("[data-since]").forEach((el) => {
-    el.textContent = fmtDur((Date.now() - new Date(el.dataset.since)) / 1000);
+  tickT = setInterval(() => document.querySelectorAll("[data-clock]").forEach((el) => {
+    el.textContent = fmtClock((Date.now() - new Date(el.dataset.clock)) / 1000);
   }), 1000);
 }
 async function stopPresence(out = false) {
@@ -352,8 +362,13 @@ async function stopPresence(out = false) {
   if (out && !isAdmin) await db.rpc("clock_out");
 }
 async function loadPresence() {
-  const { data } = await db.rpc("presence_summary");
+  const [{ data }, { data: ses }] = await Promise.all([
+    db.rpc("presence_summary"),
+    db.from("sessions").select("user_id,started_at,last_seen,ended_at").order("last_seen", { ascending: false }).limit(300),
+  ]);
   presence = new Map((data || []).map((r) => [r.user_id, r]));
+  lastConn = new Map();
+  for (const s of ses || []) if (!lastConn.has(s.user_id)) lastConn.set(s.user_id, s);   // la más reciente de cada uno
   clocked = !isAdmin && !!presence.get(user?.id)?.online;   // la verdad la tiene el servidor
   renderConectados(); renderPayos(); fillHours(); updateClockUI();
 }
@@ -376,26 +391,40 @@ async function toggleClock() {
   toast(was ? "Fichaje de salida registrado" : "Fichaje de entrada registrado", false, true);
 }
 function updateClockUI() {
-  const on = clocked, start = presence.get(user?.id)?.session_start;
+  const on = clocked, start = presence.get(user?.id)?.session_start, live = on && start;
   document.querySelectorAll(".clock-toggle").forEach((b) => {
     b.classList.toggle("on", on); b.classList.toggle("hidden", isAdmin); b.setAttribute("aria-pressed", on);
     if (b.dataset.full) { b.classList.toggle("danger", on); b.classList.toggle("primary", !on); }
-    b.querySelector(".clock-label").textContent = b.dataset.full ? (on ? "Fichar salida" : "Fichar entrada") : (on ? "Fichado" : "Fichar");
+    // barra superior: al fichar pasa de «Fichar» a un cronómetro en marcha
+    b.querySelector(".clock-label").innerHTML = b.dataset.full ? (on ? "Fichar salida" : "Fichar entrada") : (live ? clockSpan(start) : on ? "Fichado" : "Fichar");
   });
-  $("clockCard").classList.toggle("hidden", isAdmin);
+  const card = $("clockCard");
+  card.classList.toggle("hidden", isAdmin); card.classList.toggle("on", on);
   $("clockDot").classList.toggle("on", on);
   $("clockState").textContent = on ? "Fichado" : "Sin fichar";
-  $("clockSince").innerHTML = on && start ? ` · lleva <b data-since="${esc(start)}">${fmtDur((Date.now() - new Date(start)) / 1000)}</b>` : "";
+  $("clockBig").classList.toggle("hidden", !live);
+  $("clockBig").innerHTML = live ? clockSpan(start) : "";
+  const total = presence.get(user?.id)?.total_seconds;
+  $("clockTotal").textContent = total ? `Horas jugadas: ${fmtDur(total)}` : "Aún sin horas";
 }
 function fillHours() {
   if (user && $("pHours")) $("pHours").textContent = fmtDur(presence.get(user.id)?.total_seconds || 0);
 }
+const lastTs = (p) => { const s = lastConn.get(p.user_id); return s ? new Date(s.ended_at || s.last_seen).getTime() : 0; };
 function renderConectados() {
-  const on = players.filter((p) => presence.get(p.user_id)?.online);
+  const others = players.filter((p) => p.user_id !== user?.id);   // lo tuyo va aparte, arriba
+  const on = others.filter((p) => presence.get(p.user_id)?.online);
+  const off = others.filter((p) => !presence.get(p.user_id)?.online).sort((x, y) => lastTs(y) - lastTs(x));
+  $("cntOnline").textContent = on.length;
   $("onlineList").innerHTML = on.length ? on.map((p) => `<div class="friend online-row">
       ${playerIcon(p.profiles)}<span class="fname">${esc(p.profiles?.display_name || "???")}</span>
-      <span class="since">lleva <b data-since="${esc(presence.get(p.user_id).session_start)}">${fmtDur((Date.now() - new Date(presence.get(p.user_id).session_start)) / 1000)}</b></span>
-    </div>`).join("") : `<div class="empty-state"><span>Nadie conectado ahora mismo.</span></div>`;
+      <span class="since">lleva <b>${clockSpan(presence.get(p.user_id).session_start)}</b></span>
+    </div>`).join("") : `<div class="empty-state"><span>Nadie más conectado ahora mismo.</span></div>`;
+  $("recentList").innerHTML = off.map((p) => {
+    const s = lastConn.get(p.user_id);
+    const info = s ? `hace ${fmtAgo(Date.now() - lastTs(p))} · duró ${fmtDur((new Date(s.last_seen) - new Date(s.started_at)) / 1000)}` : "Nunca se ha conectado";
+    return `<div class="friend online-row off">${playerIcon(p.profiles)}<span class="fname">${esc(p.profiles?.display_name || "???")}</span><span class="since">${info}</span></div>`;
+  }).join("");
 }
 
 // ===================== datos + render =====================
