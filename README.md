@@ -59,7 +59,8 @@ css/styles.css        # estilos (tema claro por defecto + oscuro, tokens CSS, es
 js/config.js          # URL + anon key + ROUTES (filas de la tabla) + MEDALS (nombre + imagen de cada medalla)
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}
-supabase/schema.sql   # tablas + RLS + realtime + run única (se aplica una vez)
+supabase/schema.sql   # tablas + RLS + realtime + run única (se aplica una vez; BORRA y recrea las tablas)
+supabase/admin.sql    # permisos de la cuenta admin + función para borrar usuarios (seguro de re-ejecutar)
 scripts/build_pokemon_json.py  # regenera data/pokemon.json desde los CSV de PokéAPI
 ```
 
@@ -131,6 +132,18 @@ Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
 3. **Credenciales:** en [`js/config.js`](js/config.js) (Project URL + anon key, públicas).
 4. **Publicar:** repo → *Settings → Pages → Branch `main` / root*. URL: `https://<usuario>.github.io/<repo>/`.
 
+### Cuenta admin
+Usuario `admin` (email `admin@users.pokez`). **No aparece en ninguna lista** (no tiene fila en `players` ni
+perfil) y tiene su propia vista: solo las pestañas Rutas, Payos y Cementerio. Puede:
+- editar/mover/borrar **cualquier** Pokémon (desde la tabla de rutas, el cementerio o la ficha de un payo)
+  y registrar Pokémon en la celda de cualquier jugador;
+- en la ficha de un payo: marcar sus **medallas**, **renombrarlo** y **eliminar su cuenta** (con todos sus Pokémon).
+
+Los permisos reales están en la base de datos: ejecuta **una vez** [`supabase/admin.sql`](supabase/admin.sql)
+en Supabase → SQL Editor (después de crear la cuenta `admin`). Sin ese SQL, el admin entra pero no puede
+editar lo de otros. La contraseña **no** está en el repo: se cambia desde Supabase → Authentication → Users.
+Quien registre la cuenta `admin` primero es el admin, por eso hay que crearla antes de abrir la web al grupo.
+
 ### Editar las rutas
 Las filas de la tabla de rutas están en `js/config.js → ROUTES` (lista ordenada y editable). Si alguien
 registra una zona que no esté en la lista, aparece igualmente al final de la tabla.
@@ -164,6 +177,8 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
+- **Cuenta admin** (oculta, edita todo y borra usuarios): ver «Cuenta admin».
+- El modal de un payo ahora se actualiza en vivo si cambian sus datos.
 - **Medallas rediseñadas:** imágenes oficiales, editor en tarjeta a la derecha del perfil y selección independiente (máscara de bits en `players.badges`, sin cambios de esquema).
 - **Botón «Cerrar» suelto** en todas las pestañas: el modal de payo (`#payoDialog`) tenía
   `display:flex` fijo, que anula el `display:none` de un `<dialog>` cerrado. Ahora solo aplica con `[open]`.

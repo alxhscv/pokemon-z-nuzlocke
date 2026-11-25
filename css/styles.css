@@ -382,6 +382,9 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .payo-body h4 svg{width:18px;height:18px;color:var(--muted)}
 .payo-body h4 .count{margin-left:0}
 #payoMedals{margin:4px 0 2px}
+.payo-admin{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.payo-admin input{flex:1 1 140px;width:auto;margin:0;padding:8px 12px}
+#payoMedals .medal-grid{grid-template-columns:repeat(4,1fr)}
 
 /* --- Toast --- */
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);

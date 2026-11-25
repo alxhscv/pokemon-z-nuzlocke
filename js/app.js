@@ -33,6 +33,7 @@ const countMedals = (mask) => MEDALS.reduce((n, _, k) => n + hasMedal(mask, k + 
 function avatarSrc(av) { if (av == null || av === "") return null; av = String(av); return /^\d+$/.test(av) ? sprite(av) : esc(av); }  // URL escapada: se interpola en atributos HTML
 function isPhoto(av) { return av != null && av !== "" && !/^\d+$/.test(String(av)); }
 const uname2email = (u) => u.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "") + "@users.pokez";
+const ADMIN_EMAIL = "admin@users.pokez";   // la seguridad real está en RLS (supabase/admin.sql); esto solo adapta la interfaz
 const normLoc = (s) => (s || "").trim().toLowerCase();
 const ROUTE_NORMS = new Set(ROUTES.map(normLoc));
 
@@ -41,6 +42,7 @@ let POKE = [];
 const byId = new Map(), byName = new Map();
 let user = null, profile = null, run = null, myPlayer = null;
 let players = [], entries = [], channel = null, signupMode = false;
+let isAdmin = false, payoUid = null, dialogOwner = null;
 let currentLoc = null;   // zona del Pokémon en edición (viene de la celda de ruta; ya no hay campo)
 
 init();
@@ -60,7 +62,7 @@ function wireEvents() {
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("authAvatar").oninput = updateAuthAvatarPreview;
   $("logoutBtn").onclick = () => db.auth.signOut();
-  $("userChip").onclick = $("meChip").onclick = () => selectTab("perfil");
+  $("userChip").onclick = $("meChip").onclick = () => { if (!isAdmin) selectTab("perfil"); };
   $("themeToggle").onclick = toggleTheme;
   applyThemeIcon();
   const tabs = [...document.querySelectorAll(".tab")];
@@ -200,9 +202,13 @@ async function afterLogin() {
   const { data } = await db.auth.getUser();
   user = data.user;
   if (!user) { await db.auth.signOut(); return showAuth(); }   // sesión caducada/ inválida → al login
-  let { data: prof } = await db.from("profiles").select().eq("id", user.id).maybeSingle();
-  if (!prof) ({ data: prof } = await db.from("profiles").insert({ id: user.id, display_name: user.email.split("@")[0] }).select().single());
-  profile = prof;
+  isAdmin = user.email === ADMIN_EMAIL;
+  if (isAdmin) profile = { display_name: "Admin", avatar: null };   // sin perfil ni fila en players: invisible para el resto
+  else {
+    let { data: prof } = await db.from("profiles").select().eq("id", user.id).maybeSingle();
+    if (!prof) ({ data: prof } = await db.from("profiles").insert({ id: user.id, display_name: user.email.split("@")[0] }).select().single());
+    profile = prof;
+  }
   $("userInfo").classList.remove("hidden");
   // run única compartida
   const { data: r } = await db.from("runs").select().limit(1).maybeSingle();
@@ -212,7 +218,7 @@ async function afterLogin() {
 
 function resetToAuth() {
   channel?.unsubscribe();
-  user = profile = run = myPlayer = null; players = []; entries = [];
+  user = profile = run = myPlayer = null; isAdmin = false; payoUid = null; players = []; entries = [];
   showAuth();
 }
 
@@ -221,11 +227,15 @@ async function enterRun(r) {
   $("runName").textContent = r.name;
   // unirse (insert idempotente): el upsert ON CONFLICT falla con RLS cuando aún no eres miembro
   // (la policy SELECT de players es is_member()); el insert normal pasa y el duplicado (23505) se ignora.
-  const { error: joinErr } = await db.from("players").insert({ run_id: r.id, user_id: user.id });
-  if (joinErr && joinErr.code !== "23505") return toast("No se pudo entrar en la partida", true);
-  const { data: mine } = await db.from("players").select().eq("run_id", r.id).eq("user_id", user.id).maybeSingle();
-  if (!mine) return toast("No se pudo entrar en la partida", true);
-  myPlayer = mine;
+  if (!isAdmin) {
+    const { error: joinErr } = await db.from("players").insert({ run_id: r.id, user_id: user.id });
+    if (joinErr && joinErr.code !== "23505") return toast("No se pudo entrar en la partida", true);
+    const { data: mine } = await db.from("players").select().eq("run_id", r.id).eq("user_id", user.id).maybeSingle();
+    if (!mine) return toast("No se pudo entrar en la partida", true);
+    myPlayer = mine;
+  }
+  document.querySelectorAll('.tab[data-tab="seg"],.tab[data-tab="perfil"]').forEach((b) => b.classList.toggle("hidden", isAdmin));
+  if (isAdmin) selectTab("rutas");
   show("app");
   showSkeletons();
   await reload();
@@ -268,6 +278,7 @@ function render() {
   renderPayos();
   renderGraveyard();
   renderMedalsEdit();
+  refreshPayo();
 }
 
 // Cementerio global: todos los muertos de todos, con dueño, nivel y "último suspiro"
@@ -279,7 +290,7 @@ function renderGraveyard() {
     const p = byId.get(e.pokemon_id);
     const nick = e.nickname || p?.es || "???";
     const species = e.nickname && p ? p.es : null;
-    const mine = e.user_id === user.id;
+    const mine = e.user_id === user.id || isAdmin;
     const note = e.notes
       ? `<div class="epitaph">«${esc(e.notes)}»</div>`
       : `<div class="epitaph none">${mine ? "Añade su último suspiro…" : "Sin últimas palabras."}</div>`;
@@ -309,10 +320,12 @@ function renderMyColumns() {
     }
     $("list-" + st).innerHTML = html;
   }
-  const cols = $("myColumns");
-  cols.querySelectorAll(".movebtn").forEach((b) =>
+  wireMons($("myColumns"));
+}
+function wireMons(root) {
+  root.querySelectorAll(".movebtn").forEach((b) =>
     (b.onclick = (ev) => { ev.stopPropagation(); updateStatus(b.dataset.id, b.dataset.move); }));
-  cols.querySelectorAll(".mon").forEach((el) =>
+  root.querySelectorAll(".mon:not(.ro)").forEach((el) =>
     (el.onclick = (ev) => { if (ev.target.closest(".movebtn")) return; openDialog(entries.find((e) => e.id === el.dataset.id)); }));
 }
 
@@ -389,7 +402,7 @@ function renderRoutes() {
         return `<span class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
           <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></span>`;
       }).join("");
-      return `<td class="${mine ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
+      return `<td class="${mine || isAdmin ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
     }).join("");
     return `<tr><th class="rlabel"><span class="rnum">Zona ${String(i + 1).padStart(2, "0")}</span>${esc(route) || "Sin zona"}</th>${cells}</tr>`;
   }).join("");
@@ -403,7 +416,7 @@ function renderRoutes() {
   // click en mi celda vacía → registrar con esa ruta
   $("routesTable").querySelectorAll("td.addable").forEach((td) => (td.onclick = (ev) => {
     if (ev.target.closest(".rmon")) return;
-    openDialog(null, td.dataset.route);
+    openDialog(null, td.dataset.route, players.find((p) => p.user_id === td.dataset.user));
   }));
 }
 
@@ -439,43 +452,88 @@ function renderPayos() {
 function openPayo(uid) {
   const pl = players.find((p) => p.user_id === uid);
   if (!pl) return;
-  const prof = pl.profiles || { display_name: "???", color: "#888" };
-  const es = entries.filter((e) => e.user_id === uid);
+  payoUid = uid;
+  const admin = $("payoAdmin");
+  admin.classList.toggle("hidden", !isAdmin);
+  if (isAdmin) {
+    const name = pl.profiles?.display_name || "";
+    admin.innerHTML = `<input id="payoRename" maxlength="20" value="${esc(name)}" aria-label="Nombre visible">
+      <button type="button" class="btn ghost" id="payoRenameBtn">Renombrar</button>
+      <button type="button" class="btn danger" id="payoDelBtn">Eliminar usuario</button>`;
+    $("payoRenameBtn").onclick = () => renamePlayer(uid);
+    $("payoDelBtn").onclick = () => deletePlayer(uid);
+  }
+  fillPayo(pl);
+  $("payoDialog").showModal();
+}
+// repinta el modal (también con cambios en vivo); el bloque admin no se toca para no perder lo escrito
+function refreshPayo() {
+  if (!$("payoDialog").open || !payoUid) return;
+  const pl = players.find((p) => p.user_id === payoUid);
+  if (!pl) return $("payoDialog").close();   // la cuenta ya no existe
+  fillPayo(pl);
+}
+function fillPayo(pl) {
+  const prof = pl.profiles || { display_name: "???" };
+  const es = entries.filter((e) => e.user_id === pl.user_id);
   const sect = (icon, title, st) => {
     const arr = es.filter((e) => e.status === st);
     return `<h4>${icon} ${title} <span class="count">${arr.length}</span></h4>
-      <div class="list">${arr.map(monCardRO).join("") || emptyState(st)}</div>`;
+      <div class="list">${arr.map(isAdmin ? monCard : monCardRO).join("") || emptyState(st)}</div>`;
   };
   $("payoName").innerHTML = `${playerIcon(prof)}${esc(prof.display_name)}`;
-  $("payoMedals").innerHTML = medalsHTML(pl.badges);
+  if (isAdmin) { $("payoMedals").innerHTML = medalTilesHTML(pl.badges); wireMedalTiles($("payoMedals"), pl); }
+  else $("payoMedals").innerHTML = medalsHTML(pl.badges);
   $("payoBody").innerHTML = sect(SVG.team, "Equipo", "team") + sect(SVG.box, "Caja", "box") + sect(SVG.dead, "Cementerio", "dead");
-  $("payoDialog").showModal();
+  if (isAdmin) wireMons($("payoBody"));
+}
+async function renamePlayer(uid) {
+  const name = $("payoRename").value.trim();
+  if (!name) return toast("Escribe un nombre", true);
+  const { error } = await db.from("profiles").update({ display_name: name }).eq("id", uid);
+  if (error) return toast(error.message, true);
+  toast("Nombre cambiado", false, true);
+  await reload();
+}
+async function deletePlayer(uid) {
+  const name = players.find((p) => p.user_id === uid)?.profiles?.display_name || "este usuario";
+  if (!confirm(`¿Eliminar a ${name}? Se borran su cuenta y todos sus Pokémon. No se puede deshacer.`)) return;
+  const { error } = await db.rpc("admin_delete_user", { uid });
+  if (error) return toast(error.message, true);
+  $("payoDialog").close();
+  toast("Usuario eliminado", false, true);
+  await reload();
 }
 
-// editor de medallas (pestaña Perfil): cada ficha se activa/desactiva por separado
-function renderMedalsEdit() {
-  if (!myPlayer) return;
-  const mask = myPlayer.badges || 0;
+// fichas de medalla seleccionables una a una (Perfil propio y, para el admin, las de cualquier payo)
+function medalTilesHTML(mask) {
   const tiles = MEDALS.map((m, k) => {
     const on = hasMedal(mask, k + 1);
     return `<button type="button" class="medal-tile ${on ? "on" : ""}" data-n="${k + 1}" aria-pressed="${on}" title="Medalla ${esc(m.name)}">
       <img src="${medalImg(m)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${esc(m.name)}</span></button>`;
   }).join("");
-  $("medalsEdit").innerHTML = `<div class="medals-head"><h3>Medallas</h3><span class="medals-count"><b>${countMedals(mask)}</b>/${MEDALS.length}</span></div><div class="medal-grid">${tiles}</div>`;
-  $("medalsEdit").querySelectorAll(".medal-tile").forEach((b) => (b.onclick = () => toggleMedal(+b.dataset.n)));
+  return `<div class="medals-head"><span class="medals-count"><b>${countMedals(mask)}</b>/${MEDALS.length}</span></div><div class="medal-grid">${tiles}</div>`;
+}
+function wireMedalTiles(root, pl) {
+  root.querySelectorAll(".medal-tile").forEach((b) => (b.onclick = () => toggleMedal(pl, +b.dataset.n, root)));
+}
+function renderMedalsEdit() {
+  if (!myPlayer) return;
+  $("medalsEdit").innerHTML = `<h3>Medallas</h3>` + medalTilesHTML(myPlayer.badges);
+  wireMedalTiles($("medalsEdit"), myPlayer);
 }
 
-async function toggleMedal(i) {
-  if (!myPlayer) return;
-  const prev = myPlayer.badges || 0, next = prev ^ (1 << (i - 1));
-  myPlayer.badges = next;
-  renderMedalsEdit(); renderPayos();
+async function toggleMedal(pl, i, root) {
+  const prev = pl.badges || 0, next = prev ^ (1 << (i - 1));
+  const redraw = () => { renderMedalsEdit(); renderPayos(); refreshPayo(); };
+  pl.badges = next;
+  redraw();
   if (next > prev) {
     confetti();
-    $("medalsEdit").querySelector(`.medal-tile[data-n="${i}"]`)?.classList.add("just-on");
+    root.querySelector(`.medal-tile[data-n="${i}"]`)?.classList.add("just-on");
   }
-  const { error } = await db.from("players").update({ badges: next }).eq("id", myPlayer.id);
-  if (error) { myPlayer.badges = prev; renderMedalsEdit(); renderPayos(); toast(error.message, true); }
+  const { error } = await db.from("players").update({ badges: next }).eq("id", pl.id);
+  if (error) { pl.badges = prev; redraw(); toast(error.message, true); }
 }
 
 // ===================== perfil =====================
@@ -509,12 +567,13 @@ async function saveProfile() {
 }
 
 // ===================== diálogo Pokémon =====================
-function openDialog(entry = null, presetRoute = null) {
-  if (entry && entry.user_id !== user.id) return;   // no se editan Pokémon de otros
+function openDialog(entry = null, presetRoute = null, owner = null) {
+  if (entry && entry.user_id !== user.id && !isAdmin) return;   // no se editan Pokémon de otros
   $("entryTitle").textContent = entry ? "Editar Pokémon" : "Registrar Pokémon";
   $("fId").value = entry?.id || "";
   $("fPokemon").value = entry ? byId.get(entry.pokemon_id)?.es || "" : "";
   $("fNickname").value = entry?.nickname || "";
+  dialogOwner = owner || myPlayer;   // dueño del Pokémon nuevo (el admin puede crearlo en cualquier columna)
   currentLoc = entry?.location || presetRoute || null;   // zona: de la ruta clicada o la que ya tenía
   $("fLevel").value = entry?.level || "";
   $("fNotes").value = entry?.notes || "";
@@ -534,7 +593,7 @@ async function saveEntry() {
   const pid = byName.get($("fPokemon").value.trim().toLowerCase());
   if (!pid) return toast("Elige un Pokémon de la lista", true);
   const row = {
-    run_id: run.id, player_id: myPlayer.id, user_id: user.id, pokemon_id: pid,
+    pokemon_id: pid,
     nickname: $("fNickname").value.trim() || null,
     location: currentLoc,
     level: parseInt($("fLevel").value) || null,
@@ -545,7 +604,7 @@ async function saveEntry() {
   // nuevo Pokémon entra en la Caja; luego se mueve con los botones de la tarjeta
   const { error } = id
     ? await db.from("entries").update(row).eq("id", id)
-    : await db.from("entries").insert({ ...row, status: "box" });
+    : await db.from("entries").insert({ ...row, run_id: run.id, player_id: dialogOwner.id, user_id: dialogOwner.user_id, status: "box" });
   if (error) return toast(error.message, true);
   $("entryDialog").close();
   if (!id) {
