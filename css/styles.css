@@ -521,3 +521,88 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);
 .clock-mini{font-variant-numeric:tabular-nums;font-weight:800;color:var(--ok);margin-left:8px}
 .topbar .clock-toggle.on{border-color:var(--ok)}
 @media (max-width:560px){.clock-toggle:not([data-full]) .lbl{display:none}.clock-toggle .clock-mini{margin-left:0}}
+
+/* ───────── Fase 1: cabecera, menú de usuario, iconos de pestañas ───────── */
+.topbar{flex-wrap:nowrap}
+.run-info{flex-wrap:nowrap;gap:8px}
+.theme-btn{gap:8px}
+.usermenu{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 8px);min-width:190px;background:var(--surface);color:var(--txt);
+  border:2px solid var(--edge);border-radius:var(--r);box-shadow:4px 4px 0 var(--edge);padding:6px;z-index:60}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.menu-item{display:block;width:100%;text-align:left;appearance:none;background:transparent;border:0;color:inherit;
+  font:inherit;font-weight:600;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer}
+.menu-item:hover,.menu-item:focus-visible{background:var(--surface2)}
+.menu-item.danger{color:var(--danger)}
+:root[data-theme="dark"] .menu-item.danger{color:#ff8f7a}
+.menu-item b{font-weight:800}
+.me-chip.small .uname{max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:560px){
+  .brand-text small{display:none}
+  .brand-text b{font-size:1rem}
+  .theme-btn{display:none}
+  .me-chip.small .uname{display:none}
+  .me-chip.small{padding:3px}
+  .topbar{gap:8px}
+}
+/* iconos propios: contorno que hereda el color; el relleno .a se enciende en la pestaña activa */
+.tab svg{width:22px;height:22px}
+.tab svg .a{fill:currentColor;fill-opacity:0;transition:fill-opacity var(--t)}
+.tab:hover svg .a{fill-opacity:.12}
+.tab.active svg,.tab[aria-selected="true"] svg{color:var(--accent)}
+.tab.active svg .a,.tab[aria-selected="true"] svg .a{fill-opacity:.25}
+@media (max-width:960px){.tab svg{width:24px;height:24px}}
+
+/* centrado en escritorio: nada pegado a la izquierda con medio ancho vacío */
+.missions,.grave-wall,.friends{margin-inline:auto}
+.missions{max-width:1000px}
+.grave-wall>.empty-state,.missions>.empty-state,.friends>.empty-state{grid-column:1/-1}
+.panel .empty-state{padding:36px 12px}
+#panel-misiones .missions-head,#panel-conectados>*{max-width:1000px;margin-inline:auto}
+#panel-conectados .friends{max-width:1000px}
+
+/* ───────── Rutas ───────── */
+:root{--st-captured:#2E9B5E;--st-failed:#D8432C;--st-none:#C98A1B;--st-pending:var(--muted)}
+:root[data-theme="dark"]{--st-captured:#47C27E;--st-failed:#FF7A63;--st-none:#E8B04A}
+.routes-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-bottom:14px}
+.rprogress{flex:1 1 260px;display:flex;flex-direction:column;gap:6px;font-weight:600}
+.rprogress b{font-weight:800}
+.bar{height:10px;border:2px solid var(--edge);border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .4s var(--ease)}
+.bar.mini{height:6px;border-width:1px;width:100%}
+.rfilters{display:flex;flex-wrap:wrap;gap:8px}
+.chip{appearance:none;font:inherit;font-weight:700;font-size:var(--fs-sm);padding:6px 14px;border-radius:99px;cursor:pointer;
+  border:2px solid var(--line);background:var(--surface);color:var(--txt);transition:background var(--t),border-color var(--t)}
+.chip:hover{border-color:var(--edge)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.routes-wrap{max-height:calc(100svh - 270px);min-height:320px;overflow:auto}
+.rprog{font-weight:700;color:var(--muted);font-size:.7rem}
+tr.zone th{background:var(--surface2);text-align:left;padding:0;position:sticky;left:0}
+.zbtn{appearance:none;display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:0;color:var(--title);
+  font:inherit;font-weight:800;font-stretch:112%;padding:8px 12px;cursor:pointer;text-align:left}
+.zbtn:hover{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.zbtn .caret{width:1em;color:var(--muted)}
+.zprog{margin-left:auto;font-size:var(--fs-sm);color:var(--muted);font-weight:700}
+.rlabel.current{box-shadow:inset 4px 0 0 var(--accent)}
+.rlabel .here{color:var(--accent);font-weight:900;margin-right:6px}
+.cs{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.62rem;font-weight:700;line-height:1.1}
+.cs svg{width:20px;height:20px}
+.cs em{font-style:normal}
+.cs.pending{color:var(--st-pending);opacity:.7}
+.cs.none{color:var(--st-none)}
+.cs.failed{color:var(--st-failed)}
+td.c-none{background:color-mix(in srgb,var(--st-none) 10%,var(--surface))}
+td.c-failed{background:color-mix(in srgb,var(--st-failed) 10%,var(--surface))}
+td.c-captured{background:color-mix(in srgb,var(--st-captured) 9%,var(--surface))}
+td.addable:hover{outline:2px solid var(--accent);outline-offset:-2px}
+td.addable.c-pending .cs{font-size:0}
+td.addable.c-pending .cs em{display:none}
+td.addable.c-pending .cs svg{width:22px;height:22px}
+.empty-row{padding:28px;color:var(--muted);text-align:center}
+.celldlg{min-width:min(340px,86vw)}
+.celldlg h3{margin:0 0 4px}
+.cellopts{display:grid;gap:10px;margin-top:14px}
+.cellopts .btn{justify-content:center}
+.cellopts .btn.sel{outline:3px solid var(--accent);outline-offset:2px}
+td:not(.addable).c-pending .cs svg{display:none}
+td:not(.addable).c-pending .cs{opacity:.45}

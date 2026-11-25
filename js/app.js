@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, MEDALS } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, ROUTE_ZONES, MEDALS } from "./config.js";
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sprite = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -38,13 +38,14 @@ const ROUTE_NORMS = new Set(ROUTES.map(normLoc));
 let POKE = [];
 const byId = new Map(), byName = new Map();
 let user = null, profile = null, run = null, myPlayer = null;
-let players = [], entries = [], channel = null, signupMode = false;
+let players = [], entries = [], routeStatus = [], channel = null, rsChannel = null, signupMode = false;
 let isAdmin = false, payoUid = null, dialogOwner = null;
 let currentLoc = null;   // zona del Pokémon en edición (viene de la celda de ruta; ya no hay campo)
 
-init();
+window.addEventListener("unhandledrejection", (e) => { e.preventDefault(); console.error(e.reason); toast("Algo ha fallado. Si se repite, recarga la página.", true); });
+init().catch((e) => { console.error(e); toast("No se pudo iniciar la web", true); });
 async function init() {
-  POKE = await fetch("data/pokemon.json").then((r) => r.json());
+  POKE = await fetch("data/pokemon.json").then((r) => r.json()).catch(() => []);
   for (const p of POKE) { byId.set(p.id, p); byName.set(p.es.toLowerCase(), p.id); byName.set(p.en.toLowerCase(), p.id); }
   $("pokeList").innerHTML = POKE.map((p) => `<option value="${p.es}">`).join("");
   wireEvents();
@@ -59,7 +60,14 @@ function wireEvents() {
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("authAvatar").oninput = updateAuthAvatarPreview;
   $("logoutBtn").onclick = async () => { await stopPresence(true); db.auth.signOut(); };
-  $("userChip").onclick = $("meChip").onclick = () => { if (!isAdmin) selectTab("perfil"); };
+  $("meChip").onclick = () => { if (!isAdmin) selectTab("perfil"); };
+  $("userChip").onclick = (e) => { e.stopPropagation(); toggleMenu(); };
+  $("menuProfile").onclick = () => { closeMenu(); selectTab("perfil"); };
+  $("menuTheme").onclick = () => { closeMenu(); toggleTheme(); };
+  document.addEventListener("click", (e) => { if (!e.target.closest(".usermenu")) closeMenu(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+  $("cellClose").onclick = () => $("cellDialog").close();
+  document.querySelectorAll("#cellDialog [data-act]").forEach((b) => (b.onclick = () => cellAction(b.dataset.act)));
   $("themeToggle").onclick = toggleTheme;
   applyThemeIcon();
   const tabs = [...document.querySelectorAll(".tab")];
@@ -122,10 +130,14 @@ function toggleTheme() {
   if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) document.startViewTransition(apply);
   else apply();
 }
+function toggleMenu() { const o = $("userMenu").classList.toggle("hidden"); $("userChip").setAttribute("aria-expanded", String(!o)); }
+function closeMenu() { $("userMenu")?.classList.add("hidden"); $("userChip")?.setAttribute("aria-expanded", "false"); }
 function applyThemeIcon() {
   const dark = currentTheme() === "dark";
-  document.querySelector(".icon-moon")?.classList.toggle("hidden", dark);
-  document.querySelector(".icon-sun")?.classList.toggle("hidden", !dark);
+  // el icono y el texto muestran el tema ACTUAL
+  document.querySelector(".icon-moon")?.classList.toggle("hidden", !dark);
+  document.querySelector(".icon-sun")?.classList.toggle("hidden", dark);
+  $("themeName").textContent = $("menuThemeName").textContent = dark ? "Oscuro" : "Claro";
   $("themeToggle")?.setAttribute("aria-label", dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
 }
 
@@ -228,7 +240,7 @@ async function afterLogin() {
 }
 
 function resetToAuth() {
-  channel?.unsubscribe();
+  channel?.unsubscribe(); rsChannel?.unsubscribe();
   stopPresence();
   presence = new Map();
   user = profile = run = myPlayer = null; isAdmin = false; payoUid = null; players = []; entries = [];
@@ -267,6 +279,7 @@ async function loadMissions() {
     db.from("mission_rewards").select("mission_id,reward_text,reward_item"),
     db.from("mission_completions").select("mission_id,user_id"),
   ]);
+  if (!user) return;
   if (m.error) return toast("No se pudieron cargar las misiones", true);
   missions = m.data || []; rewards = new Map((r.data || []).map((x) => [x.mission_id, x])); completions = c.data || [];
   renderMissions();
@@ -368,6 +381,7 @@ async function loadPresence() {
     db.from("sessions").select("user_id,started_at,last_seen,ended_at").order("last_seen", { ascending: false }).limit(300),
   ]);
   if (error) return toast("No se pudo leer el fichaje: " + error.message, true);   // sin tocar el estado local
+  if (!user) return;
   presence = new Map((data || []).map((r) => [r.user_id, r]));
   lastConn = new Map();
   for (const s of ses || []) if (!lastConn.has(s.user_id)) lastConn.set(s.user_id, s);   // la más reciente de cada uno
@@ -433,11 +447,13 @@ function renderConectados() {
 
 // ===================== datos + render =====================
 async function reload() {
-  const [{ data: pl }, { data: en }] = await Promise.all([
+  const [{ data: pl }, { data: en }, { data: rs }] = await Promise.all([
     db.from("players").select("id, user_id, badges, profiles(display_name, color, avatar)").eq("run_id", run.id).order("created_at"),
     db.from("entries").select().eq("run_id", run.id).order("created_at"),
+    db.from("route_status").select("user_id,route,status"),   // si routes.sql aún no está aplicado, error → vacío
   ]);
-  players = pl || []; entries = en || [];
+  if (!user || !run) return;   // se cerró sesión mientras cargaba
+  players = pl || []; entries = en || []; routeStatus = rs || [];
   myPlayer = players.find((p) => p.user_id === user.id) || myPlayer;
   const mp = players.find((p) => p.user_id === user.id);
   if (mp?.profiles) profile = mp.profiles;
@@ -450,6 +466,8 @@ function subscribe() {
     .on("postgres_changes", { event: "*", schema: "public", table: "entries", filter: `run_id=eq.${run.id}` }, onRealtime)
     .on("postgres_changes", { event: "*", schema: "public", table: "players", filter: `run_id=eq.${run.id}` }, onRealtime)
     .subscribe();
+  rsChannel?.unsubscribe();
+  rsChannel = db.channel("route-status").on("postgres_changes", { event: "*", schema: "public", table: "route_status" }, onRealtime).subscribe();
 }
 
 // cambio en vivo: destello del punto rojo + recarga
@@ -460,7 +478,8 @@ function onRealtime() {
 }
 
 function render() {
-  $("userChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
+  $("userChip").innerHTML = `${playerIcon(profile)}<span class="uname">${esc(profile.display_name)}</span>`;
+  $("menuProfile").classList.toggle("hidden", isAdmin);
   $("meChip").innerHTML = `${playerIcon(profile)}${esc(profile.display_name)}`;
   renderRoutes();
   renderMyColumns();
@@ -564,9 +583,25 @@ function medalsHTML(mask) {
   }).join("");
 }
 
-// Tabla de rutas × jugadores
+// ---- Rutas: estados por casilla (pendiente / sin encuentro / fallido / capturado), zonas, progreso, filtros ----
+const ST_LABEL = { pending: "Pendiente", none: "Sin encuentro", failed: "Fallido", captured: "Capturado" };
+const ST_ICON = {
+  pending: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`,
+  none: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/></svg>`,
+  failed: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+};
+let routeFilter = "all", onlyMine = false;
+const collapsedZones = new Set();
+function cellState(uid, route) {
+  const es = entries.filter((e) => e.user_id === uid && normLoc(e.location) === normLoc(route));
+  if (es.length) return { st: "captured", es };
+  const r = routeStatus.find((x) => x.user_id === uid && normLoc(x.route) === normLoc(route));
+  return { st: r?.status || "pending", es };
+}
+const routesDone = (uid, list = ROUTES) => list.filter((r) => cellState(uid, r).st !== "pending").length;
+
 function renderRoutes() {
-  // filas: ROUTES + zonas usadas que no estén en ROUTES
+  const cols = onlyMine && !isAdmin ? players.filter((p) => p.user_id === user.id) : players;
   const extras = [];
   const seen = new Set();
   for (const e of entries) {
@@ -574,40 +609,98 @@ function renderRoutes() {
     if (e.location && !ROUTE_NORMS.has(n) && !seen.has(n)) { seen.add(n); extras.push(e.location.trim()); }
   }
   if (entries.some((e) => !e.location)) extras.push("");   // registrados sin zona (botón «Registrar»)
-  const rows = [...ROUTES, ...extras];
+  const zones = [...ROUTE_ZONES, ...(extras.length ? [["Otras zonas", extras]] : [])];
 
-  const head = `<thead><tr><th class="rcorner">Ruta</th>${players.map((pl) => {
+  // progreso del grupo + filtros
+  const total = ROUTES.length, done = players.reduce((n, p) => n + routesDone(p.user_id), 0), max = players.length * total;
+  const pct = max ? Math.round((done / max) * 100) : 0;
+  const chip = (k, l) => `<button class="chip${routeFilter === k ? " on" : ""}" data-rf="${k}">${l}</button>`;
+  $("routesBar").innerHTML = `<div class="rprogress"><span>Progreso del grupo <b>${pct}%</b></span><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="rfilters" role="group" aria-label="Filtros">${chip("all", "Todas")}${chip("pending", "Pendientes")}${chip("failed", "Fallidas")}
+    ${isAdmin ? "" : `<button class="chip${onlyMine ? " on" : ""}" data-mine="1">Solo mías</button>`}</div>`;
+  $("routesBar").querySelectorAll("[data-rf]").forEach((b) => (b.onclick = () => { routeFilter = b.dataset.rf; renderRoutes(); }));
+  $("routesBar").querySelector("[data-mine]")?.addEventListener("click", () => { onlyMine = !onlyMine; renderRoutes(); });
+
+  const head = `<thead><tr><th class="rcorner">Ruta</th>${cols.map((pl) => {
     const prof = pl.profiles || {};
-    const mine = pl.user_id === user.id;
+    const mine = pl.user_id === user.id, d = routesDone(pl.user_id);
     return `<th class="${mine ? "mine" : ""}" style="--me-col:${BRAND}">
-      <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div></div></th>`;
+      <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div>
+      <small class="rprog">${d}/${total}</small><div class="bar mini"><i style="width:${total ? (d / total) * 100 : 0}%"></i></div></div></th>`;
   }).join("")}</tr></thead>`;
 
-  const body = rows.map((route) => {
-    const cells = players.map((pl) => {
-      const mine = pl.user_id === user.id;
-      const es = entries.filter((e) => e.user_id === pl.user_id && normLoc(e.location) === normLoc(route));
-      const content = es.map((e) => {
-        const nm = e.nickname || byId.get(e.pokemon_id)?.es || "";
-        return `<span class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
-          <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></span>`;
+  const keep = (r) => {
+    if (routeFilter === "pending") return isAdmin ? cols.some((p) => cellState(p.user_id, r).st === "pending") : cellState(user.id, r).st === "pending";
+    if (routeFilter === "failed") return cols.some((p) => cellState(p.user_id, r).st === "failed");
+    return true;
+  };
+  const current = isAdmin ? null : ROUTES.find((r) => cellState(user.id, r).st === "pending");   // tu siguiente ruta
+  const subject = isAdmin ? null : user.id;
+
+  const body = zones.map(([zname, zroutes]) => {
+    const rows = zroutes.filter(keep);
+    if (!rows.length) return "";
+    const open = !collapsedZones.has(zname);
+    const zd = subject ? `<span class="zprog">${routesDone(subject, zroutes)}/${zroutes.length}</span>` : "";
+    const zhead = `<tr class="zone"><th colspan="${cols.length + 1}"><button type="button" class="zbtn" data-zone="${esc(zname)}" aria-expanded="${open}"><span class="caret">${open ? "▾" : "▸"}</span>${esc(zname)}${zd}</button></th></tr>`;
+    if (!open) return zhead;
+    return zhead + rows.map((route) => {
+      const cells = cols.map((pl) => {
+        const mine = pl.user_id === user.id;
+        const { st, es } = cellState(pl.user_id, route);
+        const content = st === "captured" ? es.map((e) => {
+          const nm = e.nickname || byId.get(e.pokemon_id)?.es || "";
+          return `<span class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
+            <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></span>`;
+        }).join("") : `<span class="cs ${st}" title="${ST_LABEL[st]}">${ST_ICON[st]}<em>${ST_LABEL[st]}</em></span>`;
+        return `<td class="c-${st} ${mine || isAdmin ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content}</td>`;
       }).join("");
-      return `<td class="${mine || isAdmin ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content || '<span class="empty">—</span>'}</td>`;
+      return `<tr><th class="rlabel${route === current ? " current" : ""}">${route === current ? '<span class="here" title="Tu siguiente ruta">›</span>' : ""}${esc(route) || "Sin zona"}</th>${cells}</tr>`;
     }).join("");
-    return `<tr><th class="rlabel">${esc(route) || "Sin zona"}</th>${cells}</tr>`;
   }).join("");
 
-  $("routesTable").innerHTML = head + `<tbody>${body}</tbody>`;
+  $("routesTable").innerHTML = head + `<tbody>${body || `<tr><td class="empty-row" colspan="${cols.length + 1}">No hay rutas con este filtro.</td></tr>`}</tbody>`;
 
+  $("routesTable").querySelectorAll(".zbtn").forEach((b) => (b.onclick = () => {
+    collapsedZones.has(b.dataset.zone) ? collapsedZones.delete(b.dataset.zone) : collapsedZones.add(b.dataset.zone);
+    renderRoutes();
+  }));
   // editar un Pokémon propio desde su celda
   $("routesTable").querySelectorAll(".rmon").forEach((el) => (el.onclick = (ev) => {
     ev.stopPropagation(); openDialog(entries.find((e) => e.id === el.dataset.id));
   }));
-  // click en mi celda vacía → registrar con esa ruta
+  // clic en una casilla propia → elegir estado o registrar captura
   $("routesTable").querySelectorAll("td.addable").forEach((td) => (td.onclick = (ev) => {
     if (ev.target.closest(".rmon")) return;
-    openDialog(null, td.dataset.route, players.find((p) => p.user_id === td.dataset.user));
+    td.dataset.route ? openCell(td.dataset.route, td.dataset.user)
+      : openDialog(null, "", players.find((p) => p.user_id === td.dataset.user));
   }));
+}
+
+let cellCtx = null;
+function openCell(route, uid) {
+  const pl = players.find((p) => p.user_id === uid);
+  if (!pl) return;
+  const { st, es } = cellState(uid, route);
+  cellCtx = { route, uid, pl };
+  $("cellTitle").textContent = route;
+  $("cellWho").textContent = `${uid === user.id ? "Tu casilla" : "Casilla de " + (pl.profiles?.display_name || "???")} · ${ST_LABEL[st]}`;
+  document.querySelectorAll("#cellDialog [data-act]").forEach((b) => {
+    const act = b.dataset.act;
+    b.disabled = es.length > 0 && (act === "none" || act === "failed");   // con captura no tiene sentido marcarla sin encuentro/fallida
+    b.classList.toggle("sel", act === st);
+  });
+  $("cellDialog").showModal();
+}
+async function cellAction(act) {
+  const { route, uid, pl } = cellCtx;
+  if (act === "capture") { $("cellDialog").close(); return openDialog(null, route, pl); }
+  const { error } = act === "pending"
+    ? await db.from("route_status").delete().eq("user_id", uid).eq("route", route)
+    : await db.from("route_status").upsert({ user_id: uid, route, status: act }, { onConflict: "user_id,route" });
+  if (error) return toast(/route_status|schema cache/i.test(error.message) ? "Falta aplicar supabase/routes.sql en Supabase" : error.message, true);
+  $("cellDialog").close();
+  await reload();
 }
 
 // Payos: todas las cuentas; clic en una abre su perfil

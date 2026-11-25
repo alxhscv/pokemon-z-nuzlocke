@@ -19,7 +19,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
    ruta. Llevas tus **medallas** (12, marcadas una a una). En tu **perfil** eliges nombre y un **avatar**.
 4. La app está en **7 pestañas**:
-   - **🗺️ Rutas** — matriz rutas × jugadores (qué capturó cada uno en cada ruta).
+   - **🗺️ Rutas** — matriz rutas × jugadores agrupada por zonas (plegables), con estado por casilla (**pendiente / sin encuentro / fallido / capturado**, clic en tu casilla para cambiarlo), progreso por jugador y del grupo, marca de tu siguiente ruta y filtros (pendientes, fallidas, solo mías).
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
    - **📋 Misiones** — las crea el admin; cada jugador marca las suyas y solo entonces se revela la recompensa (guardada en otra tabla con RLS: el servidor no la entrega antes).
@@ -34,9 +34,9 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
-**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Los **iconos** de pestañas, botones y estados vacíos son sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites) (mapa de ruta, Poké Ball, Repartir Exp., Huevo Suerte, ámbar viejo, Master Ball).
+**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Las **pestañas** llevan iconos SVG propios (se colorean con el acento al activarse); botones de mover y estados vacíos usan sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites). En la cabecera, el usuario abre un **menú** (Mi perfil · Tema · Cerrar sesión).
 
-La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
+La interfaz usa **tema oscuro por defecto** (y tema claro con el botón, que recuerda tu elección; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
 pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** a pantalla completa.
 
@@ -63,6 +63,7 @@ js/config.js          # URL + anon key + ROUTES (filas de la tabla) + MEDALS (no
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (seguro de re-ejecutar: no borra datos; incluye checks e índices)
+supabase/routes.sql   # estados de ruta (sin encuentro / fallido) por jugador (seguro de re-ejecutar)
 supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible al completar; seguro de re-ejecutar)
 supabase/presence.sql # fichaje: tabla `sessions` + funciones clock_ping/clock_out/presence_summary (seguro de re-ejecutar)
 supabase/admin.sql    # permisos de la cuenta admin + función para borrar usuarios (seguro de re-ejecutar)
@@ -120,6 +121,8 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 
 **Relaciones:** `profiles 1—N players N—1 runs`; cada `entry` pertenece a la run, a un `player` y a un
 `user`. Borrar una cuenta arrastra en cascada sus `players` y `entries` (la run permanece).
+
+**Rutas**: `route_status(user_id, route, status none|failed)`; «capturado» se deduce de `entries` y «pendiente» es no tener nada.
 
 **Misiones**: `missions`, `mission_rewards` (recompensa, solo legible al completar o siendo admin) y `mission_completions` (una fila por jugador y misión).
 
@@ -189,6 +192,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
+- **Fase 1 de rediseño:** cabecera móvil en una fila con menú de usuario (Salir dentro), tema con estado e icono, iconos de pestañas propios, contenido centrado, errores de promesas con aviso amable y Rutas con estados/zonas/progreso/filtros (`supabase/routes.sql`).
 - **Fichaje manual y Misiones** (`supabase/missions.sql` y `supabase/presence.sql`).
 - **BD endurecida:** `schema.sql` ya no borra tablas; checks de `status`/`level`/`badges`, índices de claves foráneas y políticas con `(select auth.uid())`. 
 - **Iconos Pokémon** (sprites de objetos de PokéAPI) y **cambio de tema** con una sola transición de página (View Transitions; instantáneo si no hay soporte o `prefers-reduced-motion`).

@@ -9,7 +9,7 @@
 
   <!-- Tema (evita parpadeo: aplica data-theme antes de pintar) -->
   <script>
-    try { var t = localStorage.getItem("theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+    try { var t = localStorage.getItem("theme"); document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark"); } catch (e) {}
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -39,15 +39,20 @@
       <button class="btn ghost clock-toggle" id="clockBtn" aria-pressed="false" title="Fichar entrada / salida">
         <span class="online-dot"></span><span class="clock-label">Fichar</span>
       </button>
-      <button class="btn icon" id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema">
+      <button class="btn ghost theme-btn" id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
         <svg class="icon-sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <span id="themeName">Oscuro</span>
       </button>
-      <button class="me-chip small" id="userChip" title="Editar perfil"></button>
-      <button class="btn ghost" id="logoutBtn" title="Cerrar sesión">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/></svg>
-        <span>Salir</span>
-      </button>
+      <div class="usermenu">
+        <button class="me-chip small" id="userChip" aria-haspopup="menu" aria-expanded="false" title="Menú de usuario"></button>
+        <div class="menu hidden" id="userMenu" role="menu">
+          <button class="menu-item" role="menuitem" id="menuProfile">Mi perfil</button>
+          <button class="menu-item" role="menuitem" id="menuTheme">Tema: <b id="menuThemeName">Oscuro</b></button>
+          <hr>
+          <button class="menu-item danger" role="menuitem" id="logoutBtn">Cerrar sesión</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -82,37 +87,38 @@
     <section id="app" class="hidden">
       <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones">
         <button class="tab active" role="tab" aria-selected="true" data-tab="rutas">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/town-map.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="a" d="M12 21s-6-5.3-6-10a6 6 0 0112 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>
           <span>Rutas</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="seg">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path class="a" d="M3 12a9 9 0 0118 0z"/><path d="M3 12h18"/><circle cx="12" cy="12" r="2.6" fill="var(--bg)"/></svg>
           <span>Seguimiento</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="payos">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/exp-share.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="a" cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 5.5a3 3 0 010 5.6M18 20a6 6 0 00-3-5.2"/></svg>
           <span>Payos</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="conectados">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lucky-egg.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="a" cx="12" cy="12" r="2.2"/><path d="M7.8 7.8a6 6 0 000 8.4M16.2 7.8a6 6 0 010 8.4M4.9 4.9a10 10 0 000 14.2M19.1 4.9a10 10 0 010 14.2"/></svg>
           <span>Conectados</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="misiones">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect class="a" x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg>
           <span>Misiones</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="cementerio">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/old-amber.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="a" d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 8v6M9.5 10.5h5"/></svg>
           <span>Cementerio</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="perfil">
-          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="a" cx="12" cy="8" r="3.6"/><path d="M5 21a7 7 0 0114 0"/></svg>
           <span>Perfil</span>
         </button>
       </nav>
 
       <!-- Rutas -->
       <div class="panel active" id="panel-rutas" role="tabpanel" aria-label="Rutas" tabindex="0">
+        <div class="routes-bar" id="routesBar"></div>
         <div class="routes-wrap"><table class="routes" id="routesTable"></table></div>
       </div>
 
@@ -219,6 +225,21 @@
     </form>
   </dialog>
 
+  <!-- ───────── Modal casilla de ruta ───────── -->
+  <dialog id="cellDialog" closedby="any" aria-labelledby="cellTitle">
+    <div class="celldlg">
+      <h3 id="cellTitle">Ruta</h3>
+      <p class="muted" id="cellWho"></p>
+      <div class="cellopts">
+        <button type="button" class="btn primary" data-act="capture">Registrar captura</button>
+        <button type="button" class="btn" data-act="none">Sin encuentro</button>
+        <button type="button" class="btn" data-act="failed">Fallido</button>
+        <button type="button" class="btn ghost" data-act="pending">Volver a pendiente</button>
+      </div>
+      <menu><button type="button" class="btn ghost" id="cellClose">Cerrar</button></menu>
+    </div>
+  </dialog>
+
   <!-- ───────── Modal misión (admin) ───────── -->
   <dialog id="missionDialog" closedby="any" aria-labelledby="missionTitle">
     <form method="dialog" id="missionForm">
@@ -250,6 +271,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=6"></script>
+  <script type="module" src="js/app.js?v=7"></script>
 </body>
 </html>
