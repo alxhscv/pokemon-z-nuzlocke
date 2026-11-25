@@ -18,10 +18,11 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    luego lo mueves entre ⚔️ Equipo / 📦 Caja / ⚰️ Cementerio con los botones de su tarjeta (está en un
    único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
    ruta. Llevas tus **medallas** (12, marcadas una a una). En tu **perfil** eliges nombre y un **avatar**.
-4. La app está en **5 pestañas**:
+4. La app está en **6 pestañas**:
    - **🗺️ Rutas** — matriz rutas × jugadores (qué capturó cada uno en cada ruta).
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
+   - **🟢 Conectados** — quién está online ahora y cuánto lleva en la sesión actual (tiempo en vivo). En Payos cada cuenta lleva un punto verde/gris.
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
    - **🧑 Perfil** — editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
@@ -32,7 +33,7 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
-**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex.
+**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Los **iconos** de pestañas, botones y estados vacíos son sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites) (mapa de ruta, Poké Ball, Repartir Exp., Huevo Suerte, ámbar viejo, Master Ball).
 
 La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
@@ -55,12 +56,13 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ## Estructura de archivos
 
 ```
-index.html            # una página (login · app con 5 pestañas: rutas/seguimiento/payos/cementerio/perfil)
+index.html            # una página (login · app con 6 pestañas: rutas/seguimiento/payos/conectados/cementerio/perfil)
 css/styles.css        # estilos (tema claro por defecto + oscuro, tokens CSS, estética Pokémon/Kalos)
 js/config.js          # URL + anon key + ROUTES (filas de la tabla) + MEDALS (nombre + imagen de cada medalla)
 js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (se aplica una vez; BORRA y recrea las tablas)
+supabase/presence.sql # fichaje: tabla `sessions` + funciones clock_ping/clock_out/presence_summary (seguro de re-ejecutar)
 supabase/admin.sql    # permisos de la cuenta admin + función para borrar usuarios (seguro de re-ejecutar)
 scripts/build_pokemon_json.py  # regenera data/pokemon.json desde los CSV de PokéAPI
 ```
@@ -117,6 +119,8 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 **Relaciones:** `profiles 1—N players N—1 runs`; cada `entry` pertenece a la run, a un `player` y a un
 `user`. Borrar una cuenta arrastra en cascada sus `players` y `entries` (la run permanece).
 
+**Fichaje** (`supabase/presence.sql`): tabla `sessions(user_id, started_at, last_seen, ended_at)`, una sesión abierta por usuario. Solo se escribe con `clock_ping()` (latido cada 30 s) y `clock_out()` (al cerrar sesión); `presence_summary()` devuelve horas totales, si está conectado y desde cuándo. Lectura para autenticados, sin escritura directa.
+
 ### Seguridad (RLS)
 Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
 - **Lees** perfiles y la run; **lees** `players`/`entries` solo de la run de la que eres miembro
@@ -139,6 +143,8 @@ perfil) y tiene su propia vista: solo las pestañas Rutas, Payos y Cementerio. P
 - editar/mover/borrar **cualquier** Pokémon (desde la tabla de rutas, el cementerio o la ficha de un payo)
   y registrar Pokémon en la celda de cualquier jugador;
 - en la ficha de un payo: marcar sus **medallas**, **renombrarlo** y **eliminar su cuenta** (con todos sus Pokémon).
+
+Para el fichaje ejecuta **una vez** [`supabase/presence.sql`](supabase/presence.sql) (sin él la web funciona pero Conectados sale vacío y las horas a 0).
 
 Los permisos reales están en la base de datos: ejecuta **una vez** [`supabase/admin.sql`](supabase/admin.sql)
 en Supabase → SQL Editor (después de crear la cuenta `admin`). Sin ese SQL, el admin entra pero no puede
@@ -172,12 +178,15 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 - **Rutas = borrador editable** (`config.js → ROUTES`): el fan game no publica tablas de encuentros
   fiables. Las zonas nuevas se añaden solas, así que no bloquea.
 - **Pokédex:** 9 generaciones completas (National Dex), no filtrada a los Pokémon concretos del juego.
+- **Fichaje:** latido cada 30 s, 90 s sin latido = desconectado, así que la precisión es de ±30 s y cerrar la pestaña tarda hasta 90 s en notarse (cerrar sesión es inmediato). Las horas no cuentan si la pestaña está cerrada. El admin no ficha. El tiempo en vivo usa el reloj del navegador.
 - **Sin histórico/undo:** editar o borrar es inmediato y definitivo.
 
 ---
 
 ## Registro de arreglos
 
+- **Iconos Pokémon** (sprites de objetos de PokéAPI) y **cambio de tema** con una sola transición de página (View Transitions; instantáneo si no hay soporte o `prefers-reduced-motion`).
+- **Fichaje:** pestaña Conectados, punto online en Payos y horas jugadas en el perfil (`presence.sql`).
 - **Rediseño visual** (menos plantilla, más menú de juego): ver «Estilo». Nombre de ruta alineado a la izquierda y sin numeración de adorno; «Cayó a Nv.» ya no usa la fuente pixel (no tiene acentos).
 - **Cuenta admin** (oculta, edita todo y borra usuarios): ver «Cuenta admin».
 - El modal de un payo ahora se actualiza en vivo si cambian sus datos.

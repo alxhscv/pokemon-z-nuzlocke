@@ -6,11 +6,9 @@ const sprite = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master
 const $ = (id) => document.getElementById(id);
 
 // iconos SVG (presentación; sustituyen a los emojis)
-const SVG = {
-  box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>`,
-  team: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h6M15 12h6"/><circle cx="12" cy="12" r="3"/></svg>`,
-  dead: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 7v5M9.5 9.5h5"/></svg>`,
-};
+const itemImg = (n) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${n}.png`;
+const itemTag = (n) => `<img class="iimg" src="${itemImg(n)}" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">`;
+const SVG = { box: itemTag("great-ball"), team: itemTag("poke-ball"), dead: itemTag("old-amber") };
 // estados de vacío con ilustración + texto con gracia
 const EMPTY = {
   team: ["M5 3l4 4M19 3l-4 4M4 8h16l-1.5 11a2 2 0 01-2 1.7H7.5a2 2 0 01-2-1.7z", "Tu equipo está vacío. ¡A la hierba alta!"],
@@ -19,8 +17,7 @@ const EMPTY = {
 };
 function emptyState(st) {
   const [d, txt] = EMPTY[st] || ["", "Nada por aquí."];
-  const paths = d.split("|").map((p) => `<path d="${p}"/>`).join("");
-  return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">${paths}</svg><span>${txt}</span></div>`;
+  return `<div class="empty-state">${{ team: SVG.team, box: SVG.box, dead: SVG.dead }[st] || ""}<span>${txt}</span></div>`;
 }
 
 // color de jugador: ahora fijo (rojo) para todos
@@ -61,7 +58,7 @@ function wireEvents() {
   $("authPass").onkeydown = $("authUser").onkeydown = (e) => { if (e.key === "Enter") doAuth(); };
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("authAvatar").oninput = updateAuthAvatarPreview;
-  $("logoutBtn").onclick = () => db.auth.signOut();
+  $("logoutBtn").onclick = async () => { await stopPresence(true); db.auth.signOut(); };
   $("userChip").onclick = $("meChip").onclick = () => { if (!isAdmin) selectTab("perfil"); };
   $("themeToggle").onclick = toggleTheme;
   applyThemeIcon();
@@ -107,9 +104,11 @@ function currentTheme() {
 }
 function toggleTheme() {
   const next = currentTheme() === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
+  const apply = () => { document.documentElement.setAttribute("data-theme", next); applyThemeIcon(); };
   try { localStorage.setItem("theme", next); } catch (e) {}
-  applyThemeIcon();
+  // crossfade único de toda la página (evita que cada elemento transicione por su cuenta); sin él o con reduced-motion, cambio directo
+  if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) document.startViewTransition(apply);
+  else apply();
 }
 function applyThemeIcon() {
   const dark = currentTheme() === "dark";
@@ -218,6 +217,8 @@ async function afterLogin() {
 
 function resetToAuth() {
   channel?.unsubscribe();
+  stopPresence();
+  presence = new Map();
   user = profile = run = myPlayer = null; isAdmin = false; payoUid = null; players = []; entries = [];
   showAuth();
 }
@@ -240,6 +241,44 @@ async function enterRun(r) {
   showSkeletons();
   await reload();
   subscribe();
+  startPresence();
+}
+
+// ===================== fichaje =====================
+// latido cada 30 s (clock_ping); 90 s sin latido = desconectado. Ver supabase/presence.sql
+let presence = new Map(), pingT, pollT, tickT;
+function fmtDur(s) {
+  s = Math.max(0, Math.floor(s));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h ? `${h} h ${String(m).padStart(2, "0")} min` : `${m} min`;
+}
+async function startPresence() {
+  stopPresence();
+  if (!isAdmin) { const ping = () => db.rpc("clock_ping"); ping(); pingT = setInterval(ping, 30000); }
+  await loadPresence();
+  pollT = setInterval(loadPresence, 30000);
+  tickT = setInterval(() => document.querySelectorAll("[data-since]").forEach((el) => {
+    el.textContent = fmtDur((Date.now() - new Date(el.dataset.since)) / 1000);
+  }), 1000);
+}
+async function stopPresence(out = false) {
+  clearInterval(pingT); clearInterval(pollT); clearInterval(tickT);
+  if (out && !isAdmin) await db.rpc("clock_out");
+}
+async function loadPresence() {
+  const { data } = await db.rpc("presence_summary");
+  presence = new Map((data || []).map((r) => [r.user_id, r]));
+  renderConectados(); renderPayos(); fillHours();
+}
+function fillHours() {
+  if (user && $("pHours")) $("pHours").textContent = fmtDur(presence.get(user.id)?.total_seconds || 0);
+}
+function renderConectados() {
+  const on = players.filter((p) => presence.get(p.user_id)?.online);
+  $("onlineList").innerHTML = on.length ? on.map((p) => `<div class="friend online-row">
+      ${playerIcon(p.profiles)}<span class="fname">${esc(p.profiles?.display_name || "???")}</span>
+      <span class="since">lleva <b data-since="${esc(presence.get(p.user_id).session_start)}">${fmtDur((Date.now() - new Date(presence.get(p.user_id).session_start)) / 1000)}</b></span>
+    </div>`).join("") : `<div class="empty-state"><span>Nadie conectado ahora mismo.</span></div>`;
 }
 
 // ===================== datos + render =====================
@@ -276,6 +315,7 @@ function render() {
   renderRoutes();
   renderMyColumns();
   renderPayos();
+  renderConectados();
   renderGraveyard();
   renderMedalsEdit();
   refreshPayo();
@@ -437,7 +477,7 @@ function renderPayos() {
     return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${BRAND}">
       <div class="fhead"></div>
       ${bigAv}
-      <div class="fname">${esc(prof.display_name)}</div>
+      <div class="fname"><span class="online-dot${presence.get(pl.user_id)?.online ? " on" : ""}" title="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}"></span>${esc(prof.display_name)}</div>
       <div class="stats">
         <span class="alive"><b>${es.length - dead}</b> vivos</span>
         <span class="fallen"><b>${dead}</b> caídos</span>
@@ -545,6 +585,7 @@ function fillProfile() {
   else { $("pAvatar").value = av ? byId.get(+av)?.es || "" : ""; $("pAvatarUrl").value = ""; }
   updateAvatarPreview();
   renderMedalsEdit();
+  fillHours();
 }
 function updateAvatarPreview() {
   const url = $("pAvatarUrl").value.trim();

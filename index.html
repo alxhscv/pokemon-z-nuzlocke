@@ -79,23 +79,27 @@
     <section id="app" class="hidden">
       <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones">
         <button class="tab active" role="tab" aria-selected="true" data-tab="rutas">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3L3 5v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16M15 5v16"/></svg>
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/town-map.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Rutas</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="seg">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 8V6a3 3 0 013-3h6a3 3 0 013 3v2"/><rect x="4" y="8" width="16" height="13" rx="2"/><path d="M9 12h6"/></svg>
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Seguimiento</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="payos">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 5.5a3 3 0 010 5.6M18 20a6 6 0 00-3-5.2"/></svg>
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/exp-share.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Payos</span>
         </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="conectados">
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lucky-egg.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
+          <span>Conectados</span>
+        </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="cementerio">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 7v5M9.5 9.5h5"/></svg>
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/old-amber.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Cementerio</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="perfil">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0114 0"/></svg>
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" alt="" width="30" height="30" onerror="this.style.visibility=\'hidden\'">
           <span>Perfil</span>
         </button>
       </nav>
@@ -135,6 +139,11 @@
         <div class="friends" id="friends"></div>
       </div>
 
+      <!-- Conectados -->
+      <div class="panel" id="panel-conectados" role="tabpanel" aria-label="Conectados" tabindex="0">
+        <div class="friends" id="onlineList"></div>
+      </div>
+
       <!-- Cementerio (global) -->
       <div class="panel" id="panel-cementerio" role="tabpanel" aria-label="Cementerio" tabindex="0">
         <div class="grave-wall" id="graveWall"></div>
@@ -145,6 +154,7 @@
         <div class="profile-layout">
           <div class="card profile-card">
             <h2>Tu perfil</h2>
+            <p class="hours-row">Horas jugadas: <b id="pHours">0 min</b></p>
             <form id="profileForm">
               <label>Nombre visible<input id="pName" maxlength="20" /></label>
               <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>

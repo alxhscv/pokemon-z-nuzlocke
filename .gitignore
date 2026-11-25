@@ -2,3 +2,7 @@
 scripts/*.csv
 .DS_Store
 Thumbs.db
+
+# Claves secretas locales (nunca subir)
+SECRETS.md
+.env*
