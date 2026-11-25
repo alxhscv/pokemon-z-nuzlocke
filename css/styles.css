@@ -1,7 +1,7 @@
 /* ============================================================
    Pokémon Z · Nuzlocke Tracker — hoja de estilos
    Idea: menú de consola. Paneles planos con borde marino de 2px, esquinas poco
-   redondeadas, sombra "dura" solo donde se pulsa. Acento verde Zygarde.
+   redondeadas, sombra "dura" solo donde se pulsa. Acento rojo Pokéball.
    1) tokens  2) base  3) layout  4) componentes  5) pantallas  6) utilidades
    7) animaciones  8) responsive
    ============================================================ */
@@ -10,16 +10,16 @@
 :root{
   color-scheme: light;
 
-  --zygarde:#2BB673;          /* punto/dot de jugador */
-  --accent:#17804F; --accent-d:#12683F;   /* botones y acentos con texto blanco */
-  --gold:#FFCB05; --red:#C8321A; --blue:#2F8FBF; --grave:#6B7280;
+  --brand:#E3350D;            /* color de jugador: puntos, franjas, cabeceras */
+  --accent:#C8321A; --accent-d:#A32511;   /* botones y acentos con texto blanco */
+  --gold:#FFCB05; --red:#E3350D; --blue:#2F8FBF; --grave:#6B7280;
 
   --bg:#DCE5EC; --surface:#FFFFFF; --surface2:#EEF3F7;
   --line:#C5D0DB; --edge:#1B2A4A; --bar:#1B2A4A;
   --txt:#1B2433; --muted:#4F5B70; --dex:#5E6A80; --title:#1B2A4A;
   --red-soft:#FBE4DF;
-  --ok:var(--accent); --danger:var(--red); --link:#1F6FA0;
-  --me-color:var(--zygarde);
+  --ok:#2E9B5E; --danger:#9B1C0A; --link:#1F6FA0;
+  --me-color:var(--brand);
 
   --r-sm:4px; --r:8px; --r-lg:12px;
 
@@ -32,7 +32,7 @@
   --ease:cubic-bezier(.2,.7,.3,1);
   --t:150ms var(--ease);
 
-  /* hexágonos Zygarde (cabeceras de payo y fondo del login) */
+  /* hexágonos de Kalos (cabeceras de payo y fondo del login) */
   --hex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48' viewBox='0 0 28 48'%3E%3Cpath d='M14 1 L27 8.5 L27 23.5 L14 31 L1 23.5 L1 8.5 Z' fill='none' stroke='%231B2A4A' stroke-width='1.5'/%3E%3Cpath d='M14 25 L27 32.5 L27 47.5 M14 25 L1 32.5 L1 47.5' fill='none' stroke='%231B2A4A' stroke-width='1.5'/%3E%3C/svg%3E");
 
   /* iconos (máscaras) para toast y lápida */
@@ -48,7 +48,7 @@
   --bg:#0E1524; --surface:#17203A; --surface2:#1E2A48;
   --line:#2D3B5F; --edge:#4B5E8C; --bar:#0A1020;
   --txt:#E6ECF8; --muted:#9AA8C6; --dex:#8493B2; --title:#E6ECF8;
-  --accent:#1B8A57; --accent-d:#17744A; --red-soft:#3a1b18; --link:#6BB4E0;
+  --accent:#C2371F; --accent-d:#A52D18; --red-soft:#3a1b18; --link:#6BB4E0;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -56,7 +56,7 @@
     --bg:#0E1524; --surface:#17203A; --surface2:#1E2A48;
     --line:#2D3B5F; --edge:#4B5E8C; --bar:#0A1020;
     --txt:#E6ECF8; --muted:#9AA8C6; --dex:#8493B2; --title:#E6ECF8;
-    --accent:#1B8A57; --accent-d:#17744A; --red-soft:#3a1b18; --link:#6BB4E0;
+    --accent:#C2371F; --accent-d:#A52D18; --red-soft:#3a1b18; --link:#6BB4E0;
   }
 }
 
@@ -86,7 +86,7 @@ h4{font-size:var(--fs-md);font-weight:700}
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:10px clamp(14px,4vw,24px);
   padding-top:calc(10px + env(safe-area-inset-top));
-  background:var(--bar);color:#fff;border-bottom:4px solid var(--zygarde);
+  background:var(--bar);color:#fff;border-bottom:4px solid var(--brand);
   position:sticky;top:0;z-index:30;
 }
 .wrap{max-width:1280px;margin:0 auto;padding:clamp(16px,3vw,24px) clamp(14px,4vw,24px) 80px}
@@ -103,7 +103,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0}
 .brand-text b{font-weight:800;font-stretch:125%;font-size:1.15rem;color:#fff}
 .brand-text small{font-weight:500;color:#A9B8D0;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.live-dot{width:9px;height:9px;border-radius:50%;background:var(--zygarde);flex:0 0 auto;opacity:0;transition:opacity .3s;margin-left:2px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:0 0 auto;opacity:0;transition:opacity .3s;margin-left:2px}
 .live-dot.on{opacity:1;animation:pulse 1.2s var(--ease) 2}
 
 /* --- Pokéball (indicador pequeño, CSS puro) --- */
@@ -122,7 +122,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .btn:active{transform:translate(2px,2px);box-shadow:none}
 .btn.primary{background:var(--accent);border-color:var(--edge);color:#fff}
 .btn.primary:hover{background:var(--accent-d)}
-.btn.danger{background:var(--red);color:#fff}
+.btn.danger{background:var(--danger);color:#fff}
 .btn.danger:hover{filter:brightness(.92)}
 .btn.ghost{background:transparent;border-color:var(--line);box-shadow:none}
 .btn.ghost:hover{background:var(--surface2);border-color:var(--edge)}
@@ -145,7 +145,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .me-bar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:0 0 20px}
 .me-bar .primary{margin-left:auto}
 
-/* avatar del jugador (sprite redondo) o punto verde */
+/* avatar del jugador (sprite redondo) o punto de color */
 .avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;image-rendering:pixelated;
   background:var(--surface2);border:2px solid var(--edge);flex:0 0 auto;vertical-align:middle}
 .me-chip.small .avatar{width:22px;height:22px}
@@ -162,7 +162,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .tab svg{width:20px;height:20px;flex:0 0 auto}
 .tab:hover{color:var(--txt);background:var(--surface2)}
 .tab.active,.tab[aria-selected="true"]{color:var(--title);background:var(--bg);border-color:var(--edge);
-  box-shadow:inset 0 4px 0 var(--zygarde)}
+  box-shadow:inset 0 4px 0 var(--brand)}
 
 /* --- Tarjeta de Pokémon --- */
 .list{display:flex;flex-direction:column;gap:10px}
@@ -170,7 +170,7 @@ h4{font-size:var(--fs-md);font-weight:700}
   border:1px solid var(--line);border-left:5px solid var(--line);border-radius:var(--r);padding:9px 12px;cursor:pointer;
   transition:transform var(--t),box-shadow var(--t),border-color var(--t)}
 .mon:hover{border-color:var(--edge);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)}
-.mon.team{border-left-color:var(--zygarde)}
+.mon.team{border-left-color:var(--brand)}
 .mon.dead{border-left-color:var(--grave);background:var(--surface2)}
 .mon .sprite{width:56px;height:56px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--surface2);
   border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
@@ -229,7 +229,7 @@ table.routes thead th{background:var(--surface2);position:sticky;top:0;z-index:2
 .rhead{display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;font-weight:700;min-width:72px}
 .rhead .band{position:absolute;top:0;left:0;right:0;height:4px;background:var(--me-col,var(--line))}
 .rhead-inner{display:flex;align-items:center;gap:6px;padding-top:4px}
-thead th.mine{background:color-mix(in srgb,var(--zygarde) 14%,var(--surface2))}
+thead th.mine{background:color-mix(in srgb,var(--brand) 14%,var(--surface2))}
 
 /* primera columna (sticky izquierda) = nombre de ruta */
 table.routes .rlabel,table.routes .rcorner{text-align:left}
@@ -240,8 +240,8 @@ table.routes .rlabel,table.routes .rcorner{text-align:left}
 .rcorner{border-right:2px solid var(--edge)!important}
 
 /* mi columna */
-td.addable{cursor:pointer;background:color-mix(in srgb,var(--zygarde) 8%,var(--surface))}
-table.routes tbody tr:hover td.addable,td.addable:hover{background:color-mix(in srgb,var(--zygarde) 18%,var(--surface))}
+td.addable{cursor:pointer;background:color-mix(in srgb,var(--brand) 8%,var(--surface))}
+table.routes tbody tr:hover td.addable,td.addable:hover{background:color-mix(in srgb,var(--brand) 18%,var(--surface))}
 /* celda vacía propia → hueco con "+"; ajena → "—" */
 .routes .empty{color:var(--dex)}
 td.addable .empty{font-size:0;display:block;position:relative;width:32px;height:32px;margin:0 auto;
@@ -268,7 +268,7 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .friend{position:relative;background:var(--surface);border:2px solid var(--edge);border-radius:var(--r-lg);
   cursor:pointer;transition:transform var(--t),box-shadow var(--t);padding:0 16px 16px}
 .friend:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--edge)}
-.friend .fhead{margin:0 -16px 44px;height:60px;background:var(--fc,var(--zygarde));position:relative;
+.friend .fhead{margin:0 -16px 44px;height:60px;background:var(--fc,var(--brand));position:relative;
   overflow:hidden;border-radius:10px 10px 0 0;border-bottom:2px solid var(--edge)}
 .friend .fhead::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.16}
 .friend .favatar{position:absolute;left:16px;top:30px;width:60px;height:60px;border-radius:50%;
@@ -282,7 +282,7 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .friend .stats .fallen{color:var(--grave)}
 .friend .team{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
 .friend .team img{width:38px;height:38px;image-rendering:pixelated;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-sm)}
-.friend.me-card{outline:3px solid var(--zygarde);outline-offset:2px}
+.friend.me-card{outline:3px solid var(--brand);outline-offset:2px}
 
 /* --- Medallas (imágenes oficiales) --- */
 .medals-view{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
@@ -372,10 +372,10 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
   box-shadow:3px 3px 0 var(--edge);z-index:50;max-width:min(92vw,420px);font-weight:600;animation:toast-in .2s var(--ease)}
 .toast::before{content:"";width:18px;height:18px;flex:0 0 auto;background:var(--blue);
   -webkit-mask:var(--ic-info) center/contain no-repeat;mask:var(--ic-info) center/contain no-repeat}
-.toast.ok{border-left-color:var(--zygarde)}
-.toast.ok::before{background:var(--accent);-webkit-mask:var(--ic-ok) center/contain no-repeat;mask:var(--ic-ok) center/contain no-repeat}
-.toast.err{border-left-color:var(--red)}
-.toast.err::before{background:var(--red);-webkit-mask:var(--ic-err) center/contain no-repeat;mask:var(--ic-err) center/contain no-repeat}
+.toast.ok{border-left-color:var(--ok)}
+.toast.ok::before{background:var(--ok);-webkit-mask:var(--ic-ok) center/contain no-repeat;mask:var(--ic-ok) center/contain no-repeat}
+.toast.err{border-left-color:var(--danger)}
+.toast.err::before{background:var(--danger);-webkit-mask:var(--ic-err) center/contain no-repeat;mask:var(--ic-err) center/contain no-repeat}
 
 /* --- Estados de vacío --- */
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;

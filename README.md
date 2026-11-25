@@ -24,8 +24,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
-   - **🧑 Perfil** — editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (verde
-     Zygarde)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
+   - **🧑 Perfil** — editas tu nombre y avatar (a la izquierda) y tus **medallas** (a la derecha: fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores). El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
 
@@ -33,7 +32,7 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
-**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento verde Zygarde, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex.
+**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex.
 
 La interfaz usa **tema claro por defecto** y **tema oscuro** (respeta `prefers-color-scheme`; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
@@ -77,7 +76,7 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 |---|---|---|
 | `id` | uuid **PK** | = `auth.users.id` (cascade) |
 | `display_name` | text | nombre visible |
-| `color` | text | en desuso: todos usan verde Zygarde |
+| `color` | text | en desuso: todos usan el rojo de la marca |
 | `avatar` | text | id del Pokémon-avatar **o** URL de imagen (opcional) |
 | `created_at` | timestamptz | |
 
@@ -186,7 +185,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 - **Botón «Cerrar» suelto** en todas las pestañas: el modal de payo (`#payoDialog`) tenía
   `display:flex` fijo, que anula el `display:none` de un `<dialog>` cerrado. Ahora solo aplica con `[open]`.
 - **Avatar por URL sin escapar** al pintarlo en `src="…"` (podía inyectar HTML a los demás): ahora se escapa.
-- El **color** de cada cuenta ya no depende de lo guardado en BD (siempre verde Zygarde).
+- El **color** de cada cuenta ya no depende de lo guardado en BD (siempre el rojo de la marca).
 - Pokémon registrados **sin ruta** ya no desaparecen de la tabla (fila «Sin zona»).
 - Modal de payo en móvil: ocupa todo el ancho como el resto de hojas inferiores.
 - Aviso (toast) en móvil ya no queda tapado por la barra de pestañas.

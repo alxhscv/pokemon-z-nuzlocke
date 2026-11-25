@@ -17,7 +17,7 @@ drop function if exists public.is_member(uuid);
 create table public.profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
   display_name  text not null,
-  color         text not null default '#2BB673',       -- (en desuso: ahora todos usan verde Zygarde)
+  color         text not null default '#2BB673',       -- (en desuso: ahora todos usan rojo de la marca)
   avatar        text,                                   -- id del Pokémon-avatar O una URL de imagen (opcional)
   created_at    timestamptz not null default now()
 );

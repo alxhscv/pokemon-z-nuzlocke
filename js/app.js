@@ -23,8 +23,8 @@ function emptyState(st) {
   return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" aria-hidden="true">${paths}</svg><span>${txt}</span></div>`;
 }
 
-// color de jugador: ahora fijo (verde Zygarde) para todos
-const GREEN = "#2BB673";
+// color de jugador: ahora fijo (rojo) para todos
+const BRAND = "#E3350D";
 // medallas: `players.badges` es una máscara de bits (bit i-1 = medalla i), así se marcan sueltas
 const medalImg = (m) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/badges/${m.img}.png`;
 const hasMedal = (mask, i) => ((mask || 0) >> (i - 1)) & 1;
@@ -141,11 +141,11 @@ function showSkeletons() {
   for (const st of ["team", "box", "dead"]) $("list-" + st).innerHTML = sk;
 }
 
-// avatar del jugador: sprite/imagen si tiene avatar, si no un punto verde
+// avatar del jugador: sprite/imagen si tiene avatar, si no un punto rojo
 function playerIcon(prof) {
   const src = avatarSrc(prof?.avatar);
-  const dot = `<span class="dot" style="background:${GREEN}"></span>`;
-  if (src) return `<img class="avatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${src}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;dot&quot; style=&quot;background:${GREEN}&quot;></span>'">`;
+  const dot = `<span class="dot" style="background:${BRAND}"></span>`;
+  if (src) return `<img class="avatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${src}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;dot&quot; style=&quot;background:${BRAND}&quot;></span>'">`;
   return dot;
 }
 
@@ -182,7 +182,7 @@ async function doAuth() {
       if (error) return toast(traduceAuth(error.message), true);
       if (!data.session) return toast("Cuenta creada, ahora inicia sesión", true);
       const pid = byName.get($("authAvatar").value.trim().toLowerCase());
-      await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color: GREEN, avatar: pid ? String(pid) : null });
+      await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color: BRAND, avatar: pid ? String(pid) : null });
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password: pass });
       if (error) return toast(traduceAuth(error.message), true);
@@ -263,7 +263,7 @@ function subscribe() {
     .subscribe();
 }
 
-// cambio en vivo: destello del punto verde + recarga
+// cambio en vivo: destello del punto rojo + recarga
 function onRealtime() {
   const dot = $("liveDot");
   if (dot) { dot.classList.remove("on"); void dot.offsetWidth; dot.classList.add("on"); }
@@ -389,7 +389,7 @@ function renderRoutes() {
   const head = `<thead><tr><th class="rcorner">Ruta</th>${players.map((pl) => {
     const prof = pl.profiles || {};
     const mine = pl.user_id === user.id;
-    return `<th class="${mine ? "mine" : ""}" style="--me-col:${GREEN}">
+    return `<th class="${mine ? "mine" : ""}" style="--me-col:${BRAND}">
       <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div></div></th>`;
   }).join("")}</tr></thead>`;
 
@@ -432,9 +432,9 @@ function renderPayos() {
       || `<span class="muted">Sin equipo</span>`;
     const av = avatarSrc(prof.avatar);
     const bigAv = av
-      ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${GREEN}&quot;></span>'">`
-      : `<span class="favatar dot-av" style="background:${GREEN}"></span>`;
-    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${GREEN}">
+      ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${BRAND}&quot;></span>'">`
+      : `<span class="favatar dot-av" style="background:${BRAND}"></span>`;
+    return `<div class="friend ${pl.user_id === user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${BRAND}">
       <div class="fhead"></div>
       ${bigAv}
       <div class="fname">${esc(prof.display_name)}</div>
@@ -551,7 +551,7 @@ function updateAvatarPreview() {
   const id = byName.get($("pAvatar").value.trim().toLowerCase());
   if (url) $("avatarPreview").innerHTML = `<img class="photo" src="${esc(url)}" alt="" onerror="this.style.display='none'"><span>Avatar por URL</span>`;
   else if (id) $("avatarPreview").innerHTML = `<img src="${sprite(id)}" alt=""><span>${esc(byId.get(id).es)}</span>`;
-  else $("avatarPreview").innerHTML = `<span>Sin avatar (se usará un punto verde)</span>`;
+  else $("avatarPreview").innerHTML = `<span>Sin avatar (se usará un punto rojo)</span>`;
 }
 async function saveProfile() {
   const name = $("pName").value.trim();
@@ -559,9 +559,9 @@ async function saveProfile() {
   const url = $("pAvatarUrl").value.trim();
   const pid = byName.get($("pAvatar").value.trim().toLowerCase());
   const avatar = url || (pid ? String(pid) : null);
-  const { error } = await db.from("profiles").update({ display_name: name, color: GREEN, avatar }).eq("id", user.id);
+  const { error } = await db.from("profiles").update({ display_name: name, color: BRAND, avatar }).eq("id", user.id);
   if (error) return toast(error.message, true);
-  profile = { ...profile, display_name: name, color: GREEN, avatar };
+  profile = { ...profile, display_name: name, color: BRAND, avatar };
   toast("Perfil guardado", false, true);
   await reload();
 }
