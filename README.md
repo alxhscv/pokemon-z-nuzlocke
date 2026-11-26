@@ -36,7 +36,7 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
-**Pantalla de carga:** al abrir la web, en silencio, hay un **telón** cerrado con un botón rojo señalado por flechas y dedos; al pulsarlo se abre (y suena el audio) y aparece `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav` con brillos, destellos y estrellas durante 10 s; al acabar o saltar, la música baja con fundido y la intro se desvanece sobre la web; se salta con la tecla **K**. El **admin** la activa/desactiva para todos desde el menú de usuario (**Intro**; requiere ejecutar `supabase/intro.sql` una vez) (inline en `index.html`).
+**Pantalla de carga (intro):** al abrir la web, en silencio, se ve un **telón** cerrado con un botón rojo señalado por flechas y dedos. Al pulsarlo (ese clic es lo que permite que suene el audio) el telón se abre y aparece `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav`, con rayos, anillos, destellos y estrellas. Dura 10 s o se salta con la tecla **K**; al acabar, la música baja con fundido y la intro se desvanece sobre la web. El **admin** la activa o desactiva para todos desde el menú de usuario (**Intro: Activada/Desactivada**); el ajuste vive en la tabla `app_settings` (`supabase/intro.sql`) y cada navegador lo recuerda en `localStorage`. El código está inline en `index.html`.
 
 **Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Las **pestañas**, los botones de mover y los estados vacíos usan sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites). En la cabecera, el usuario abre un **menú** (Mi perfil · Tema · Cerrar sesión).
 
@@ -61,7 +61,8 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ## Estructura de archivos
 
 ```
-index.html            # una página (login · app con 9 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/ranking/gacha/perfil)
+Inicio/               # splash.jpeg + splash.wav de la intro
+index.html            # una página (incluye la intro/telón inline) (login · app con 9 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/ranking/gacha/perfil)
 css/styles.css        # estilos (tema oscuro por defecto + claro, tokens CSS, estética Pokémon/Kalos)
 css/themes.css        # 16 temas de web completos (`html[data-skin]`: colores, radios, sombras y tipografía)
 js/config.js          # URL + anon key + ROUTE_ZONES/ROUTES (zonas y filas de Rutas) + MEDALS + BANNERS (temas de banner)
@@ -164,6 +165,8 @@ Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
    3. [`supabase/presence.sql`](supabase/presence.sql) — fichaje.
    4. [`supabase/missions.sql`](supabase/missions.sql) — misiones.
    5. [`supabase/pendiente.sql`](supabase/pendiente.sql) — estados de ruta + banners + Ranking/Gacha/frase (equivale a `routes.sql` + `banners.sql` + `gacha_ranking.sql`; sin la parte de Ranking/Gacha esas pestañas muestran un aviso).
+
+   6. [`supabase/intro.sql`](supabase/intro.sql) — interruptor de la intro (tabla `app_settings`).
 
    Si falta alguno, la web sigue funcionando pero esa parte avisa de que hay que aplicar su SQL.
 3. **Credenciales:** en [`js/config.js`](js/config.js) (Project URL + anon key, públicas).
