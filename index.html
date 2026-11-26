@@ -21,13 +21,22 @@
 </head>
 <body>
   <div id="splash">
-    <div class="sp-rays"></div>
-    <div class="sp-ring"></div><div class="sp-ring" style="animation-delay:.3333s"></div>
-    <div class="sp-box"><img src="Inicio/splash.jpeg" alt=""><i class="sp-shine"></i></div>
+    <div class="sp-stage">
+      <div class="sp-rays"></div>
+      <div class="sp-ring"></div><div class="sp-ring" style="animation-delay:.3333s"></div>
+      <div class="sp-box"><img src="Inicio/splash.jpeg" alt=""><i class="sp-shine"></i></div>
+    </div>
+    <div class="sp-curtain l"></div><div class="sp-curtain r"></div>
   </div>
   <style>
     :root{--beat:.6667s}
-    #splash{position:fixed;inset:0;z-index:99999;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#2a1a4a,#0b0614 70%);animation:sp-bg var(--beat) ease-out infinite}
+    #splash{position:fixed;inset:0;z-index:99999;overflow:hidden;background:#0b0614;transition:opacity 1.6s ease}
+    #splash.out{opacity:0;pointer-events:none}
+    .sp-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#2a1a4a,#0b0614 70%);opacity:0;transform:scale(.8);transition:opacity 2s ease,transform 2.6s cubic-bezier(.2,.7,.2,1);animation:sp-bg var(--beat) ease-out infinite}
+    .sp-stage.on{opacity:1;transform:none}
+    .sp-curtain{position:absolute;top:0;bottom:0;width:51%;z-index:2;transition:transform 2.4s cubic-bezier(.65,0,.3,1);background:repeating-linear-gradient(90deg,#6e0b1a 0,#b3162f 4%,#6e0b1a 8%);box-shadow:inset 0 -14px 0 #d4a72c,0 0 40px #000}
+    .sp-curtain.l{left:0;transform-origin:left}.sp-curtain.r{right:0;transform-origin:right}
+    .sp-curtain.open.l{transform:translateX(-102%) scaleX(.7)}.sp-curtain.open.r{transform:translateX(102%) scaleX(.7)}
     .sp-rays{position:absolute;width:220vmax;height:220vmax;background:repeating-conic-gradient(rgba(255,215,90,.22) 0 8deg,transparent 8deg 24deg);animation:sp-spin 14s linear infinite;-webkit-mask:radial-gradient(circle,#000 5%,transparent 40%);mask:radial-gradient(circle,#000 5%,transparent 40%)}
     .sp-ring{position:absolute;width:40vmin;height:40vmin;border:4px solid #ffd75a;border-radius:50%;opacity:0;animation:sp-ring calc(var(--beat)*2) ease-out infinite}
     .sp-box{position:relative;overflow:hidden;border-radius:12px;animation:sp-beat var(--beat) ease-out infinite,sp-glow calc(var(--beat)*2) ease-in-out infinite}
@@ -46,8 +55,11 @@
   </style>
   <script>
     (function(){
-      var el=document.getElementById('splash'),a=new Audio('Inicio/splash.wav'),t;
-      function end(){clearTimeout(t);a.pause();el.remove();removeEventListener('keydown',key)}
+      var el=document.getElementById('splash'),st0=el.firstElementChild,a=new Audio('Inicio/splash.wav'),t,done;
+      // al terminar o saltar: la música baja con fundido y la intro se desvanece sobre la web
+      function end(){if(done)return;done=1;clearTimeout(t);removeEventListener('keydown',key);el.classList.add('out');
+        var v=setInterval(function(){a.volume=Math.max(0,a.volume-.0625);if(!a.volume){clearInterval(v);a.pause()}},100);
+        setTimeout(function(){el.remove()},1700)}
       function key(e){if(e.key==='k'||e.key==='K')end()}
       var KEY='intro_enabled',URL='https://lrzpgufrsvwlkizrlmrt.supabase.co/rest/v1/app_settings?key=eq.'+KEY+'&select=value',AK='sb_publishable_flXeoN0iYEbt2UduG9azTw_qiufj8Q2';
       // shortcut: el ajuste se lee de la caché local (instantáneo); la primera visita siempre ve la intro
@@ -56,10 +68,11 @@
       if(off){el.remove();return}
       addEventListener('keydown',key);
       for(var i=0;i<30;i++){var st=document.createElement('span');st.className='sp-star';st.textContent=i%2?'✦':'✧';
-        st.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;font-size:'+(12+Math.random()*28)+'px;--d:'+(.8+Math.random()*1.4)+'s;--t:'+Math.random()*2+'s';el.appendChild(st)}
-      t=setTimeout(end,10000);
+        st.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;font-size:'+(12+Math.random()*28)+'px;--d:'+(.8+Math.random()*1.4)+'s;--t:'+Math.random()*2+'s';st0.appendChild(st)}
+      // el telón se abre y solo entonces aparece la intro y suena la música
+      setTimeout(function(){if(done)return;el.querySelectorAll('.sp-curtain').forEach(function(c){c.classList.add('open')});st0.classList.add('on');t=setTimeout(end,10000);
       // shortcut: el navegador puede bloquear el autoplay; se reintenta en la primera interacción
-      a.play().catch(function(){['pointerdown','keydown','touchstart'].forEach(function(ev){addEventListener(ev,function f(){a.play().then(function(){['pointerdown','keydown','touchstart'].forEach(function(e2){removeEventListener(e2,f)})}).catch(function(){})})})});
+      a.play().catch(function(){['pointerdown','keydown','touchstart'].forEach(function(ev){addEventListener(ev,function f(){if(done)return;a.play().then(function(){['pointerdown','keydown','touchstart'].forEach(function(e2){removeEventListener(e2,f)})}).catch(function(){})})})});},900);
     })();
   </script>
   <header class="topbar">
