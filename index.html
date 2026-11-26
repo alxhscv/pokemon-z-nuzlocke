@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Silkscreen&display=swap" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
-  <link rel="stylesheet" href="css/styles.css?v=3" />
+  <link rel="stylesheet" href="css/styles.css?v=4" />
   <link rel="stylesheet" href="css/themes.css?v=2" />
 </head>
 <body>
@@ -50,7 +50,6 @@
         <div class="menu hidden" id="userMenu" role="menu">
           <button class="menu-item" role="menuitem" id="menuProfile">Mi perfil</button>
           <button class="menu-item" role="menuitem" id="menuTheme">Tema: <b id="menuThemeName">Oscuro</b></button>
-          <label class="menu-item skin-pick">Tema de la web<select id="skinSelect" aria-label="Tema de la web"></select></label>
           <hr>
           <button class="menu-item danger" role="menuitem" id="logoutBtn">Cerrar sesión</button>
         </div>
@@ -220,7 +219,8 @@
               <label>Tu frase<input id="pMotto" maxlength="40" placeholder="Ej. Nunca subestimes a un Magikarp" autocomplete="off" /></label></div>
               <div class="form-row"><label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
               <label>…o avatar por URL<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label></div>
-              <div class="preview" id="avatarPreview"></div>
+              <div class="form-row"><label>Tema de la web<select id="skinSelect"></select></label>
+              <div class="preview" id="avatarPreview"></div></div>
               <div class="form-actions">
                 <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
                 <button type="submit" class="btn primary">Guardar perfil</button>
@@ -234,11 +234,6 @@
             <h3>Banner</h3>
             <p class="muted">Se ve en tu tarjeta de Payos junto a tu frase. Elige el que más te represente.</p>
             <div class="banner-grid" id="bannerGrid" role="radiogroup" aria-label="Banner"></div>
-          </div>
-          <div class="card skin-card">
-            <h3>Tema de la web</h3>
-            <p class="muted">Cambia el diseño completo. Los temas con modo propio desactivan el botón claro/oscuro; Clásico lo mantiene.</p>
-            <div class="skin-grid" id="skinGrid" role="radiogroup" aria-label="Tema de la web"></div>
           </div>
         </div>
       </div>
@@ -313,6 +308,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=20"></script>
+  <script type="module" src="js/app.js?v=21"></script>
 </body>
 </html>

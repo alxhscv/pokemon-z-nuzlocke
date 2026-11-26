@@ -39,20 +39,10 @@ export function applySkin(id) {
     }
   } catch (e) {}
   applyThemeIcon();
-  renderSkinGrid();
   const sel = $("skinSelect"); if (sel) sel.value = sk.id;
 }
-export function renderSkinGrid() {
-  const grid = $("skinGrid");
-  if (!grid) return;
-  const cur = skinOf();
-  grid.innerHTML = SKINS.map((s) => `<button type="button" role="radio" aria-checked="${s.id === cur}" class="stile${s.id === cur ? " on" : ""}" data-s="${esc(s.id)}" style="--p-bg:${s.bg};--p-sf:${s.surface};--p-ac:${s.accent}">
-    <span class="sprev" aria-hidden="true"><i></i><b></b></span>
-    <span class="sname">${esc(s.name)}</span><span class="smode">${s.mode === "light" ? "Claro" : s.mode === "dark" ? "Oscuro" : "Claro u oscuro"}</span></button>`).join("");
-  grid.querySelectorAll(".stile").forEach((t) => (t.onclick = () => applySkin(t.dataset.s)));
-}
 
-// selector rápido en el menú de usuario (disponible en cualquier pestaña y en móvil)
+// selector de tema dentro de "Tu perfil"
 {
   const sel = $("skinSelect");
   if (sel) {
