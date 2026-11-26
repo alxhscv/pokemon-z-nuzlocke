@@ -336,25 +336,28 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .medal-tile.just-on{animation:medal-pop .5s var(--ease)}
 
 /* --- Cementerio global: lápidas --- */
-.grave-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px}
-.grave-card{position:relative;background:color-mix(in srgb,var(--grave) 12%,var(--surface));
-  border:2px solid var(--edge);border-bottom-width:6px;border-radius:110px 110px 6px 6px;padding:30px 16px 18px;
-  display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;transition:transform var(--t)}
-.grave-card.mine{cursor:pointer}
-.grave-card.mine:hover{transform:translateY(-3px)}
-.grave-card .cross{width:20px;height:20px;color:var(--grave)}
-.grave-card .cross svg{width:100%;height:100%}
+.grave-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--sp-5)}
+/* misma tarjeta que el Cementerio de Seguimiento (fondo --grave-bg, borde 1px, sombra suave), con arco de lápida */
+.grave-card{position:relative;background:var(--grave-bg);border:1px solid var(--line);border-bottom:4px solid var(--grave);
+  border-radius:96px 96px var(--r-lg) var(--r-lg);box-shadow:var(--sh-1);padding:var(--sp-5) var(--sp-4) var(--sp-4);
+  transition:transform var(--t),box-shadow var(--t)}
+.grave-card.mine:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+@media (prefers-reduced-motion:reduce){.grave-card.mine:hover{transform:none}}
+.grave-body{appearance:none;display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--sp-2);width:100%;
+  background:none;border:0;padding:0;font:inherit;color:inherit;border-radius:var(--r)}
+button.grave-body{cursor:pointer}
+.grave-card .cross{display:block;width:20px;height:20px;color:var(--grave)}
+.grave-card .cross svg,.grave-card .cross .iimg{width:100%;height:100%}
 .grave-card .sprite{width:86px;height:86px;display:grid;place-items:center;border-radius:50%;
   background:color-mix(in srgb,var(--grave) 16%,var(--surface2))}
 .grave-card .sprite img{width:72px;height:72px;image-rendering:pixelated;filter:grayscale(1) brightness(.72)}
-.grave-card .gname{font-weight:800;font-size:var(--fs-lg)}
+.grave-card .gname{font-weight:800;font-size:var(--fs-lg);overflow-wrap:anywhere}
 .grave-card .gmeta{font-size:var(--fs-xs);color:var(--muted)}
 .grave-card .gmeta b{color:var(--txt)}
-.grave-card .glvl{font-size:var(--fs-xs);font-weight:600;color:var(--muted);background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r-sm);padding:3px 8px}
-.grave-card .epitaph{margin-top:6px;font-style:italic;color:var(--muted);font-size:var(--fs-sm);
-  border-top:1px solid var(--line);padding-top:10px;width:100%}
-.grave-card .epitaph.none{opacity:.7}
+.grave-card .glvl{font-size:var(--fs-xs);font-weight:700;color:var(--danger);background:var(--surface);
+  border:1px solid var(--danger);border-radius:var(--r-pill);padding:2px var(--sp-3)}
+.grave-card .epitaph{display:block;margin-top:var(--sp-2);font-style:italic;color:var(--muted);font-size:var(--fs-sm);
+  border-top:1px solid var(--line);padding-top:var(--sp-3);width:100%}
 
 /* --- Formularios --- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:clamp(18px,4vw,26px)}

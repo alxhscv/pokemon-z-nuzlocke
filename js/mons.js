@@ -14,16 +14,17 @@ export function renderGraveyard() {
     const species = e.nickname && p ? p.es : null;
     const mine = e.user_id === S.user.id || S.isAdmin;
     const note = e.notes
-      ? `<div class="epitaph">«${esc(e.notes)}»</div>`
-      : `<div class="epitaph none">${mine ? "Añade su último suspiro…" : "Sin últimas palabras."}</div>`;
-    return `<div class="grave-card ${mine ? "mine" : ""}" data-id="${esc(e.id)}">
-      <span class="cross">${SVG.dead}</span>
+      ? `<span class="epitaph">«${esc(e.notes)}»</span>`
+      : `<span class="epitaph none">${mine ? "Añade su último suspiro…" : "Sin últimas palabras."}</span>`;
+    const tag = mine ? `button type="button" aria-label="Editar ${esc(nick)}"` : "div";
+    return `<div class="grave-card ${mine ? "mine" : ""}" data-id="${esc(e.id)}"><${tag} class="grave-body">
+      <span class="cross" aria-hidden="true">${SVG.dead}</span>
       <span class="sprite"><img src="${sprite(e.pokemon_id)}" alt="${esc(nick)}" width="72" height="72" loading="lazy" onerror="this.style.visibility='hidden'"></span>
-      <div class="gname">${esc(nick)}</div>
-      <div class="gmeta">${species ? esc(species) + " · " : ""}de <b>${esc(nameOf(e.user_id))}</b></div>
+      <span class="gname">${esc(nick)}</span>
+      <span class="gmeta">${species ? esc(species) + " · " : ""}de <b>${esc(nameOf(e.user_id))}</b></span>
       ${e.level ? `<span class="glvl">Cayó a Nv. ${e.level}</span>` : ""}
       ${note}
-    </div>`;
+    </${mine ? "button" : "div"}></div>`;
   }).join("");
   // editar las tuyas (apodo, nivel y último suspiro) desde su lápida
   $("graveWall").querySelectorAll(".grave-card.mine").forEach((c) =>
