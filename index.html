@@ -110,6 +110,14 @@
           <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/old-amber.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
           <span>Cementerio</span>
         </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="ranking">
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/choice-band.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
+          <span>Ranking</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="gacha">
+          <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/amulet-coin.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
+          <span>Gacha</span>
+        </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="perfil">
           <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
           <span>Perfil</span>
@@ -186,9 +194,21 @@
         <div class="grave-wall" id="graveWall"></div>
       </div>
 
+      <!-- Ranking -->
+      <div class="panel" id="panel-ranking" role="tabpanel" aria-label="Ranking" tabindex="0">
+        <header class="panel-head"><h2>Ranking</h2><p class="muted">Victorias, derrotas y últimas batallas del grupo.</p></header>
+        <div id="rankingBody"></div>
+      </div>
+
+      <!-- Gacha -->
+      <div class="panel" id="panel-gacha" role="tabpanel" aria-label="Gacha" tabindex="0">
+        <header class="panel-head"><h2>Gacha</h2><p class="muted">Gasta tus monedas y completa tu colección.</p></header>
+        <div id="gachaBody"></div>
+      </div>
+
       <!-- Perfil -->
       <div class="panel" id="panel-perfil" role="tabpanel" aria-label="Perfil" tabindex="0">
-        <header class="panel-head"><h2>Perfil</h2><p class="muted">Tu nombre, avatar, medallas y banner.</p></header>
+        <header class="panel-head"><h2>Perfil</h2><p class="muted">Tu nombre, avatar, frase, medallas y banner.</p></header>
         <div class="profile-layout">
           <div class="card profile-card">
             <h3>Tu perfil</h3>
@@ -198,19 +218,22 @@
               <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
               <label>…o avatar por URL de imagen<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label>
               <div class="preview" id="avatarPreview"></div>
+              <label>Tu frase<input id="pMotto" maxlength="40" placeholder="Ej. Nunca subestimes a un Magikarp" autocomplete="off" /></label>
               <div class="form-actions">
                 <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
                 <button type="submit" class="btn primary">Guardar perfil</button>
               </div>
             </form>
           </div>
+          <div class="profile-side">
           <div class="card medals-card">
             <div id="medalsEdit"></div>
           </div>
           <div class="card banner-card">
             <h3>Banner</h3>
-            <p class="muted">Se ve en tu tarjeta de Payos, con su título. Elige el que más te represente.</p>
+            <p class="muted">Se ve en tu tarjeta de Payos junto a tu frase. Elige el que más te represente.</p>
             <div class="banner-grid" id="bannerGrid" role="radiogroup" aria-label="Banner"></div>
+          </div>
           </div>
         </div>
       </div>
@@ -285,6 +308,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=17"></script>
+  <script type="module" src="js/app.js?v=18"></script>
 </body>
 </html>

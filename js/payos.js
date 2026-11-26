@@ -5,6 +5,8 @@ import { medalsHTML, monCard, monCardRO, wireMons } from "./mons.js";
 import { setBanner } from "./perfil.js";
 import { reload } from "./data.js";
 
+// banner sin título fijo: muestra la frase del jugador (si la hay)
+
 // Payos: todas las cuentas; clic en una abre su perfil
 export function renderPayos() {
   $("friends").innerHTML = S.players.map((pl) => {

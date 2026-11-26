@@ -1,6 +1,7 @@
 import { BANNERS } from "./config.js";
 import { $, BRAND, S, bannerArt, bannerOf, bannerVars, byId, byName, db, esc, isPhoto, sprite, toast } from "./core.js";
 import { reload } from "./data.js";
+import { saveMotto } from "./api.js";
 import { renderMedalsEdit } from "./payos.js";
 import { fillHours } from "./presence.js";
 
@@ -9,9 +10,9 @@ export function renderBannerGrid() {
   const grid = $("bannerGrid");
   if (!grid || !S.profile || S.isAdmin) return;
   const cur = bannerOf(S.profile).id;
-  grid.innerHTML = BANNERS.map((b) => `<button type="button" role="radio" aria-checked="${b.id === cur}" class="btile banner${b.id === cur ? " on" : ""}" data-b="${b.id}" style="${bannerVars(b)}" title="${esc(b.title)}">
+  grid.innerHTML = BANNERS.map((b) => `<button type="button" role="radio" aria-checked="${b.id === cur}" class="btile banner${b.id === cur ? " on" : ""}" data-b="${b.id}" style="${bannerVars(b)}" title="${esc(b.name)}">
     <img class="bart" src="${bannerArt(b)}" alt="" loading="lazy" onerror="this.style.display='none'">
-    <span class="bname">${esc(b.name)}</span><span class="btitle">${esc(b.title)}</span></button>`).join("");
+    <span class="bname">${esc(b.name)}</span></button>`).join("");
   grid.querySelectorAll(".btile").forEach((t) => (t.onclick = () => setBanner(S.user.id, t.dataset.b)));
 }
 export async function setBanner(uid, id) {
@@ -30,6 +31,7 @@ export function fillProfile() {
   const av = S.profile.avatar;
   if (isPhoto(av)) { $("pAvatarUrl").value = av; $("pAvatar").value = ""; }
   else { $("pAvatar").value = av ? byId.get(+av)?.es || "" : ""; $("pAvatarUrl").value = ""; }
+  $("pMotto").value = S.profile.motto || "";
   updateAvatarPreview();
   renderMedalsEdit();
   fillHours();
@@ -49,7 +51,11 @@ export async function saveProfile() {
   const avatar = url || (pid ? String(pid) : null);
   const { error } = await db.from("profiles").update({ display_name: name, color: BRAND, avatar }).eq("id", S.user.id);
   if (error) return toast(error.message, true);
-  S.profile = { ...S.profile, display_name: name, color: BRAND, avatar };
+  const motto = $("pMotto").value.trim().slice(0, 40);
+  if (motto !== (S.profile.motto || "")) {
+    try { await saveMotto(motto); } catch (e) { return toast(e.message || "No se pudo guardar la frase", true); }
+  }
+  S.profile = { ...S.profile, display_name: name, color: BRAND, avatar, motto };
   toast("Perfil guardado", false, true);
   await reload();
 }

@@ -59,3 +59,5 @@ export const BANNERS = [
   { id: "masterball",name: "Master Ball",    title: "Campeón Invicto",         c1: "#5B2A86", c2: "#C77DFF", item: "master-ball" },
   { id: "nuzlocke",  name: "Nuzlocke",       title: "Superviviente del Cementerio", c1: "#263238", c2: "#607D8B", pk: 92 },
 ];
+
+export const GACHA_COST = 100;   // monedas por tirada (el servidor aplica el mismo precio)

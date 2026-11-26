@@ -1,5 +1,7 @@
 import { fillProfile } from "./perfil.js";
 import { loadMissions } from "./misiones.js";
+import { renderRanking } from "./ranking.js";
+import { renderGacha } from "./gacha.js";
 import { $ } from "./core.js";
 
 // pestañas
@@ -12,6 +14,8 @@ export function selectTab(name) {
   document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + name));
   if (name === "perfil") fillProfile();
   if (name === "misiones") loadMissions();
+  if (name === "ranking") renderRanking();
+  if (name === "gacha") renderGacha();
 }
 
 // tema claro/oscuro (botón + prefers-color-scheme por defecto)

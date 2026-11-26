@@ -2,7 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, MEDALS, BANNERS } from "./config.js";
 
 // estado compartido entre módulos (los `let` importados no se pueden reasignar desde fuera)
-export const S = { user: null, profile: null, run: null, myPlayer: null, players: [], entries: [], routeStatus: [], isAdmin: false, payoUid: null };
+export const S = { user: null, profile: null, run: null, myPlayer: null, players: [], entries: [], routeStatus: [], isAdmin: false, payoUid: null, battles: [], wallets: {}, pulls: [], rankingReady: false };
 export const byId = new Map(), byName = new Map();
 
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -31,7 +31,7 @@ export const bannerArt = (b) => b.item ? itemImg(b.item)
 export const bannerVars = (b) => `--b1:${b.c1};--b2:${b.c2}`;
 export function bannerHTML(prof, cls = "fhead") {
   const b = bannerOf(prof);
-  return `<div class="${cls} banner" style="${bannerVars(b)}"><img class="bart" src="${bannerArt(b)}" alt="" loading="lazy" onerror="this.style.display='none'"><span class="btitle">${esc(b.title)}</span></div>`;
+  return `<div class="${cls} banner" style="${bannerVars(b)}"><img class="bart" src="${bannerArt(b)}" alt="" loading="lazy" onerror="this.style.display='none'">${prof?.motto ? `<span class="btitle">${esc(prof.motto)}</span>` : ""}</div>`;
 }
 
 // color de jugador: ahora fijo (rojo) para todos

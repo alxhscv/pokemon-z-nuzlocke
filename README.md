@@ -18,7 +18,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    luego lo mueves entre ⚔️ Equipo / 📦 Caja / ⚰️ Cementerio con los botones de su tarjeta (está en un
    único estado). La **zona de captura** no se escribe: se pone sola al registrar desde una celda de
    ruta. Llevas tus **medallas** (12, marcadas una a una). En tu **perfil** eliges nombre y un **avatar**.
-4. La app está en **7 pestañas**:
+4. La app está en **9 pestañas**:
    - **🗺️ Rutas** — matriz rutas × jugadores agrupada por zonas (plegables), con estado por casilla (**pendiente / sin encuentro / fallido / capturado**, clic en tu casilla para cambiarlo), progreso por jugador y del grupo, marca de tu siguiente ruta y filtros (pendientes, fallidas, solo mías).
    - **🎒 Seguimiento** — tus Pokémon en Equipo / Caja / Cementerio, con botones para moverlos.
    - **👥 Payos** — todas las cuentas (avatar, medallas visuales, equipo); clic en una abre su perfil.
@@ -26,7 +26,9 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    - **🟢 Conectados** — **fichaje manual** (botón Fichar entrada/salida, también en la barra superior): solo cuentas horas y sales online si has fichado. Arriba **tu fichaje** (en otro color, con «entrada a las HH:MM» y cronómetro en vivo; el botón pasa a «Fichar salida»); debajo los **conectados ahora** con su tiempo y las **últimas conexiones** de los demás (hace cuánto y cuánto duró). En Payos cada cuenta lleva un punto verde/gris.
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
-   - **🧑 Perfil** — eliges tu **banner** (26 temas: tipos, Kalos, Mega, Zygarde, shiny…; cada uno lleva un **título** que ven los demás en Payos; el admin puede cambiar el de cualquiera), editas tu nombre y avatar y tus **medallas** (fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores), todo en una **sola columna centrada**. El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
+   - **🏆 Ranking** — todos los usuarios con victorias, derrotas y % de victorias, y el registro de las **últimas batallas** (entre nosotros). **Solo el admin** registra o borra batallas: el ganador recibe +50 monedas y el perdedor +20.
+   - **🎰 Gacha** — gastas monedas (**100 por tirada**, x1 o x10) y consigues Pokémon para tu colección: Común 70 % · Raro 22 % · Épico 7 % · Legendario 1 %. El sorteo lo hace el servidor (no se puede trucar). El admin reparte o quita monedas; el admin no tira.
+   - **🧑 Perfil** — eliges tu **banner** (26 temas: tipos, Kalos, Mega, Zygarde, shiny…; el admin puede cambiar el de cualquiera), escribes tu propia **frase** (máx. 40; se ve sobre tu banner en Payos), editas tu nombre y avatar y tus **medallas** (fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores), todo en una **sola columna centrada**. El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
 
@@ -57,7 +59,7 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ## Estructura de archivos
 
 ```
-index.html            # una página (login · app con 7 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/perfil)
+index.html            # una página (login · app con 9 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/ranking/gacha/perfil)
 css/styles.css        # estilos (tema oscuro por defecto + claro, tokens CSS, estética Pokémon/Kalos)
 js/config.js          # URL + anon key + ROUTE_ZONES/ROUTES (zonas y filas de Rutas) + MEDALS + BANNERS (temas de banner)
 js/app.js             # arranque: carga datos y conecta eventos
@@ -65,11 +67,12 @@ js/core.js            # estado compartido (S), cliente Supabase, helpers (esc, t
 js/shell.js           # pestañas, tema claro/oscuro, menú, skeletons
 js/auth.js            # login/registro, entrada a la run
 js/data.js            # reload(), realtime y render()
-js/rutas.js · mons.js · payos.js · perfil.js · misiones.js · presence.js · dialog.js   # una pestaña/diálogo cada uno
+js/rutas.js · mons.js · payos.js · perfil.js · misiones.js · presence.js · dialog.js · ranking.js · gacha.js   # una pestaña/diálogo cada uno
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 .claude/agents/       # subagentes: pz-interfaz, pz-logica, pz-contenido (escriben) y pz-revisor (solo lectura, informe corto)
 supabase/schema.sql   # tablas + RLS + realtime + run única (seguro de re-ejecutar: no borra datos; incluye checks e índices)
-supabase/pendiente.sql # routes.sql + banners.sql juntos, para pegar de una vez (seguro de re-ejecutar)
+supabase/gacha_ranking.sql # frase de perfil, monedas, gacha y batallas (tablas + RPC; seguro de re-ejecutar)
+supabase/pendiente.sql # routes.sql + banners.sql + gacha_ranking.sql juntos, para pegar de una vez (seguro de re-ejecutar)
 supabase/banners.sql  # columna profiles.banner (temas de banner de perfil; seguro de re-ejecutar)
 supabase/routes.sql   # estados de ruta (sin encuentro / fallido) por jugador (seguro de re-ejecutar)
 supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible al completar; seguro de re-ejecutar)
@@ -156,7 +159,7 @@ Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
    2. [`supabase/admin.sql`](supabase/admin.sql) — permisos del admin (tras crear la cuenta `admin`).
    3. [`supabase/presence.sql`](supabase/presence.sql) — fichaje.
    4. [`supabase/missions.sql`](supabase/missions.sql) — misiones.
-   5. [`supabase/pendiente.sql`](supabase/pendiente.sql) — estados de ruta + banners (equivale a `routes.sql` + `banners.sql`).
+   5. [`supabase/pendiente.sql`](supabase/pendiente.sql) — estados de ruta + banners + Ranking/Gacha/frase (equivale a `routes.sql` + `banners.sql` + `gacha_ranking.sql`; sin la parte de Ranking/Gacha esas pestañas muestran un aviso).
 
    Si falta alguno, la web sigue funcionando pero esa parte avisa de que hay que aplicar su SQL.
 3. **Credenciales:** en [`js/config.js`](js/config.js) (Project URL + anon key, públicas).
@@ -212,7 +215,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
-- **Perfil centrado:** formulario, medallas y banner apilados en una sola columna centrada (680 px máx.).
+- **Perfil compacto** (tarjeta estrecha; medallas y banners a la derecha), **frase personalizable** en lugar del título fijo del banner, **Ranking** de batallas y **Gacha** con monedas (`supabase/gacha_ranking.sql`, hay que aplicarlo a mano en Supabase). Las escrituras de monedas/batallas/tiradas solo van por RPC (no hay inserts directos).- **Perfil centrado:** formulario, medallas y banner apilados en una sola columna centrada (680 px máx.).
 - **Banners de perfil** con 26 temas y título visible en Payos (`supabase/banners.sql`; sin él la web funciona con el banner clásico).
 - **Subagentes del proyecto** (`.claude/agents/`) y primera revisión de seguridad. Pendiente de arreglar: `with check` en `players_update`/`entries_update`, restringir `profiles.avatar` a `https` y límites de longitud en SQL; `reload()` ignora errores de `entries`/`players` y puede pisarse con eventos realtime seguidos; solo `app.js` lleva `?v=` (los demás módulos se cachean sin versión).
 - **Código en módulos:** `js/app.js` (960 líneas) se parte en módulos ES (`core`, `shell`, `auth`, `data`, `rutas`, `mons`, `payos`, `perfil`, `misiones`, `presence`, `dialog`); el estado compartido vive en `S` (`core.js`). Sin cambios de comportamiento.
