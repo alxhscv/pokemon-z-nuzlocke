@@ -1,7 +1,6 @@
 import { MEDALS } from "./config.js";
 import { $, S, SVG, byId, db, emptyState, esc, hasMedal, medalImg, sprite, toast } from "./core.js";
 import { openDialog } from "./dialog.js";
-import { reload } from "./data.js";
 
 // Cementerio global: todos los muertos de todos, con dueño, nivel y "último suspiro"
 export function renderGraveyard() {
@@ -88,7 +87,6 @@ export function monCardRO(e) {
 export async function updateStatus(id, status) {
   const { error } = await db.from("entries").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) return toast(error.message, true);
-  await reload();
 }
 
 // medallas visuales (solo lectura): las conseguidas en color, el resto en gris

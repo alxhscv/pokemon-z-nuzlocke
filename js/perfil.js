@@ -1,6 +1,5 @@
 import { BANNERS, SKINS } from "./config.js";
 import { $, BRAND, S, bannerArt, bannerOf, bannerVars, byId, byName, db, esc, isPhoto, sprite, toast } from "./core.js";
-import { reload } from "./data.js";
 import { saveMotto } from "./api.js";
 import { renderMedalsEdit } from "./payos.js";
 import { fillHours } from "./presence.js";
@@ -19,10 +18,9 @@ export function renderBannerGrid() {
 export async function setBanner(uid, id) {
   const banner = id === BANNERS[0].id ? null : id;
   const { error } = await db.from("profiles").update({ banner }).eq("id", uid);
-  if (error) return toast(/banner|schema cache/i.test(error.message) ? "Falta aplicar supabase/banners.sql en Supabase" : error.message, true);
+  if (error) return toast(error.message, true);
   if (uid === S.user.id) S.profile = { ...S.profile, banner };
   toast(`Banner: ${BANNERS.find((b) => b.id === id)?.name || "Clásico"}`, false, true);
-  await reload();
 }
 
 // ===================== temas de la web =====================
@@ -85,5 +83,4 @@ export async function saveProfile() {
   }
   S.profile = { ...S.profile, display_name: name, color: BRAND, avatar, motto };
   toast("Perfil guardado", false, true);
-  await reload();
 }

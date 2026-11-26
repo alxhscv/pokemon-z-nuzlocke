@@ -1,5 +1,4 @@
 import { $, S, esc, playerIcon, toast } from "./core.js";
-import { reload } from "./data.js";
 import { computeRanking } from "./ranking-calc.js";
 import { adminDeleteBattle, adminRecordBattle } from "./api.js";
 
@@ -15,12 +14,11 @@ export function ago(iso) {
   if (h < 24) return `hace ${Math.floor(h)} h`;
   return d < 30 ? `hace ${Math.floor(d)} d` : new Date(iso).toLocaleDateString("es-ES");
 }
-export const notReadyHTML = () => `<p class="notice warn" role="alert">Falta aplicar supabase/gacha_ranking.sql en Supabase</p>`;
 
 export function renderRanking() {
   const box = $("rankingBody");
   if (!box || !S.user) return;
-  const ready = S.rankingReady !== false, battles = S.battles || [];
+  const battles = S.battles || [];
   const keep = ["rkWin", "rkLose", "rkNote"].map((id) => $(id)?.value);   // no perder lo escrito al refrescar
   const rows = computeRanking(S.players, battles);
   const table = rows.length ? `<div class="table-wrap"><table class="rank-table">
@@ -40,28 +38,28 @@ export function renderRanking() {
       <label>Perdedor<select id="rkLose" required>${opts}</select></label>
       <label>Nota (opcional)<input id="rkNote" maxlength="80" placeholder="Ej. Final de liga" autocomplete="off"></label>
     </div>
-    <div class="form-actions"><button type="submit" class="btn primary"${ready ? "" : " disabled"}>Registrar batalla</button></div></form>` : "";
+    <div class="form-actions"><button type="submit" class="btn primary">Registrar batalla</button></div></form>` : "";
   const list = battles.length ? `<ul class="battle-list">${battles.map((b) => `<li>
       <span class="bw">${playerIcon(profOf(b.winner_id))}<b>${esc(nameOf(b.winner_id))}</b></span>
       <span class="vs">venció a</span>
       <span class="bw">${playerIcon(profOf(b.loser_id))}<b>${esc(nameOf(b.loser_id))}</b></span>
       ${b.note ? `<span class="bnote">${esc(b.note)}</span>` : ""}
       <time class="when" datetime="${esc(b.created_at)}">${ago(b.created_at)}</time>
-      ${S.isAdmin ? `<button type="button" class="btn danger sm" data-del="${esc(b.id)}" aria-label="Borrar batalla"${ready ? "" : " disabled"}>Borrar</button>` : ""}</li>`).join("")}</ul>`
+      ${S.isAdmin ? `<button type="button" class="btn danger sm" data-del="${esc(b.id)}" aria-label="Borrar batalla">Borrar</button>` : ""}</li>`).join("")}</ul>`
     : `<div class="empty-state"><span>Ninguna batalla todavía. La arena espera retadores.</span></div>`;
-  box.innerHTML = `${ready ? "" : notReadyHTML()}${table}${form}<h3 class="sect">Últimas batallas</h3>${list}`;
+  box.innerHTML = `${table}${form}<h3 class="sect">Últimas batallas</h3>${list}`;
   ["rkWin", "rkLose", "rkNote"].forEach((id, i) => { if ($(id) && keep[i]) $(id).value = keep[i]; });
   if ($("rkLose") && !keep[1] && S.players[1]) $("rkLose").value = S.players[1].user_id;
   $("rkForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const w = $("rkWin").value, l = $("rkLose").value;
     if (w === l) return toast("Ganador y perdedor deben ser distintos", true);
-    try { await adminRecordBattle(w, l, $("rkNote").value.trim().slice(0, 80) || null); $("rkNote").value = ""; toast("Batalla registrada", false, true); await reload(); }
+    try { await adminRecordBattle(w, l, $("rkNote").value.trim().slice(0, 80) || null); $("rkNote").value = ""; toast("Batalla registrada", false, true); }
     catch (err) { toast(err.message || "No se pudo registrar", true); }
   });
   box.querySelectorAll("[data-del]").forEach((b) => (b.onclick = async () => {
     if (!confirm("¿Borrar esta batalla?")) return;
-    try { await adminDeleteBattle(b.dataset.del); toast("Batalla borrada", false, true); await reload(); }
+    try { await adminDeleteBattle(b.dataset.del); toast("Batalla borrada", false, true); }
     catch (err) { toast(err.message || "No se pudo borrar", true); }
   }));
 }

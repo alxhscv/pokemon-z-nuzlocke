@@ -68,7 +68,7 @@ begin
   select array_agg(g) into rare from generate_series(5,1025,5) g where g <> all(leg) and g <> all(epi);
   select array_agg(g) into comm from generate_series(1,1025) g where g <> all(leg) and g <> all(epi) and g % 5 <> 0;
   for i in 1..n loop
-    r := random();
+    r := random();   -- probabilidades 1/7/22/70 %: deben coincidir con RAR de js/gacha.js
     if r < 0.01 then rar := 'legendario'; pid := leg[1 + floor(random() * array_length(leg,1))::int];
     elsif r < 0.08 then rar := 'epico'; pid := epi[1 + floor(random() * array_length(epi,1))::int];
     elsif r < 0.30 then rar := 'raro'; pid := rare[1 + floor(random() * array_length(rare,1))::int];

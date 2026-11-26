@@ -17,5 +17,5 @@ export const adminDeleteBattle = (id) => rpc("admin_delete_battle", { bid: id })
 export async function saveMotto(motto) {
   const m = (motto || "").trim().slice(0, 40) || null;
   const { error } = await db.from("profiles").update({ motto: m }).eq("id", S.user.id);
-  if (error) throw new Error(/motto|schema cache/i.test(error.message) ? "Falta aplicar supabase/gacha_ranking.sql en Supabase" : error.message);
+  if (error) throw new Error(error.message);
 }

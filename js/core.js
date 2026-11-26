@@ -2,7 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY, ROUTES, MEDALS, BANNERS } from "./config.js";
 
 // estado compartido entre módulos (los `let` importados no se pueden reasignar desde fuera)
-export const S = { user: null, profile: null, run: null, myPlayer: null, players: [], entries: [], routeStatus: [], isAdmin: false, payoUid: null, battles: [], wallets: {}, pulls: [], rankingReady: false };
+export const S = { user: null, profile: null, run: null, myPlayer: null, players: [], entries: [], routeStatus: [], isAdmin: false, payoUid: null, battles: [], wallets: {}, pulls: [], myPulls: [] };
 export const byId = new Map(), byName = new Map();
 
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

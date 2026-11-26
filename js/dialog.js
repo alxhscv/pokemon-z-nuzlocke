@@ -51,7 +51,6 @@ export async function saveEntry() {
     }
     toast("¡Pokémon capturado! Entra en la caja", false, true);
   }
-  await reload();
 }
 
 export async function deleteEntry() {

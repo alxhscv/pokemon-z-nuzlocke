@@ -71,20 +71,20 @@ js/app.js             # arranque: carga datos y conecta eventos
 js/core.js            # estado compartido (S), cliente Supabase, helpers (esc, toast, avatares, banners, medallas)
 js/shell.js           # pestañas, tema claro/oscuro, menú, skeletons
 js/auth.js            # login/registro, entrada a la run
-js/data.js            # reload(), realtime y render()
+js/data.js            # reload(), realtime (recarga única con antirrebote de 300 ms) y render()
 js/casino.js · casino-wallet.js · casino-audio.js · casino-gacha.js · casino-bj.js · casino-bj-rules.js   # Casino: armazón, saldo local, sonido, gacha, blackjack y sus reglas puras (`selfTest()`)
 js/rutas.js · mons.js · payos.js · perfil.js · misiones.js · presence.js · dialog.js · ranking.js · gacha.js   # una pestaña/diálogo cada uno
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 .claude/agents/       # subagentes: pz-interfaz, pz-logica, pz-contenido (escriben) y pz-revisor (solo lectura, informe corto)
 supabase/schema.sql   # tablas + RLS + realtime + run única (seguro de re-ejecutar: no borra datos; incluye checks e índices)
 supabase/gacha_ranking.sql # frase de perfil, monedas, gacha y batallas (tablas + RPC; seguro de re-ejecutar)
-supabase/pendiente.sql # routes.sql + banners.sql + gacha_ranking.sql juntos, para pegar de una vez (seguro de re-ejecutar)
 supabase/intro.sql    # tabla app_settings: interruptor de la intro (lectura pública, escribe el admin)
 supabase/banners.sql  # columna profiles.banner (temas de banner de perfil; seguro de re-ejecutar)
 supabase/routes.sql   # estados de ruta (sin encuentro / fallido) por jugador (seguro de re-ejecutar)
 supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible al completar; seguro de re-ejecutar)
 supabase/presence.sql # fichaje: tabla `sessions` + funciones clock_ping/clock_out/presence_summary (seguro de re-ejecutar)
 supabase/admin.sql    # permisos de la cuenta admin + función para borrar usuarios (seguro de re-ejecutar)
+scripts/test-ranking.mjs · test-bj-rules.mjs  # tests sin dependencias: `node scripts/<archivo>.mjs` (imprimen `ok`)
 scripts/build_pokemon_json.py  # regenera data/pokemon.json desde los CSV de PokéAPI
 ```
 
@@ -164,13 +164,14 @@ Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
 2. **Base de datos:** Supabase → *SQL Editor* → pega cada archivo y **Run**, en este orden (todos son seguros de re-ejecutar):
    1. [`supabase/schema.sql`](supabase/schema.sql) — tablas, RLS, realtime y la run única.
    2. [`supabase/admin.sql`](supabase/admin.sql) — permisos del admin (tras crear la cuenta `admin`).
-   3. [`supabase/presence.sql`](supabase/presence.sql) — fichaje.
-   4. [`supabase/missions.sql`](supabase/missions.sql) — misiones.
-   5. [`supabase/pendiente.sql`](supabase/pendiente.sql) — estados de ruta + banners + Ranking/Gacha/frase (equivale a `routes.sql` + `banners.sql` + `gacha_ranking.sql`; sin la parte de Ranking/Gacha esas pestañas muestran un aviso).
+   3. [`supabase/routes.sql`](supabase/routes.sql) — estados de ruta.
+   4. [`supabase/banners.sql`](supabase/banners.sql) — banners de perfil.
+   5. [`supabase/gacha_ranking.sql`](supabase/gacha_ranking.sql) — frase, monedas, Ranking y Gacha clásico.
+   6. [`supabase/presence.sql`](supabase/presence.sql) — fichaje.
+   7. [`supabase/missions.sql`](supabase/missions.sql) — misiones.
+   8. [`supabase/intro.sql`](supabase/intro.sql) — interruptor de la intro (tabla `app_settings`).
 
-   6. [`supabase/intro.sql`](supabase/intro.sql) — interruptor de la intro (tabla `app_settings`).
-
-   Si falta alguno, la web sigue funcionando pero esa parte avisa de que hay que aplicar su SQL.
+   La web **asume que todos están aplicados**: ya no avisa si falta alguno (fallaría con el error de Supabase).
 3. **Credenciales:** en [`js/config.js`](js/config.js) (Project URL + anon key, públicas).
 4. **Publicar:** repo → *Settings → Pages → Branch `main` / root*. URL: `https://<usuario>.github.io/<repo>/`.
 
@@ -246,3 +247,5 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 - Aviso (toast) en móvil ya no queda tapado por la barra de pestañas.
 - `Enter` en el campo usuario envía el login; el chip de usuario de Seguimiento lleva al Perfil.
 - Cuadrícula de la Caja (nunca se veía) simplificada a fondo liso.
+
+- **Recarga en vivo:** los eventos de Supabase se agrupan (300 ms) en un solo `reload()`; las acciones ya no recargan a mano salvo borrar Pokémon o usuario (los DELETE con filtro no llegan en vivo). «Mi colección» del Gacha clásico trae todas tus tiradas; «Últimas tiradas» solo 15. `pendiente.sql` eliminado y avisos de «falta aplicar SQL» quitados. Tests nuevos: `scripts/test-bj-rules.mjs` (el gacha del Casino no se puede probar en node: `core.js` importa Supabase por URL).

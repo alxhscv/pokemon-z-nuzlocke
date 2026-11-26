@@ -1,7 +1,6 @@
 import { ROUTES, ROUTE_ZONES } from "./config.js";
 import { $, ROUTE_NORMS, S, byId, db, esc, normLoc, playerIcon, sprite, toast } from "./core.js";
 import { openDialog } from "./dialog.js";
-import { reload } from "./data.js";
 
 // ---- Rutas: estados por casilla (pendiente / sin encuentro / fallido / capturado), zonas, progreso, filtros ----
 export const ST_LABEL = { pending: "Pendiente", none: "Sin encuentro", failed: "Fallido", captured: "Capturado" };
@@ -122,7 +121,6 @@ export async function cellAction(act) {
   const { error } = act === "pending"
     ? await db.from("route_status").delete().eq("user_id", uid).eq("route", route)
     : await db.from("route_status").upsert({ user_id: uid, route, status: act }, { onConflict: "user_id,route" });
-  if (error) return toast(/route_status|schema cache/i.test(error.message) ? "Falta aplicar supabase/routes.sql en Supabase" : error.message, true);
+  if (error) return toast(error.message, true);
   $("cellDialog").close();
-  await reload();
 }

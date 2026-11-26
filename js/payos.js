@@ -85,7 +85,6 @@ export async function renamePlayer(uid) {
   const { error } = await db.from("profiles").update({ display_name: name }).eq("id", uid);
   if (error) return toast(error.message, true);
   toast("Nombre cambiado", false, true);
-  await reload();
 }
 export async function deletePlayer(uid) {
   const name = S.players.find((p) => p.user_id === uid)?.profiles?.display_name || "este usuario";
