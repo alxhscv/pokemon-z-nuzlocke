@@ -54,7 +54,7 @@
         st.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;font-size:'+(12+Math.random()*28)+'px;--d:'+(.8+Math.random()*1.4)+'s;--t:'+Math.random()*2+'s';el.appendChild(st)}
       t=setTimeout(end,10000);
       // shortcut: el navegador puede bloquear el autoplay; se reintenta en la primera interacción
-      a.play().catch(function(){addEventListener('pointerdown',function(){a.play()},{once:true})});
+      a.play().catch(function(){['pointerdown','keydown','touchstart'].forEach(function(ev){addEventListener(ev,function f(){a.play().then(function(){['pointerdown','keydown','touchstart'].forEach(function(e2){removeEventListener(e2,f)})}).catch(function(){})})})});
     })();
   </script>
   <header class="topbar">
