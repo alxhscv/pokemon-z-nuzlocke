@@ -125,13 +125,16 @@
 
       <!-- Seguimiento -->
       <div class="panel" id="panel-seg" role="tabpanel" aria-label="Seguimiento" tabindex="0">
-        <div class="me-bar">
-          <span class="me-chip" id="meChip"></span>
+        <header class="panel-head">
+          <h2>Seguimiento</h2>
+          <div class="panel-actions">
+          <button type="button" class="me-chip" id="meChip" title="Ir a mi perfil"></button>
           <button class="btn primary" id="addBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             <span>Registrar Pokémon</span>
           </button>
-        </div>
+          </div>
+        </header>
         <div class="columns" id="myColumns">
           <div class="col team" data-status="team">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 3l4 4M19 3l-4 4M4 8h16l-1.5 11a2 2 0 01-2 1.7H7.5a2 2 0 01-2-1.7z"/></svg>Equipo <span class="count" id="cnt-team">0</span></h3>
@@ -278,6 +281,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=11"></script>
+  <script type="module" src="js/app.js?v=12"></script>
 </body>
 </html>

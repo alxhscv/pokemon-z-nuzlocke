@@ -55,31 +55,33 @@ export function wireMons(root) {
 export const MOVE = { box: [SVG.box, "A la caja"], team: [SVG.team, "Al equipo"], dead: [SVG.dead, "Al cementerio"] };
 
 // partes comunes de la carta Pokédex (sprite en caja gris + nombre + Nº + Nv.)
+export function monMark(e) {
+  return e.status === "team" ? `<span class="state-mark pokeball" aria-hidden="true"></span>`
+    : e.status === "dead" ? `<span class="state-mark" aria-hidden="true">${SVG.dead}</span>` : "";
+}
 export function monInner(e) {
   const p = byId.get(e.pokemon_id);
   const name = e.nickname || p?.es || "???";
   const species = e.nickname && p ? p.es : null;
   const sub = [e.location, species].filter(Boolean).join(" · ");
-  const mark = e.status === "team" ? `<span class="state-mark pokeball"></span>`
-    : e.status === "dead" ? `<span class="state-mark">${SVG.dead}</span>` : "";
-  return `${mark}
-    <span class="sprite"><img src="${sprite(e.pokemon_id)}" alt="${esc(name)}" width="48" height="48" loading="lazy" onerror="this.style.visibility='hidden'"></span>
-    <div class="info">
-      <div class="nick">${esc(name)}</div>
-      <div class="sub">${esc(sub) || `<span class="dex">Nº ${String(e.pokemon_id).padStart(3, "0")}</span>`}</div>
-    </div>
+  return `<span class="sprite"><img src="${sprite(e.pokemon_id)}" alt="${esc(name)}" width="48" height="48" loading="lazy" onerror="this.style.visibility='hidden'"></span>
+    <span class="info">
+      <span class="nick">${esc(name)}</span>
+      <span class="sub">${esc(sub) || `<span class="dex">Nº ${String(e.pokemon_id).padStart(3, "0")}</span>`}</span>
+    </span>
     ${e.level ? `<span class="lvl">Nv. ${e.level}</span>` : ""}`;
 }
 
 export function monCard(e) {
   const moves = ["box", "team", "dead"].filter((s) => s !== e.status).map((s) =>
-    `<button class="movebtn" data-move="${s}" data-id="${e.id}" title="${MOVE[s][1]}" aria-label="${MOVE[s][1]}">${MOVE[s][0]}</button>`).join("");
-  return `<div class="mon ${e.status}" data-id="${e.id}">${monInner(e)}<div class="moves">${moves}</div></div>`;
+    `<button type="button" class="movebtn" data-move="${s}" data-id="${e.id}" title="${MOVE[s][1]}" aria-label="${MOVE[s][1]}">${MOVE[s][0]}</button>`).join("");
+  const mark = monMark(e);
+  return `<div class="mon ${e.status}" data-id="${e.id}">${mark}<button type="button" class="mon-open" aria-label="Editar ${esc(e.nickname || byId.get(e.pokemon_id)?.es || "Pokémon")}">${monInner(e)}</button><div class="moves">${moves}</div></div>`;
 }
 
 // tarjeta solo-lectura (para ver el equipo de otro payo)
 export function monCardRO(e) {
-  return `<div class="mon ro ${e.status}">${monInner(e)}</div>`;
+  return `<div class="mon ro ${e.status}">${monMark(e)}<div class="mon-open">${monInner(e)}</div></div>`;
 }
 
 export async function updateStatus(id, status) {

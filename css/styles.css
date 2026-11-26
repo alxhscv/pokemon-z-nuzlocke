@@ -18,7 +18,7 @@
   --line:#DDD6C5; --edge:#B9B09A; --bar:#1B2A4A;
   --txt:#1B2433; --muted:#4F5B70; --dex:#5E6A80; --title:#1B2A4A;
   --red-soft:#FBE4DF;
-  --ok:#1F7A47; --danger:#B0126B; --danger-d:#8E0F57; --link:#1F6FA0;   /* peligro = magenta, separado del rojo */
+  --ok:#1F7A47; --grave-bg:color-mix(in srgb,var(--grave) 10%,var(--surface)); --danger:#B0126B; --danger-d:#8E0F57; --link:#1F6FA0;   /* peligro = magenta, separado del rojo */
   --focus:#1F6FA0;
   --me-color:var(--brand);
 
@@ -182,13 +182,55 @@ h4{font-size:var(--fs-md);font-weight:700}
 .panel-head .muted{flex:1 1 220px;margin:0}
 .panel-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3)}
 
+/* --- Tarjeta de Pokémon (Seguimiento, ficha de payo) --- */
+.list{display:flex;flex-direction:column;gap:var(--sp-3)}
+.mon{position:relative;display:flex;align-items:center;gap:var(--sp-2);background:var(--surface);
+  border:1px solid var(--line);border-left:5px solid var(--line);border-radius:var(--r);padding:var(--sp-2) var(--sp-3);box-shadow:var(--sh-1);
+  transition:transform var(--t),box-shadow var(--t),border-color var(--t)}
+.mon:hover{border-color:var(--edge);box-shadow:var(--sh-2)}
+.mon.team{border-left-color:var(--brand)}
+.mon.dead{border-left-color:var(--grave);background:var(--grave-bg)}
+/* zona clicable = <button> interior; en solo-lectura, un div */
+.mon-open{appearance:none;display:flex;align-items:center;gap:var(--sp-3);flex:1;min-width:0;min-height:var(--tap);
+  background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;border-radius:var(--r-sm)}
+div.mon-open{cursor:default}
+.mon .sprite{width:56px;height:56px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--surface2);
+  border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.mon.dead .sprite{background:var(--bg)}
+.mon .sprite img{width:48px;height:48px;image-rendering:pixelated}
+.mon .info{min-width:0;flex:1;display:block}
+.mon .nick,.mon .sub{display:block}
+.mon .nick{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mon .sub{font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mon .dex{font-family:var(--retro);font-size:var(--fs-xs);color:var(--muted)}
+.lvl{font-family:var(--retro);font-size:var(--fs-xs);background:var(--surface2);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:3px 7px;color:var(--muted);flex:0 0 auto;white-space:nowrap}
+.state-mark{position:absolute;top:6px;left:6px;z-index:1;width:16px;height:16px;color:var(--muted);pointer-events:none}
+.state-mark svg,.state-mark .iimg{width:100%;height:100%;display:block}
+.mon.dead .sprite img{filter:grayscale(1) brightness(.7);opacity:.85}
+.mon.dead .nick{color:var(--muted)}
+.mon.dead .state-mark{color:var(--grave)}
+
+/* botones de mover estado */
+.mon .moves{display:flex;gap:var(--sp-2);flex:0 0 auto;opacity:0;transition:opacity var(--t)}
+.mon:hover .moves,.mon:focus-within .moves{opacity:1}
+.movebtn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);
+  width:36px;height:36px;cursor:pointer;padding:0;display:grid;place-items:center;color:var(--muted);
+  transition:border-color var(--t),color var(--t),background var(--t)}
+.movebtn svg{width:18px;height:18px}
+.movebtn:hover{border-color:var(--blue);color:var(--title);background:var(--surface2)}
+.movebtn:active{transform:scale(.92)}
+.mon.ro{cursor:default}
+.mon.ro:hover{box-shadow:var(--sh-1);border-color:var(--line)}
+@media (hover:none){.mon .moves{opacity:1}}
+
 /* --- Columnas de Seguimiento --- */
 .columns{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .col{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:16px;min-height:140px}
 .col>h3{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:var(--fs-md)}
 .col>h3 svg{width:20px;height:20px;flex:0 0 auto;color:var(--muted)}
 .col.box{background:var(--surface2)}
-.col.grave{background:color-mix(in srgb,var(--grave) 10%,var(--surface))}
+.col.grave{background:var(--grave-bg)}
 .count{margin-left:auto;background:var(--surface2);border:1.5px solid var(--line);border-radius:var(--r-sm);
   padding:0 8px;font-size:var(--fs-xs);color:var(--muted);font-weight:700}
 
@@ -418,7 +460,8 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
   .profile-layout{grid-template-columns:1fr}
 }
 @media (max-width:640px){
-  .me-bar .primary{margin-left:0;flex:1}
+  .panel-actions{width:100%}
+  .panel-actions .primary{flex:1;justify-content:center}
   .panel{margin-top:16px}
 
   /* pestañas → barra inferior fija tipo app */
@@ -430,6 +473,9 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
   .tab .ticon{width:26px;height:26px}
   .btn,.chip,.me-chip,.menu-item{min-height:var(--tap)}
   .btn.icon,.movebtn{width:var(--tap);height:var(--tap)}
+  /* Seguimiento móvil: botones de mover en su propia fila, sin apretar el nombre */
+  .mon{flex-wrap:wrap}
+  .mon .moves{flex:1 0 100%;justify-content:flex-end;opacity:1;border-top:1px solid var(--line);padding-top:var(--sp-2)}
   .wrap{padding-bottom:84px}
 
   /* modales → hoja inferior a pantalla completa */
