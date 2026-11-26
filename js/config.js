@@ -61,3 +61,25 @@ export const BANNERS = [
 ];
 
 export const GACHA_COST = 100;   // monedas por tirada (el servidor aplica el mismo precio)
+
+// Temas de la web (Perfil). El CSS de cada uno vive en css/themes.css (html[data-skin]); "clasico" = sin skin y con botón claro/oscuro.
+// mode = modo fijo del skin; bg/surface/accent solo alimentan la mini-previsualización.
+export const SKINS = [
+  { id: "clasico", name: "Clásico Pokéball", mode: "auto", bg: "#0B1226", surface: "#141E3A", accent: "#C2371F" },
+  { id: "kanto", name: "Kanto retro", mode: "light", bg: "#9BBC0F", surface: "#B0CE22", accent: "#0F380F" },
+  { id: "johto", name: "Johto dorado", mode: "light", bg: "#F4EBD0", surface: "#FFFBEF", accent: "#8A5A00" },
+  { id: "hoenn", name: "Hoenn océano", mode: "dark", bg: "#06283D", surface: "#0B3B57", accent: "#0A6E9E" },
+  { id: "sinnoh", name: "Sinnoh nieve", mode: "light", bg: "#EEF3F8", surface: "#FFFFFF", accent: "#3A5FA0" },
+  { id: "teselia", name: "Teselia urbana", mode: "dark", bg: "#1A1A1D", surface: "#26262B", accent: "#B8341F" },
+  { id: "kalos", name: "Kalos elegante", mode: "light", bg: "#FBF3F6", surface: "#FFFFFF", accent: "#A02A6A" },
+  { id: "alola", name: "Alola atardecer", mode: "dark", bg: "#3A1630", surface: "#52203F", accent: "#C2410C" },
+  { id: "galar", name: "Galar competitivo", mode: "light", bg: "#EDEFF2", surface: "#FFFFFF", accent: "#C4162A" },
+  { id: "paldea", name: "Paldea estudiantil", mode: "light", bg: "#FFF6E0", surface: "#FFFFFF", accent: "#7A2FB0" },
+  { id: "neon", name: "Neón cyberpunk", mode: "dark", bg: "#08060F", surface: "#120C22", accent: "#B5179E" },
+  { id: "manga", name: "Papel manga", mode: "light", bg: "#F5F5F0", surface: "#FFFFFF", accent: "#111111" },
+  { id: "bosque", name: "Bosque", mode: "dark", bg: "#0F2418", surface: "#173524", accent: "#2E7D4F" },
+  { id: "lava", name: "Lava", mode: "dark", bg: "#1C0A06", surface: "#2E110A", accent: "#C2380F" },
+  { id: "hielo", name: "Hielo", mode: "light", bg: "#E4F6FB", surface: "#F7FDFF", accent: "#0A6B8F" },
+  { id: "ghost", name: "Ghost / Dark", mode: "dark", bg: "#0E0B16", surface: "#181327", accent: "#7A4FD1" },
+  { id: "pastel", name: "Pastel", mode: "light", bg: "#FDF2F8", surface: "#FFFFFF", accent: "#8B4FC8" },
+];

@@ -9,14 +9,15 @@
 
   <!-- Tema (evita parpadeo: aplica data-theme antes de pintar) -->
   <script>
-    try { var t = localStorage.getItem("theme"); document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark"); } catch (e) {}
+    try { var t = localStorage.getItem("theme"); var d = document.documentElement, k = localStorage.getItem("skin"), m = localStorage.getItem("skinMode"); d.setAttribute("data-theme", t === "light" ? "light" : "dark"); if (k && /^[a-z]+$/.test(k) && (m === "light" || m === "dark")) { d.setAttribute("data-skin", k); d.setAttribute("data-theme", m); } } catch (e) {}
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Silkscreen&display=swap" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=2" />
+  <link rel="stylesheet" href="css/themes.css?v=1" />
 </head>
 <body>
   <header class="topbar">
@@ -235,6 +236,11 @@
             <div class="banner-grid" id="bannerGrid" role="radiogroup" aria-label="Banner"></div>
           </div>
           </div>
+          <div class="card skin-card">
+            <h3>Tema de la web</h3>
+            <p class="muted">Cambia el diseño completo. Los temas con modo propio desactivan el botón claro/oscuro; Clásico lo mantiene.</p>
+            <div class="skin-grid" id="skinGrid" role="radiogroup" aria-label="Tema de la web"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -308,6 +314,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=18"></script>
+  <script type="module" src="js/app.js?v=19"></script>
 </body>
 </html>

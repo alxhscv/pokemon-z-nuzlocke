@@ -741,3 +741,35 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+/* ── Rutas: "+" / estado centrado en su casilla ── */
+.routes td>.cs{margin-inline:auto}
+
+/* ── Perfil simétrico: columnas del mismo alto, tarjetas que rellenan ── */
+.profile-layout{align-items:stretch}
+.profile-card{display:flex;flex-direction:column}
+.profile-card #profileForm{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:var(--sp-3)}
+.profile-card .form-actions{margin-top:auto}
+.profile-side{grid-template-rows:auto 1fr}
+.banner-card{display:flex;flex-direction:column}
+.banner-grid{flex:1;grid-auto-rows:minmax(84px,1fr)}
+.btile{height:auto;min-height:84px;display:flex;flex-direction:column;justify-content:flex-end}
+.skin-card{grid-column:1/-1}
+.skin-card p{margin:2px 0 14px}
+
+/* ── Selector de tema de la web ── */
+.skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.stile{appearance:none;display:flex;flex-direction:column;gap:6px;padding:10px;text-align:left;cursor:pointer;font:inherit;
+  background:var(--surface2);color:var(--txt);border:1px solid var(--line);border-radius:var(--r);transition:transform .1s,border-color var(--t)}
+.stile:hover{border-color:var(--edge);transform:translateY(-2px)}
+.stile:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.stile.on{outline:3px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.stile.on:focus-visible{outline-color:var(--focus)}
+.sprev{display:block;position:relative;height:46px;border-radius:var(--r-sm);background:var(--p-bg);border:1px solid rgba(128,128,128,.45);overflow:hidden}
+.sprev i{position:absolute;left:8px;right:8px;bottom:6px;height:24px;border-radius:4px;background:var(--p-sf);border:1px solid rgba(128,128,128,.4)}
+.sprev b{position:absolute;left:14px;bottom:12px;width:36px;height:12px;border-radius:3px;background:var(--p-ac)}
+.sname{font-weight:800;font-size:var(--fs-sm)}
+.smode{color:var(--muted);font-size:var(--fs-xs)}
+#themeToggle[aria-disabled]{opacity:.6}
+@media (prefers-reduced-motion:reduce){.stile{transition:none}.stile:hover{transform:none}}
+@media (max-width:760px){.profile-side{grid-template-rows:none}.skin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

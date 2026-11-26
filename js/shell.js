@@ -2,7 +2,7 @@ import { fillProfile } from "./perfil.js";
 import { loadMissions } from "./misiones.js";
 import { renderRanking } from "./ranking.js";
 import { renderGacha } from "./gacha.js";
-import { $ } from "./core.js";
+import { $, toast } from "./core.js";
 
 // pestañas
 export function selectTab(name) {
@@ -25,6 +25,7 @@ export function currentTheme() {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 export function toggleTheme() {
+  if (document.documentElement.dataset.skin) return toast("Este tema tiene su propio modo. Elige Clásico en Perfil para alternar claro/oscuro.");
   const next = currentTheme() === "dark" ? "light" : "dark";
   const apply = () => { document.documentElement.setAttribute("data-theme", next); applyThemeIcon(); };
   try { localStorage.setItem("theme", next); } catch (e) {}
@@ -40,6 +41,8 @@ export function applyThemeIcon() {
   document.querySelector(".icon-moon")?.classList.toggle("hidden", !dark);
   document.querySelector(".icon-sun")?.classList.toggle("hidden", dark);
   $("themeName").textContent = $("menuThemeName").textContent = dark ? "Oscuro" : "Claro";
+  $("themeToggle")?.toggleAttribute("aria-disabled", !!document.documentElement.dataset.skin);
+  $("themeToggle")?.toggleAttribute("aria-disabled", !!document.documentElement.dataset.skin);
   $("themeToggle")?.setAttribute("aria-label", dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
 }
 

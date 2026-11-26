@@ -61,6 +61,7 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ```
 index.html            # una página (login · app con 9 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/ranking/gacha/perfil)
 css/styles.css        # estilos (tema oscuro por defecto + claro, tokens CSS, estética Pokémon/Kalos)
+css/themes.css        # 16 temas de web completos (`html[data-skin]`: colores, radios, sombras y tipografía)
 js/config.js          # URL + anon key + ROUTE_ZONES/ROUTES (zonas y filas de Rutas) + MEDALS + BANNERS (temas de banner)
 js/app.js             # arranque: carga datos y conecta eventos
 js/core.js            # estado compartido (S), cliente Supabase, helpers (esc, toast, avatares, banners, medallas)
@@ -215,6 +216,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
+- **Temas de la web:** en Perfil hay un panel "Tema de la web" con 16 diseños (Clásico, Kanto retro, Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola, Galar, Paldea, Neón, Manga, Bosque, Lava, Hielo, Ghost, Pastel). Se guarda en este navegador (`localStorage`); cada tema fija su modo claro/oscuro y solo Clásico conserva el botón de tema. La lista vive en `js/config.js → SKINS`. Además, el "+" de Rutas queda centrado en su casilla y el Perfil tiene columnas del mismo alto.
 - **Perfil compacto** (tarjeta estrecha; medallas y banners a la derecha), **frase personalizable** en lugar del título fijo del banner, **Ranking** de batallas y **Gacha** con monedas (`supabase/gacha_ranking.sql`, hay que aplicarlo a mano en Supabase). Las escrituras de monedas/batallas/tiradas solo van por RPC (no hay inserts directos).- **Perfil centrado:** formulario, medallas y banner apilados en una sola columna centrada (680 px máx.).
 - **Banners de perfil** con 26 temas y título visible en Payos (`supabase/banners.sql`; sin él la web funciona con el banner clásico).
 - **Subagentes del proyecto** (`.claude/agents/`) y primera revisión de seguridad. Pendiente de arreglar: `with check` en `players_update`/`entries_update`, restringir `profiles.avatar` a `https` y límites de longitud en SQL; `reload()` ignora errores de `entries`/`players` y puede pisarse con eventos realtime seguidos; solo `app.js` lleva `?v=` (los demás módulos se cachean sin versión).

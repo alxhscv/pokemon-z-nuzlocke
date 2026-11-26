@@ -1,9 +1,10 @@
-import { BANNERS } from "./config.js";
+import { BANNERS, SKINS } from "./config.js";
 import { $, BRAND, S, bannerArt, bannerOf, bannerVars, byId, byName, db, esc, isPhoto, sprite, toast } from "./core.js";
 import { reload } from "./data.js";
 import { saveMotto } from "./api.js";
 import { renderMedalsEdit } from "./payos.js";
 import { fillHours } from "./presence.js";
+import { applyThemeIcon } from "./shell.js";
 
 // ===================== banners =====================
 export function renderBannerGrid() {
@@ -22,6 +23,32 @@ export async function setBanner(uid, id) {
   if (uid === S.user.id) S.profile = { ...S.profile, banner };
   toast(`Banner: ${BANNERS.find((b) => b.id === id)?.name || "Clásico"}`, false, true);
   await reload();
+}
+
+// ===================== temas de la web =====================
+const skinOf = () => document.documentElement.dataset.skin || "clasico";
+export function applySkin(id) {
+  const sk = SKINS.find((s) => s.id === id) || SKINS[0], d = document.documentElement;
+  try {
+    if (sk.id === "clasico") {
+      localStorage.removeItem("skin"); localStorage.removeItem("skinMode");
+      d.removeAttribute("data-skin"); d.setAttribute("data-theme", localStorage.getItem("theme") === "light" ? "light" : "dark");
+    } else {
+      localStorage.setItem("skin", sk.id); localStorage.setItem("skinMode", sk.mode);
+      d.setAttribute("data-skin", sk.id); d.setAttribute("data-theme", sk.mode);
+    }
+  } catch (e) {}
+  applyThemeIcon();
+  renderSkinGrid();
+}
+export function renderSkinGrid() {
+  const grid = $("skinGrid");
+  if (!grid) return;
+  const cur = skinOf();
+  grid.innerHTML = SKINS.map((s) => `<button type="button" role="radio" aria-checked="${s.id === cur}" class="stile${s.id === cur ? " on" : ""}" data-s="${esc(s.id)}" style="--p-bg:${s.bg};--p-sf:${s.surface};--p-ac:${s.accent}">
+    <span class="sprev" aria-hidden="true"><i></i><b></b></span>
+    <span class="sname">${esc(s.name)}</span><span class="smode">${s.mode === "light" ? "Claro" : s.mode === "dark" ? "Oscuro" : "Claro u oscuro"}</span></button>`).join("");
+  grid.querySelectorAll(".stile").forEach((t) => (t.onclick = () => applySkin(t.dataset.s)));
 }
 
 // ===================== perfil =====================
