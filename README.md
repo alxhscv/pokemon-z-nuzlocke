@@ -36,7 +36,7 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
-**Pantalla de carga:** al abrir la web se muestra `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav` durante 10 s; se salta con la tecla **K** (inline en `index.html`).
+**Pantalla de carga:** al abrir la web se muestra `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav` con brillos, destellos y estrellas durante 10 s; se salta con la tecla **K** (inline en `index.html`).
 
 **Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Las **pestañas**, los botones de mover y los estados vacíos usan sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites). En la cabecera, el usuario abre un **menú** (Mi perfil · Tema · Cerrar sesión).
 
