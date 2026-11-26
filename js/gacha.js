@@ -82,8 +82,8 @@ export function renderGacha() {
   $("gForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const amt = parseInt($("gAmount").value, 10);
-    if (!amt) return toast("Cantidad no válida", true);
-    try { await adminGiveCoins($("gUser").value, amt); $("gAmount").value = ""; toast("Monedas actualizadas", false, true); }
+    if (!amt) return toast("Esa cantidad no vale. Escribe un número.", true);
+    try { await adminGiveCoins($("gUser").value, amt); $("gAmount").value = ""; toast("¡Monedas entregadas!", false, true); }
     catch (err) { toast(err.message || "No se pudo", true); }
   });
 }

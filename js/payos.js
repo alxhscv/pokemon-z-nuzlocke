@@ -15,8 +15,12 @@ export function renderPayos() {
     const dead = es.filter((e) => e.status === "dead").length;
     const team = es.filter((e) => e.status === "team");
     const chips = team.map((e) =>
-      `<img src="${sprite(e.pokemon_id)}" alt="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
-      || `<span class="muted">Sin equipo</span>`;
+      `<img src="${sprite(e.pokemon_id)}" width="40" height="40" alt="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" title="${esc(e.nickname || byId.get(e.pokemon_id)?.es || "")}" loading="lazy" onerror="this.style.display='none'">`).join("")
+      || "";
+    const slots = '<span class="slot" aria-hidden="true"></span>'.repeat(Math.max(0, 6 - team.length));
+    const id = String((parseInt(String(pl.user_id).replace(/-/g, "").slice(0, 6), 16) || 0) % 100000).padStart(5, "0");   // nº de carnet derivado del usuario
+    const first = es.map((e) => e.created_at).filter(Boolean).sort()[0];
+    const since = first ? new Date(first).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "—";
     const av = avatarSrc(prof.avatar);
     const bigAv = av
       ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot;></span>'">`
@@ -26,12 +30,13 @@ export function renderPayos() {
       ${bannerHTML(prof)}
       ${bigAv}
       <div class="fname"><span class="online-dot${presence.get(pl.user_id)?.online ? " on" : ""}" role="img" aria-label="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}" title="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}"></span>${esc(prof.display_name)}</div>
+      <div class="idrow"><span>ID <b>${id}</b></span><span>Inicio <b>${since}</b></span></div>
       <div class="stats">
         <span class="alive"><b>${es.length - dead}</b> vivos</span>
         <span class="fallen"><b>${dead}</b> caídos</span>
       </div>
       <div class="medals-view">${medalsHTML(pl.badges)}</div>
-      <div class="team">${chips}</div>
+      <div class="team">${chips}${slots}</div>
     </div>`;
   }).join("");
   $("friends").querySelectorAll(".friend").forEach((c) => (c.onclick = () => openPayo(c.dataset.user)));
@@ -81,10 +86,10 @@ export function fillPayo(pl) {
 }
 export async function renamePlayer(uid) {
   const name = $("payoRename").value.trim();
-  if (!name) return toast("Escribe un nombre", true);
+  if (!name) return toast("¡Dime un nombre, entrenador!", true);
   const { error } = await db.from("profiles").update({ display_name: name }).eq("id", uid);
   if (error) return toast(error.message, true);
-  toast("Nombre cambiado", false, true);
+  toast("¡Nombre cambiado!", false, true);
 }
 export async function deletePlayer(uid) {
   const name = S.players.find((p) => p.user_id === uid)?.profiles?.display_name || "este usuario";
@@ -92,7 +97,7 @@ export async function deletePlayer(uid) {
   const { error } = await db.rpc("admin_delete_user", { uid });
   if (error) return toast(error.message, true);
   $("payoDialog").close();
-  toast("Usuario eliminado", false, true);
+  toast("Entrenador eliminado.", false, true);
   await reload();
 }
 

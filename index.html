@@ -9,15 +9,15 @@
 
   <!-- Tema (evita parpadeo: aplica data-theme antes de pintar) -->
   <script>
-    try { var t = localStorage.getItem("theme"); var d = document.documentElement, k = localStorage.getItem("skin"), m = localStorage.getItem("skinMode"); d.setAttribute("data-theme", t === "light" ? "light" : "dark"); if (k && /^[a-z]+$/.test(k) && (m === "light" || m === "dark")) { d.setAttribute("data-skin", k); d.setAttribute("data-theme", m); } } catch (e) {}
+    try { var t = localStorage.getItem("theme"); var d = document.documentElement, k = localStorage.getItem("skin"), m = localStorage.getItem("skinMode"); d.setAttribute("data-theme", t === "light" ? "light" : "dark"); if (k && /^(kanto|johto|hoenn|alola|galar)$/.test(k) && (m === "light" || m === "dark")) { d.setAttribute("data-skin", k); d.setAttribute("data-theme", m); } } catch (e) {}
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Silkscreen&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pixelify+Sans:wght@400..700&family=Silkscreen&display=swap" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
-  <link rel="stylesheet" href="css/styles.css?v=5" />
-  <link rel="stylesheet" href="css/themes.css?v=2" />
+  <link rel="stylesheet" href="css/styles.css?v=10" />
+  <link rel="stylesheet" href="css/themes.css?v=3" />
   <link rel="stylesheet" href="css/casino.css?v=1" />
   <link rel="stylesheet" href="css/casino-gacha.css?v=1" />
   <link rel="stylesheet" href="css/casino-bj.css?v=1" />
@@ -92,18 +92,17 @@
   </script>
   <header class="topbar">
     <div class="brand">
-      <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+<svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
         <circle cx="24" cy="24" r="22" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
-        <path d="M2.5 24a21.5 21.5 0 0143 0z" fill="#E3350D"/>
-        <path d="M2.5 24h43" stroke="#1b1b1b" stroke-width="3"/>
-        <circle cx="24" cy="24" r="7.5" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
-        <circle cx="24" cy="24" r="3" fill="#1b1b1b"/>
+        <circle cx="24" cy="24" r="15" fill="var(--lens)" stroke="#1b1b1b" stroke-width="3"/>
+        <path d="M15 22a9 9 0 019-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"/>
+        <rect x="17" y="27" width="3" height="3" fill="#fff" opacity=".7"/>
       </svg>
+      <span class="leds" aria-hidden="true"><i class="led r"></i><i class="led y live-dot" id="liveDot"></i><i class="led g"></i></span>
       <span class="brand-text">
         <b>Nuzlocke&nbsp;Z</b>
         <small id="runName">Pokémon Z Tracker</small>
       </span>
-      <span class="live-dot" id="liveDot" aria-hidden="true"></span>
     </div>
 
     <div id="userInfo" class="run-info hidden">
@@ -131,27 +130,28 @@
   <main class="wrap">
     <!-- ───────── Login / registro ───────── -->
     <section id="auth" class="gate hidden">
-      <div class="card auth-card">
-        <svg class="logo-big" viewBox="0 0 48 48" aria-hidden="true">
+      <div class="auth-scene">
+        <h1 class="auth-logo"><svg class="logo-big" viewBox="0 0 48 48" aria-hidden="true">
           <circle cx="24" cy="24" r="22" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
-          <path d="M2.5 24a21.5 21.5 0 0143 0z" fill="#E3350D"/>
-          <path d="M2.5 24h43" stroke="#1b1b1b" stroke-width="3"/>
-          <circle cx="24" cy="24" r="7.5" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
-          <circle cx="24" cy="24" r="3" fill="#1b1b1b"/>
-        </svg>
-        <h2 id="authTitle">Iniciar sesión</h2>
-        <p class="muted" id="authSub">Entra con tu usuario y contraseña.</p>
-        <label>Usuario<input id="authUser" placeholder="tu_usuario" maxlength="20" autocomplete="username" /></label>
-        <label>Contraseña<input id="authPass" type="password" placeholder="••••••" autocomplete="current-password" /></label>
-        <label id="avatarField" class="hidden">Tu avatar (Pokémon)
-          <input id="authAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" />
-        </label>
-        <div id="authAvatarPreview" class="preview hidden"></div>
-        <button class="btn primary" id="authSubmit">Entrar</button>
-        <p class="muted switch">
-          <span id="switchText">¿No tienes cuenta?</span>
-          <a href="#" id="switchMode">Crear una</a>
-        </p>
+          <circle cx="24" cy="24" r="15" fill="var(--lens)" stroke="#1b1b1b" stroke-width="3"/>
+          <path d="M15 22a9 9 0 019-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"/>
+        </svg><span>Pokémon Z</span></h1>
+        <p class="dlgbox prof"><span class="typed">¡Bienvenido al mundo de Pokémon Z! Tu aventura Nuzlocke empieza aquí.</span><i class="more" aria-hidden="true">▼</i></p>
+        <div class="dlgbox auth-card">
+          <h2 id="authTitle">Continuar partida</h2>
+          <p class="muted" id="authSub">Escribe tu nombre y tu clave.</p>
+          <label>¿Cuál es tu nombre?<input id="authUser" placeholder="tu_nombre" maxlength="20" autocomplete="username" /></label>
+          <label>Clave secreta<input id="authPass" type="password" placeholder="••••••" autocomplete="current-password" /></label>
+          <label id="avatarField" class="hidden">Tu avatar (Pokémon)
+            <input id="authAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" />
+          </label>
+          <div id="authAvatarPreview" class="preview hidden"></div>
+          <button class="btn primary" id="authSubmit">Continuar</button>
+          <p class="muted switch">
+            <span id="switchText">¿Primera vez por aquí?</span>
+            <a href="#" id="switchMode">Nueva partida</a>
+          </p>
+        </div>
       </div>
     </section>
 
@@ -217,15 +217,15 @@
         </header>
         <div class="columns" id="myColumns">
           <div class="col team" data-status="team">
-            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 3l4 4M19 3l-4 4M4 8h16l-1.5 11a2 2 0 01-2 1.7H7.5a2 2 0 01-2-1.7z"/></svg>Equipo <span class="count" id="cnt-team">0</span></h3>
+            <h3><img class="iimg" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="" width="28" height="28" onerror="this.style.visibility='hidden'">Equipo <span class="count" id="cnt-team">0</span></h3>
             <div class="list" id="list-team"></div>
           </div>
           <div class="col box" data-status="box">
-            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>Caja <span class="count" id="cnt-box">0</span></h3>
+            <h3><img class="iimg" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png" alt="" width="28" height="28" onerror="this.style.visibility='hidden'">Caja <span class="count" id="cnt-box">0</span></h3>
             <div class="list" id="list-box"></div>
           </div>
           <div class="col grave" data-status="dead">
-            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 21V10a6 6 0 0112 0v11z"/><path d="M12 7v5M9.5 9.5h5"/></svg>Cementerio <span class="count" id="cnt-dead">0</span></h3>
+            <h3><img class="iimg" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/old-amber.png" alt="" width="28" height="28" onerror="this.style.visibility='hidden'">Cementerio <span class="count" id="cnt-dead">0</span></h3>
             <div class="list" id="list-dead"></div>
           </div>
         </div>
@@ -278,7 +278,7 @@
         <div class="cas-bar">
           <div class="cas-bal" id="casBalBox" aria-live="polite"><span class="coin" aria-hidden="true"></span><b id="casBal">0</b> <span>monedas</span></div>
           <button type="button" class="btn primary" id="casRecharge" hidden>Recarga gratis</button>
-          <button type="button" class="btn ghost" id="casMute" aria-label="Silenciar sonido" aria-pressed="false">🔊</button>
+          <button type="button" class="btn ghost" id="casMute" aria-label="Silenciar sonido" aria-pressed="false">Sonido: sí</button>
           <button type="button" class="btn ghost" id="casReset" aria-label="Reiniciar saldo">Reiniciar</button>
         </div>
         <nav class="cas-tabs" role="tablist" aria-label="Juegos del casino">

@@ -41,8 +41,8 @@ export function initCasino() {
   $("casBal").textContent = shown;
   $("casRecharge").hidden = getBalance() !== 0;
   $("casRecharge").onclick = recharge;
-  $("casReset").onclick = () => { if (confirm("¿Volver al saldo inicial?")) resetWallet(); };
-  const mute = () => { $("casMute").textContent = isMuted() ? "🔇" : "🔊"; $("casMute").setAttribute("aria-pressed", String(isMuted())); };
+  $("casReset").onclick = () => { if (confirm("¿Seguro que quieres volver al saldo inicial?")) resetWallet(); };
+  const mute = () => { $("casMute").textContent = isMuted() ? "Sonido: no" : "Sonido: sí"; $("casMute").setAttribute("aria-pressed", String(isMuted())); };
   $("casMute").onclick = () => { setMuted(!isMuted()); mute(); };
   mute();
   selectCasinoView("gacha");

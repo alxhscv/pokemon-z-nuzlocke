@@ -26,7 +26,7 @@ export function currentTheme() {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 export function toggleTheme() {
-  if (document.documentElement.dataset.skin) return toast("Este tema tiene su propio modo. Elige Clásico en Perfil para alternar claro/oscuro.");
+  if (document.documentElement.dataset.skin) return toast("Este tema tiene su propio modo. Elige Clásico en Perfil para alternar claro y oscuro.");
   const next = currentTheme() === "dark" ? "light" : "dark";
   const apply = () => { document.documentElement.setAttribute("data-theme", next); applyThemeIcon(); };
   try { localStorage.setItem("theme", next); } catch (e) {}

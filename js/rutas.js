@@ -4,10 +4,10 @@ import { openDialog } from "./dialog.js";
 
 // ---- Rutas: estados por casilla (pendiente / sin encuentro / fallido / capturado), zonas, progreso, filtros ----
 export const ST_LABEL = { pending: "Pendiente", none: "Sin encuentro", failed: "Fallido", captured: "Capturado" };
-export const ST_ICON = {
-  pending: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`,
-  none: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/></svg>`,
-  failed: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+export const ST_ICON = {   // Pokéball: vacía (pendiente) · tachada (sin encuentro) · rota (fallido)
+  pending: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h6M15 12h6"/><circle cx="12" cy="12" r="3"/></svg>`,
+  none: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h6M15 12h6"/><circle cx="12" cy="12" r="3"/><path d="M5 19L19 5" stroke-width="2.6"/></svg>`,
+  failed: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3.2 10A9 9 0 0111 3.1L10 8l3 2-2 3"/><path d="M21 14a9 9 0 01-8.2 7l.7-4.5-3-2 2.3-2.5M3.3 14H8"/><path d="M16 10h5"/></svg>`,
 };
 export let routeFilter = "all", onlyMine = false;
 export const collapsedZones = new Set();
@@ -72,7 +72,7 @@ export function renderRoutes() {
           const nm = e.nickname || byId.get(e.pokemon_id)?.es || "";
           const tag = addable ? `button type="button" aria-label="Editar ${esc(nm)}"` : "span";
           return `<${tag} class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
-            <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></${addable ? "button" : "span"}>`;
+            <img src="${sprite(e.pokemon_id)}" alt="" width="42" height="42" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></${addable ? "button" : "span"}>`;
         }).join("") : addable
           ? `<button type="button" class="cs ${st}" title="${ST_LABEL[st]}" aria-label="${esc(route) || "Sin zona"}: ${ST_LABEL[st]}">${ST_ICON[st]}<em>${ST_LABEL[st]}</em></button>`
           : `<span class="cs ${st}" title="${ST_LABEL[st]}">${ST_ICON[st]}<em>${ST_LABEL[st]}</em></span>`;

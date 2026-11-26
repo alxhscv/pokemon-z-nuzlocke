@@ -78,6 +78,6 @@ export function show(id) { for (const s of ["auth", "app"]) $(s).classList.toggl
 export function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 export let toastT;
 export function toast(msg, err = false, ok = false) {
-  const t = $("toast"); t.textContent = msg; t.className = "toast" + (err ? " err" : ok ? " ok" : "");
+  const t = $("toast"); t.textContent = msg; t.className = "toast" + (err ? " err" : ok ? " ok" : ""); t.style.animation = "none"; void t.offsetWidth; t.style.animation = "";   // reinicia el efecto máquina de escribir
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hidden"), 2800);
 }

@@ -71,7 +71,7 @@ export function updateAvatarPreview() {
 }
 export async function saveProfile() {
   const name = $("pName").value.trim();
-  if (!name) return toast("Escribe un nombre", true);
+  if (!name) return toast("¡Dime tu nombre, entrenador!", true);
   const url = $("pAvatarUrl").value.trim();
   const pid = byName.get($("pAvatar").value.trim().toLowerCase());
   const avatar = url || (pid ? String(pid) : null);
@@ -82,5 +82,5 @@ export async function saveProfile() {
     try { await saveMotto(motto); } catch (e) { return toast(e.message || "No se pudo guardar la frase", true); }
   }
   S.profile = { ...S.profile, display_name: name, color: BRAND, avatar, motto };
-  toast("Perfil guardado", false, true);
+  toast("¡Perfil guardado!", false, true);
 }

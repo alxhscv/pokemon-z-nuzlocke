@@ -38,7 +38,7 @@ botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona�
 
 **Pantalla de carga (intro):** al abrir la web, en silencio, se ve un **telón** cerrado con un botón rojo señalado por flechas y dedos. Al pulsarlo (ese clic es lo que permite que suene el audio) el telón se abre y aparece `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav`, con rayos, anillos, destellos y estrellas. Dura 10 s o se salta con la tecla **K**; al acabar, la música baja con fundido y la intro se desvanece sobre la web. El **admin** la activa o desactiva para todos desde el menú de usuario (**Intro: Activada/Desactivada**); el ajuste vive en la tabla `app_settings` (`supabase/intro.sql`) y cada navegador lo recuerda en `localStorage`. El código está inline en `index.html`.
 
-**Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Las **pestañas**, los botones de mover y los estados vacíos usan sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites). En la cabecera, el usuario abre un **menú** (Mi perfil · Tema · Cerrar sesión).
+**Estilo:** «Pokédex + PC de Bill + menú de juego» (detalle en la sección [Estilo](#estilo)).
 
 La interfaz usa **tema oscuro por defecto** (y tema claro con el botón, que recuerda tu elección; hay un
 botón en la barra superior para alternar, y la preferencia se guarda en el dispositivo). En móvil las
@@ -63,9 +63,9 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 ```
 Inicio/               # splash.jpeg + splash.wav de la intro
 index.html            # una página (incluye la intro/telón inline) (login · app con 9 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/ranking/gacha/perfil)
-css/styles.css        # estilos (tema oscuro por defecto + claro, tokens CSS, estética Pokémon/Kalos)
+css/styles.css        # estilos (tokens CSS, tema oscuro por defecto + claro, estética Pokédex)
 css/casino*.css       # estilos del Casino (armazón, gacha, blackjack)
-css/themes.css        # 16 temas de web completos (`html[data-skin]`: colores, radios, sombras y tipografía)
+css/themes.css        # 5 skins además del Clásico (`html[data-skin]`: colores y carcasa; Kanto también radios y tipografía)
 js/config.js          # URL + anon key + ROUTE_ZONES/ROUTES (zonas y filas de Rutas) + MEDALS + BANNERS (temas de banner)
 js/app.js             # arranque: carga datos y conecta eventos
 js/core.js            # estado compartido (S), cliente Supabase, helpers (esc, toast, avatares, banners, medallas)
@@ -85,10 +85,24 @@ supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible 
 supabase/presence.sql # fichaje: tabla `sessions` + funciones clock_ping/clock_out/presence_summary (seguro de re-ejecutar)
 supabase/admin.sql    # permisos de la cuenta admin + función para borrar usuarios (seguro de re-ejecutar)
 scripts/test-ranking.mjs · test-bj-rules.mjs  # tests sin dependencias: `node scripts/<archivo>.mjs` (imprimen `ok`)
-scripts/build_pokemon_json.py  # regenera data/pokemon.json desde los CSV de PokéAPI
+scripts/build_pokemon_json.py  # regenera data/pokemon.json (nombres + tipos `t`) desde los CSV de PokéAPI
 ```
 
 ---
+
+## Estilo
+
+Dirección: **Pokédex + PC de Bill + menú de juego**. Todo sale de tokens en `:root` de `css/styles.css`.
+
+- **Colores:** carcasa roja (`--shell`), lente azul (`--lens`), LED (`--led-r/y/g`), crema (`--case`) y los **18 tipos oficiales** como `--t-fuego`, `--t-agua`… (chips de tipo y bordes). Las rarezas del gacha son `--rar-*`. Un solo acento por pantalla.
+- **Formas:** bordes de 2–3 px (`--bw`), esquinas de 2/4/6 px y **sombras duras sin blur**; nada de glassmorphism.
+- **Tipografía:** Silkscreen en títulos (`h1`, `h2`, marca), Pixelify Sans en números (Nº, Nv., posiciones) y Nunito en el cuerpo y los textos pequeños (las fuentes pixel confundían la «C» con la «O» a tamaño pequeño).
+- **Cabecera:** carcasa de Pokédex con lente y tres LED; el LED amarillo (`#liveDot`) parpadea con cada evento en vivo. Pestañas de menú de juego con cursor ▶ en la activa; en móvil, barra inferior roja.
+- **Cuadros de texto de juego** (`.dlgbox`): login, toasts y estados vacíos, con borde doble, efecto máquina de escribir corto y ▼ parpadeante. Se desactivan con `prefers-reduced-motion`. Las confirmaciones siguen siendo el `confirm()` del navegador (no se puede estilar) pero con texto de juego.
+- **Pokémon:** ficha de entrada de Pokédex (sprite en recuadro, Nº, chips de tipo desde `data/pokemon.json → t`, barra de PS decorativa que refleja el nivel), Caja como cuadrícula de PC y Equipo con 6 huecos de Pokéball.
+- **Rutas:** zonas como carteles, casillas con Pokéball (vacía / tachada / rota / llena) y progreso con barras de PS. **Medallas:** estuche de 12 huecos grabados con destello. **Payos:** carnet de Entrenador. **Ranking:** podio y tabla tipo Torre de combate.
+- **Iconos:** sprites de objeto de PokéAPI para objetos y secciones, y SVG propios para controles (cerrar, más, tema). No hay emojis en la interfaz salvo el telón de la intro.
+- **Textos:** frases cortas con tono de juego («¡Has capturado a X!», «¿Seguro que quieres…?»).
 
 ## Base de datos — tablas y columnas
 
@@ -203,7 +217,8 @@ Las 8 primeras son las reales de Kalos (43–50); las 4 últimas son imágenes o
 ```bash
 curl -s -o scripts/species_names.csv https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species_names.csv
 curl -s -o scripts/species.csv       https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species.csv
-python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.csv data/pokemon.json
+curl -s -o scripts/pokemon_types.csv   https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_types.csv
+python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.csv data/pokemon.json scripts/pokemon_types.csv
 ```
 
 ---
@@ -225,7 +240,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 
 ## Registro de arreglos
 
-- **Temas de la web:** en la tarjeta "Tu perfil" hay un selector "Tema de la web" con 16 diseños (Clásico, Kanto retro, Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola, Galar, Paldea, Neón, Manga, Bosque, Lava, Hielo, Ghost, Pastel). Se guarda en este navegador (`localStorage`); cada tema fija su modo claro/oscuro y solo Clásico conserva el botón de tema. La lista vive en `js/config.js → SKINS`. Además, el "+" de Rutas queda centrado en su casilla y el Perfil tiene columnas del mismo alto.
+- **Temas de la web:** en «Tu perfil» hay un selector con 6 diseños: **Clásico Pokéball** (por defecto, alterna claro/oscuro con el botón), **Kanto retro** (verde Game Boy), **Johto dorado**, **Hoenn océano**, **Alola atardecer** y **Galar competitivo**. Se guarda en este navegador (`localStorage`); cada skin fija su modo. La lista vive en `js/config.js → SKINS` y los colores en `css/themes.css`. Se quitaron Sinnoh, Teselia, Kalos, Paldea, Neón, Manga, Bosque, Lava, Hielo, Ghost y Pastel por no estar al nivel del diseño nuevo; quien los tuviera guardados vuelve al Clásico.
 - **Perfil compacto** (tarjeta estrecha; medallas y banners a la derecha), **frase personalizable** en lugar del título fijo del banner, **Ranking** de batallas y **Gacha** con monedas (`supabase/gacha_ranking.sql`, hay que aplicarlo a mano en Supabase). Las escrituras de monedas/batallas/tiradas solo van por RPC (no hay inserts directos).- **Perfil centrado:** formulario, medallas y banner apilados en una sola columna centrada (680 px máx.).
 - **Banners de perfil** con 26 temas y título visible en Payos (`supabase/banners.sql`; sin él la web funciona con el banner clásico).
 - **Subagentes del proyecto** (`.claude/agents/`) y primera revisión de seguridad. Pendiente de arreglar: `with check` en `players_update`/`entries_update`, restringir `profiles.avatar` a `https` y límites de longitud en SQL; `reload()` ignora errores de `entries`/`players` y puede pisarse con eventos realtime seguidos; solo `app.js` lleva `?v=` (los demás módulos se cachean sin versión).
@@ -249,3 +264,5 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 - Cuadrícula de la Caja (nunca se veía) simplificada a fondo liso.
 
 - **Recarga en vivo:** los eventos de Supabase se agrupan (300 ms) en un solo `reload()`; las acciones ya no recargan a mano salvo borrar Pokémon o usuario (los DELETE con filtro no llegan en vivo). «Mi colección» del Gacha clásico trae todas tus tiradas; «Últimas tiradas» solo 15. `pendiente.sql` eliminado y avisos de «falta aplicar SQL» quitados. Tests nuevos: `scripts/test-bj-rules.mjs` (el gacha del Casino no se puede probar en node: `core.js` importa Supabase por URL).
+
+- **Rediseño Pokédex (5 fases):** tokens, tipografía, cabecera y pestañas; login de arranque y cuadros de texto; fichas de Pokémon, Caja, Rutas y Medallas; Payos, Ranking, Casino y Perfil; y por último skins (de 17 a 6), textos y pulido. `data/pokemon.json` ahora trae los tipos (`t`).

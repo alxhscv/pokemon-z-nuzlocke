@@ -45,7 +45,7 @@ export async function completeMission(id) {
   const { error } = await db.from("mission_completions").insert({ mission_id: id, user_id: S.user.id });
   if (error && error.code !== "23505") return toast(error.message, true);
   await loadMissions();
-  confetti(); toast("¡Misión completada!", false, true);
+  confetti(); toast("¡Misión completada! Recompensa desbloqueada.", false, true);
 }
 export function openMission(m = null) {
   missionId = m?.id || null;
@@ -58,18 +58,18 @@ export function openMission(m = null) {
 }
 export async function saveMission() {
   const title = $("mTitle").value.trim(), reward = $("mReward").value.trim();
-  if (!title || !reward) return toast("Título y recompensa son obligatorios", true);
+  if (!title || !reward) return toast("Falta el título o la recompensa de la misión.", true);
   const row = { title, description: $("mDesc").value.trim() || null };
   let id = missionId;
   if (id) { const { error } = await db.from("missions").update(row).eq("id", id); if (error) return toast(error.message, true); }
   else { const { data, error } = await db.from("missions").insert(row).select("id").single(); if (error) return toast(error.message, true); id = data.id; }
   const { error } = await db.from("mission_rewards").upsert({ mission_id: id, reward_text: reward, reward_item: $("mItem").value || null });
   if (error) return toast(error.message, true);
-  $("missionDialog").close(); toast("Misión guardada", false, true);
+  $("missionDialog").close(); toast("¡Misión guardada!", false, true);
   await loadMissions();
 }
 export async function deleteMission() {
-  if (!missionId || !confirm("¿Borrar esta misión? Se pierden también las completadas.")) return;
+  if (!missionId || !confirm("¿Seguro que quieres borrar esta misión? Se pierden también las completadas.")) return;
   const { error } = await db.from("missions").delete().eq("id", missionId);
   if (error) return toast(error.message, true);
   $("missionDialog").close(); await loadMissions();

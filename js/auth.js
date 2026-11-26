@@ -9,11 +9,11 @@ let signupMode = false;
 export function showAuth() { signupMode = false; applyAuthMode(); $("userInfo").classList.add("hidden"); show("auth"); }
 export function toggleAuthMode() { signupMode = !signupMode; applyAuthMode(); }
 export function applyAuthMode() {
-  $("authTitle").textContent = signupMode ? "Crear cuenta" : "Iniciar sesión";
-  $("authSub").textContent = signupMode ? "Elige usuario, contraseña y tu avatar." : "Entra con tu usuario y contraseña.";
-  $("authSubmit").textContent = signupMode ? "Crear cuenta" : "Entrar";
-  $("switchText").textContent = signupMode ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
-  $("switchMode").textContent = signupMode ? "Inicia sesión" : "Crear una";
+  $("authTitle").textContent = signupMode ? "Nueva partida" : "Continuar partida";
+  $("authSub").textContent = signupMode ? "Elige tu nombre, tu clave y tu avatar." : "Escribe tu nombre y tu clave.";
+  $("authSubmit").textContent = signupMode ? "¡Empezar aventura!" : "Continuar";
+  $("switchText").textContent = signupMode ? "¿Ya tienes partida?" : "¿Primera vez por aquí?";
+  $("switchMode").textContent = signupMode ? "Continuar" : "Nueva partida";
   $("avatarField").classList.toggle("hidden", !signupMode);
   $("authAvatarPreview").classList.toggle("hidden", !signupMode);
   if (signupMode) updateAuthAvatarPreview();
@@ -28,15 +28,15 @@ export function updateAuthAvatarPreview() {
 export async function doAuth() {
   const uname = $("authUser").value.trim();
   const pass = $("authPass").value;
-  if (!uname) return toast("Escribe un usuario", true);
-  if (pass.length < 6) return toast("La contraseña necesita al menos 6 caracteres", true);
+  if (!uname) return toast("¡Dime tu nombre, entrenador!", true);
+  if (pass.length < 6) return toast("La clave necesita al menos 6 caracteres.", true);
   const email = uname2email(uname);
   $("authSubmit").disabled = true;
   try {
     if (signupMode) {
       const { data, error } = await db.auth.signUp({ email, password: pass });
       if (error) return toast(traduceAuth(error.message), true);
-      if (!data.session) return toast("Cuenta creada, ahora inicia sesión", true);
+      if (!data.session) return toast("¡Cuenta creada! Ahora continúa tu partida.", true);
       const pid = byName.get($("authAvatar").value.trim().toLowerCase());
       await db.from("profiles").upsert({ id: data.user.id, display_name: uname, color: BRAND, avatar: pid ? String(pid) : null });
     } else {
@@ -48,9 +48,9 @@ export async function doAuth() {
 }
 
 export function traduceAuth(m) {
-  if (/already registered/i.test(m)) return "Ese usuario ya existe";
-  if (/Invalid login/i.test(m)) return "Usuario o contraseña incorrectos";
-  if (/at least/i.test(m)) return "La contraseña es demasiado corta";
+  if (/already registered/i.test(m)) return "Ese nombre ya lo tiene otro entrenador.";
+  if (/Invalid login/i.test(m)) return "Nombre o clave incorrectos.";
+  if (/at least/i.test(m)) return "La clave es demasiado corta.";
   return m;
 }
 

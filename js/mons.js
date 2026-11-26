@@ -59,17 +59,23 @@ export function monMark(e) {
   return e.status === "team" ? `<span class="state-mark pokeball" aria-hidden="true"></span>`
     : e.status === "dead" ? `<span class="state-mark" aria-hidden="true">${SVG.dead}</span>` : "";
 }
+const TIPO = { electrico: "eléctrico", psiquico: "psíquico", dragon: "dragón" };   // slug → etiqueta con tilde
 export function monInner(e) {
   const p = byId.get(e.pokemon_id);
   const name = e.nickname || p?.es || "???";
   const species = e.nickname && p ? p.es : null;
   const sub = [e.location, species].filter(Boolean).join(" · ");
-  return `<span class="sprite"><img src="${sprite(e.pokemon_id)}" alt="${esc(name)}" width="48" height="48" loading="lazy" onerror="this.style.visibility='hidden'"></span>
+  const lv = Math.min(100, +e.level || 0);
+  // «PS» decorativa: la barra refleja el nivel (verde / amarillo / rojo según lo llena que esté)
+  const ps = lv ? `<span class="ps"><b>Nv. ${lv}</b><span class="psbar ${lv > 50 ? "hi" : lv > 20 ? "mid" : "lo"}" aria-hidden="true"><i style="width:${lv}%"></i></span></span>` : "";
+  const types = (p?.t || []).map((t) => `<span class="tchip t-${esc(t)}">${TIPO[t] || esc(t)}</span>`).join("");   // p.t = tipos (si pokemon.json los trae)
+  return `<span class="sprite"><span class="dexn">Nº ${String(e.pokemon_id).padStart(3, "0")}</span><img src="${sprite(e.pokemon_id)}" alt="${esc(name)}" width="48" height="48" loading="lazy" onerror="this.style.visibility='hidden'"></span>
     <span class="info">
       <span class="nick">${esc(name)}</span>
-      <span class="sub">${esc(sub) || `<span class="dex">Nº ${String(e.pokemon_id).padStart(3, "0")}</span>`}</span>
-    </span>
-    ${e.level ? `<span class="lvl">Nv. ${e.level}</span>` : ""}`;
+      ${types ? `<span class="tchips">${types}</span>` : ""}
+      ${sub ? `<span class="sub">${esc(sub)}</span>` : ""}
+      ${ps}
+    </span>`;
 }
 
 export function monCard(e) {

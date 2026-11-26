@@ -52,7 +52,7 @@ export let clocked = false, localStart = null;   // localStart: entrada según e
 export async function ping() {
   if (!clocked) return;
   const { data, error } = await db.rpc("clock_ping");
-  if (!error && data === false) { clocked = false; updateClockUI(); toast("Tu fichaje caducó, ficha de nuevo", true); }
+  if (!error && data === false) { clocked = false; updateClockUI(); toast("Tu fichaje caducó. Ficha de nuevo.", true); }
 }
 export async function toggleClock() {
   if (S.isAdmin) return;

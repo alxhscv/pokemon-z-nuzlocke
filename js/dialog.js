@@ -28,7 +28,7 @@ export function updatePreview() {
 
 export async function saveEntry() {
   const pid = byName.get($("fPokemon").value.trim().toLowerCase());
-  if (!pid) return toast("Elige un Pokémon de la lista", true);
+  if (!pid) return toast("Ese Pokémon no está en la Pokédex. Elige uno de la lista.", true);
   const row = {
     pokemon_id: pid,
     nickname: $("fNickname").value.trim() || null,
@@ -49,13 +49,13 @@ export async function saveEntry() {
     if (logo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
       logo.classList.remove("shake"); void logo.offsetWidth; logo.classList.add("shake");
     }
-    toast("¡Pokémon capturado! Entra en la caja", false, true);
+    toast(`¡Has capturado a ${byId.get(pid)?.es || "un Pokémon"}! Entra en la caja.`, false, true);
   }
 }
 
 export async function deleteEntry() {
   const id = $("fId").value;
-  if (!id || !confirm("¿Borrar este Pokémon?")) return;
+  if (!id || !confirm("¿Seguro que quieres soltar a este Pokémon? No se puede deshacer.")) return;
   const { error } = await db.from("entries").delete().eq("id", id);
   if (error) return toast(error.message, true);
   $("entryDialog").close();
