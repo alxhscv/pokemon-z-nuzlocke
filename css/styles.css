@@ -24,7 +24,7 @@
   --box-bg:#FBFAF4; --box-ink:#1b1b1b;   /* cuadro de texto de juego: siempre claro, borde doble */
 
   /* carcasa Pokédex: rojo, lente azul, LED y crema */
-  --shell:#C42B2B; --shell-d:#8E1C1C; --shell-ink:#fff; --lens:#2D9CDB; --lens-d:#1B6FA8; --led-r:#FF4B4B; --led-y:#FFD23F; --led-g:#4BE08A; --case:#E9E3D3;
+  --shell:#C42B2B; --shell-d:#8E1C1C; --shell-ink:#fff; --lens:#2D9CDB; --lens-d:#1B6FA8; --led-r:#FF4B4B; --led-y:#FFD23F; --led-g:#4BE08A; --hl:var(--led-y); --box-line:#1b1b1b; --box-mut:#3d4658; --box-in:#fff; --case:#E9E3D3;
   /* los 18 tipos oficiales (para chips, bordes y banners) */
   --t-normal:#A8A77A; --t-fuego:#EE8130; --t-agua:#6390F0; --t-planta:#7AC74C; --t-electrico:#F7D02C; --t-hielo:#96D9D6;
   --t-lucha:#C22E28; --t-veneno:#A33EA1; --t-tierra:#E2BF65; --t-volador:#A98FF3; --t-psiquico:#F95587; --t-bicho:#A6B91A;
@@ -70,7 +70,7 @@
   --txt:#E8EDF9; --muted:#A3B0CC; --dex:#8F9DBD; --title:#F2F5FD;
   --accent:#C2371F; --accent-d:#A52D18; --accent-l:#E04526; --red-soft:#3a1b18; --link:#7CBCE8;
   --danger:#FF6FB5; --danger-d:#E0529A; --ok:#47C27E; --focus:#8CC8F0;
-  --sh-1:0 2px 0 #000; --sh-2:0 4px 0 #000; --shell:#A32222; --shell-d:#6E1414; --case:#2A3350;
+  --sh-1:0 2px 0 #000; --sh-2:0 4px 0 #000; --shell:#A32222; --shell-d:#6E1414; --case:#2A3350; --box-bg:var(--surface2); --box-ink:var(--txt); --box-line:var(--edge); --box-mut:var(--muted); --box-in:var(--surface);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -80,7 +80,7 @@
   --txt:#E8EDF9; --muted:#A3B0CC; --dex:#8F9DBD; --title:#F2F5FD;
   --accent:#C2371F; --accent-d:#A52D18; --accent-l:#E04526; --red-soft:#3a1b18; --link:#7CBCE8;
   --danger:#FF6FB5; --danger-d:#E0529A; --ok:#47C27E; --focus:#8CC8F0;
-  --sh-1:0 2px 0 #000; --sh-2:0 4px 0 #000; --shell:#A32222; --shell-d:#6E1414; --case:#2A3350;
+  --sh-1:0 2px 0 #000; --sh-2:0 4px 0 #000; --shell:#A32222; --shell-d:#6E1414; --case:#2A3350; --box-bg:var(--surface2); --box-ink:var(--txt); --box-line:var(--edge); --box-mut:var(--muted); --box-in:var(--surface);
   }
 }
 
@@ -404,9 +404,9 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 #payoMedals .medal-grid{grid-template-columns:repeat(4,1fr)}
 
 /* --- Cuadro de texto de juego: fondo claro, borde doble y esquinas casi rectas --- */
-.dlgbox,.toast,.empty-state{background:var(--box-bg);color:var(--box-ink);border:3px solid #1b1b1b;border-radius:var(--r);
-  box-shadow:inset 0 0 0 3px var(--box-bg),inset 0 0 0 5px #1b1b1b,0 4px 0 rgba(0,0,0,.35)}
-.dlgbox .muted,.empty-state{color:#3d4658}
+.dlgbox,.toast,.empty-state{background:var(--box-bg);color:var(--box-ink);border:3px solid var(--box-line);border-radius:var(--r);
+  box-shadow:inset 0 0 0 3px var(--box-bg),inset 0 0 0 5px var(--box-line),0 4px 0 rgba(0,0,0,.35)}
+.dlgbox .muted,.empty-state{color:var(--box-mut)}
 .dlgbox h2,.dlgbox h3{color:var(--box-ink)}
 /* efecto máquina de escribir: revelado por pasos, corto */
 @keyframes type{from{clip-path:inset(0 100% 0 0)}}
@@ -419,14 +419,14 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);
   display:flex;align-items:center;gap:10px;padding:12px 18px;z-index:50;max-width:min(92vw,420px);font-weight:700;
   animation:toast-in .2s var(--ease),type .5s steps(16,end)}
-.toast::before{content:"";width:18px;height:18px;flex:0 0 auto;background:var(--lens-d);
+.toast::before{content:"";width:18px;height:18px;flex:0 0 auto;background:var(--box-ink);
   -webkit-mask:var(--ic-info) center/contain no-repeat;mask:var(--ic-info) center/contain no-repeat}
 .toast.ok::before{background:#1F7A47;-webkit-mask:var(--ic-ok) center/contain no-repeat;mask:var(--ic-ok) center/contain no-repeat}
 .toast.err::before{background:#B0126B;-webkit-mask:var(--ic-err) center/contain no-repeat;mask:var(--ic-err) center/contain no-repeat}
 
 /* --- Estados de vacío --- */
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:var(--fs-sm);font-weight:700;padding:18px 16px}
-.empty-state svg{width:44px;height:44px;stroke:#3d4658;opacity:.6}
+.empty-state svg{width:44px;height:44px;stroke:var(--box-mut);opacity:.6}
 
 /* --- Skeletons --- */
 .skel{position:relative;overflow:hidden;background:var(--surface2);border-radius:var(--r)}
@@ -447,7 +447,7 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .auth-card{padding:20px 18px 22px;text-align:left}
 .auth-card h2{margin-bottom:4px;font-size:var(--fs-lg)}
 .auth-card label{color:var(--box-ink);font-weight:700}
-.auth-card input{background:#fff;color:var(--box-ink);border:2px solid #1b1b1b;border-radius:var(--r-sm)}
+.auth-card input{background:var(--box-in);color:var(--box-ink);border:2px solid var(--box-line);border-radius:var(--r-sm)}
 .auth-card .btn.primary{width:100%;justify-content:center;margin-top:20px}
 .switch{margin-top:18px}
 .switch a{font-weight:800;color:var(--lens-d)}
@@ -495,7 +495,7 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
     gap:0;overflow-x:auto;scrollbar-width:none;background:var(--shell);border:0;border-top:3px solid var(--shell-d);border-radius:0;box-shadow:0 -3px 0 rgba(0,0,0,.35)}
   .tab{flex:1 0 64px;flex-direction:column;justify-content:center;gap:2px;font-size:.75rem;padding:4px 1px;min-height:var(--tap);min-width:0;margin:0;border:0;border-radius:var(--r)}
   .tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tab.active,.tab[aria-selected="true"]{background:var(--led-y);color:#1b1b1b;box-shadow:none}
+  .tab.active,.tab[aria-selected="true"]{background:var(--hl);color:#1b1b1b;box-shadow:none}
   .tab .ticon{width:26px;height:26px}
   .btn,.chip,.me-chip,.menu-item{min-height:var(--tap)}
   .btn.icon,.movebtn{width:var(--tap);height:var(--tap)}
@@ -636,14 +636,14 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);
 .tab{font-family:var(--sans);font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--txt);background:var(--surface);
   border:2px solid var(--edge);border-bottom:0;border-radius:var(--r) var(--r) 0 0;margin-bottom:-3px;padding:var(--sp-2) 10px;gap:6px}
 .tab:hover{background:var(--surface2);color:var(--txt)}
-.tab.active,.tab[aria-selected="true"]{background:var(--led-y);color:#1b1b1b;border-color:#1b1b1b;border-bottom:3px solid var(--led-y)}
+.tab.active,.tab[aria-selected="true"]{background:var(--hl);color:#1b1b1b;border-color:#1b1b1b;border-bottom:3px solid var(--led-y)}
 .tab.active::before,.tab[aria-selected="true"]::before{content:"▶";font-size:.7em;margin-right:-2px}
 .tab:focus-visible{outline-offset:-3px}
 @media (max-width:640px){   /* barra inferior: carcasa roja, activa amarilla */
   .tabs{padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
   .tab{font-size:.7rem;color:#fff;background:transparent;border:2px solid transparent;margin:0;padding:4px 1px;border-radius:var(--r)}
   .tab:hover{background:rgba(0,0,0,.25);color:#fff}
-  .tab.active,.tab[aria-selected="true"]{background:var(--led-y);color:#1b1b1b;border-color:#1b1b1b}
+  .tab.active,.tab[aria-selected="true"]{background:var(--hl);color:#1b1b1b;border-color:#1b1b1b}
   .tab.active::before,.tab[aria-selected="true"]::before{content:none}
 }
 
@@ -860,34 +860,17 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 .movebtn{border:var(--bw) solid var(--edge);border-radius:var(--r)}
 .movebtn:hover{border-color:#1b1b1b}
 
-/* columnas: Equipo con 6 huecos de Pokéball, Caja como caja de PC, Cementerio */
-.col{border:var(--bw) solid var(--edge);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
-.col>h3{font-size:var(--fs-md);letter-spacing:.02em}
-.col.team{background:var(--surface)}
+/* columnas de Seguimiento: mismo formato las tres (cabecera de color + lista de fichas) */
+.col{padding:0;overflow:hidden;border:var(--bw) solid var(--edge);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.col>h3{margin:0;padding:10px 14px;color:#fff;border-bottom:3px solid #1b1b1b;font-size:var(--fs-md);letter-spacing:.03em;text-transform:uppercase}
+.col>h3 svg,.col>h3 .iimg{width:24px;height:24px}
+.col.team>h3{background:var(--shell)} .col.box>h3{background:var(--lens-d)} .col.grave>h3{background:#5b6270}
+.col>h3 .count{margin-left:auto;background:#fff;color:#1b1b1b;border-color:#1b1b1b}
+.col>.list{padding:12px}
+.col.team,.col.box{background:var(--surface)}
 .team-slots{gap:10px}
 .slot{width:34px;height:34px;border:2px solid var(--edge);border-radius:50%;
   background:linear-gradient(transparent 0 42%,var(--edge) 42% 58%,transparent 58%),radial-gradient(circle,var(--surface) 0 22%,transparent 24%);opacity:.7}
-.col.box{background:var(--surface2);padding:0;overflow:hidden}
-.col.box>h3{margin:0;padding:10px 14px;background:var(--lens-d);color:#fff;border-bottom:3px solid #1b1b1b;font-size:var(--fs-md);text-transform:uppercase}
-.col.box>h3::before{content:"◀";font-size:.7em;margin-right:4px}
-.col.box>h3 .count{margin-left:auto;background:#fff;color:#1b1b1b;border-color:#1b1b1b}
-.col.box .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:12px;
-  background:repeating-conic-gradient(color-mix(in srgb,var(--lens) 14%,var(--surface2)) 0 25%,var(--surface2) 0 50%) 0 0/24px 24px}
-.col.box .empty-state{grid-column:1/-1}
-.col.box .mon{flex-direction:column;align-items:stretch;padding:6px 4px;border-left-width:2px;text-align:center;gap:2px}
-.col.box .mon-open{flex-direction:column;gap:4px;min-height:0}
-.col.box .mon .sprite{width:64px;height:64px;margin:0 auto}
-.col.box .mon .info{display:block}
-.col.box .mon .nick{font-size:.75rem}
-.col.box .mon .sub,.col.box .mon .ps,.col.box .mon .tchips{display:none}
-.col.box .mon .moves{position:absolute;top:2px;right:2px;flex-direction:column;gap:2px}
-.col.box .mon .movebtn{width:26px;height:26px}
-.col.box .mon .movebtn svg,.col.box .mon .movebtn .iimg{width:16px;height:16px}
-@media (hover:none){.col.box .mon .moves{opacity:.9}}
-@media (max-width:640px){
-  .col.box .mon{flex-wrap:nowrap}
-  .col.box .mon .moves{flex:0 0 auto;border-top:0;padding-top:0;justify-content:flex-start}
-}
 
 /* Rutas como Pokégear: carteles de zona, casillas Pokéball, barras de PS */
 .bar{height:14px;border:2px solid #1b1b1b;border-radius:var(--r-sm);background:var(--case);overflow:hidden}
@@ -908,7 +891,7 @@ td.c-captured{position:relative}
 td.c-captured::after{content:"";position:absolute;top:3px;right:3px;width:12px;height:12px;pointer-events:none;
   background:linear-gradient(#E3350D 0 40%,#1b1b1b 40% 60%,#fff 60%);border:2px solid #1b1b1b;border-radius:50%;box-sizing:border-box}
 .chip{border:var(--bw) solid var(--edge);border-radius:var(--r);font-weight:800}
-.chip.on{background:var(--led-y);border-color:#1b1b1b;color:#1b1b1b}
+.chip.on{background:var(--hl);border-color:#1b1b1b;color:#1b1b1b}
 
 /* estuche de medallas: 12 huecos grabados; las conseguidas brillan con un destello */
 .medals-view{gap:6px;padding:8px;background:var(--case);border:var(--bw) solid #1b1b1b;border-radius:var(--r);box-shadow:inset 0 3px 0 #0002}
@@ -935,7 +918,7 @@ td.c-captured::after{content:"";position:absolute;top:3px;right:3px;width:12px;h
 .cas-tabs .cas-tab{border:var(--bw) solid var(--edge);border-radius:var(--r);box-shadow:0 3px 0 var(--edge);font-family:var(--sans);text-transform:uppercase;letter-spacing:.04em;font-size:var(--fs-sm)}
 .cas-tabs .cas-tab:hover{transform:none;background:var(--surface2)}
 .cas-tabs .cas-tab:active{transform:translateY(2px);box-shadow:none}
-.cas-tabs .cas-tab.active{background:var(--led-y);border-color:#1b1b1b;color:#1b1b1b;box-shadow:0 3px 0 #1b1b1b}
+.cas-tabs .cas-tab.active{background:var(--hl);border-color:#1b1b1b;color:#1b1b1b;box-shadow:0 3px 0 #1b1b1b}
 .cas-view .cg-chip,.cas-view .cg-f{border-radius:var(--r)}
 
 /* Payos: carnet de Entrenador */
@@ -949,7 +932,7 @@ td.c-captured::after{content:"";position:absolute;top:3px;right:3px;width:12px;h
 .friend .team{gap:6px}
 .friend .team img,.friend .team .slot{width:40px;height:40px;border:2px solid var(--edge);border-radius:var(--r-sm);background:var(--case);padding:2px}
 .friend .team .slot{padding:0;border-radius:50%;background:linear-gradient(transparent 0 42%,var(--edge) 42% 58%,transparent 58%),radial-gradient(circle,var(--surface) 0 22%,transparent 24%);opacity:.6}
-.friend.me-card{outline:3px solid var(--led-y);outline-offset:2px}
+.friend.me-card{outline:3px solid var(--hl);outline-offset:2px}
 
 /* Ranking: podio y tabla tipo Torre de combate */
 .podium{border-bottom:3px solid #1b1b1b;display:flex;justify-content:center;align-items:flex-end;gap:var(--sp-3);list-style:none;margin:0 0 var(--sp-5);padding:0}
@@ -968,13 +951,13 @@ td.c-captured::after{content:"";position:absolute;top:3px;right:3px;width:12px;h
 .rank-table .pos.p1{color:var(--rar-legendario);text-shadow:1px 1px 0 #1b1b1b}
 .rank-table .pos.p2{color:#9aa5b1;text-shadow:1px 1px 0 #1b1b1b}
 .rank-table .pos.p3{color:#d08a4f;text-shadow:1px 1px 0 #1b1b1b}
-.rank-table tr.me{background:color-mix(in srgb,var(--led-y) 22%,transparent)}
+.rank-table tr.me{background:color-mix(in srgb,var(--hl) 22%,transparent)}
 .battle-list li{border:var(--bw) solid var(--edge);border-radius:var(--r)}
 
 /* Perfil: formularios como menú de juego */
 .profile-card h3,.medals-card h3,.banner-card h3{border-bottom:3px solid var(--edge);padding-bottom:var(--sp-2);margin-bottom:var(--sp-3)}
 .btile{border:var(--bw) solid var(--edge);border-radius:var(--r)}
-.btile.on{border-color:var(--led-y);box-shadow:0 3px 0 #1b1b1b}
+.btile.on{border-color:var(--hl);box-shadow:0 3px 0 #1b1b1b}
 .preview img{border:2px solid #1b1b1b;background:var(--case);border-radius:var(--r-sm)}
 input,select,textarea{border:var(--bw) solid var(--edge);border-radius:var(--r-sm)}
 input:focus,select:focus,textarea:focus{border-color:#1b1b1b;box-shadow:0 3px 0 var(--lens)}
@@ -992,6 +975,20 @@ input:focus,select:focus,textarea:focus{border-color:#1b1b1b;box-shadow:0 3px 0 
 ::-webkit-scrollbar{width:14px;height:14px}
 ::-webkit-scrollbar-track{background:var(--surface2);border-left:2px solid var(--edge);border-top:2px solid var(--edge)}
 ::-webkit-scrollbar-thumb{background:var(--shell);border:2px solid #1b1b1b;box-shadow:inset 0 0 0 2px #fff3}
-::-webkit-scrollbar-thumb:hover{background:var(--led-y)}
+::-webkit-scrollbar-thumb:hover{background:var(--hl)}
 ::-webkit-scrollbar-corner{background:var(--surface2)}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--shell) var(--surface2)}}
+
+/* ═════════ Banners: arte oficial, patrón de rayas y borde duro ═════════ */
+.banner,.friend .fhead.banner{background:radial-gradient(circle at 82% 75%,rgba(255,255,255,.45),transparent 52%),
+  repeating-linear-gradient(135deg,rgba(255,255,255,.09) 0 10px,transparent 10px 20px),linear-gradient(120deg,var(--b1),var(--b2));border-bottom:3px solid #1b1b1b}
+.banner::before{display:none}
+.banner .bart{height:104px;width:auto;right:4px;bottom:-16px;image-rendering:auto;filter:drop-shadow(3px 3px 0 rgba(0,0,0,.35))}
+.banner .btitle{border-radius:var(--r-sm);background:rgba(0,0,0,.62);border:2px solid #1b1b1b;padding:3px 9px;font-size:.75rem;letter-spacing:.03em}
+.payo-banner{height:104px;border-bottom:3px solid #1b1b1b}
+.btile{height:92px;border:var(--bw) solid #1b1b1b;border-radius:var(--r);box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.btile .bart{height:100px;bottom:-14px}
+.btile .bname{display:inline-block;padding:2px 8px;border-radius:var(--r-sm);background:rgba(0,0,0,.6);border:2px solid #1b1b1b;font-size:.78rem;text-shadow:none}
+.btile.on::after{border-radius:var(--r-sm);background:var(--hl);color:#1b1b1b;border:2px solid #1b1b1b}
+.btile.on{outline:3px solid var(--hl);outline-offset:2px}
+.friend .fhead.banner .bart{height:92px;bottom:-12px}
