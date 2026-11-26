@@ -10,26 +10,36 @@
 :root{
   color-scheme: light;
 
-  --brand:#E3350D;            /* color de jugador: puntos, franjas, cabeceras */
-  --accent:#C8321A; --accent-d:#A32511;   /* botones y acentos con texto blanco */
+  /* colores (claro: blanco hueso) */
+  --brand:#E3350D;            /* color de jugador: puntos, franjas */
+  --accent:#C8321A; --accent-d:#A32511; --accent-l:#E3482A;   /* SOLO acción primaria (texto blanco) */
   --gold:#FFCB05; --red:#E3350D; --blue:#2F8FBF; --grave:#6B7280;
-
-  --bg:#DCE5EC; --surface:#FFFFFF; --surface2:#EEF3F7;
-  --line:#C5D0DB; --edge:#1B2A4A; --bar:#1B2A4A;
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface2:#F0ECE1;
+  --line:#DDD6C5; --edge:#B9B09A; --bar:#1B2A4A;
   --txt:#1B2433; --muted:#4F5B70; --dex:#5E6A80; --title:#1B2A4A;
   --red-soft:#FBE4DF;
-  --ok:#2E9B5E; --danger:#9B1C0A; --link:#1F6FA0;
+  --ok:#2E8B57; --danger:#B0126B; --danger-d:#8E0F57; --link:#1F6FA0;   /* peligro = magenta, separado del rojo */
+  --focus:#1F6FA0;
   --me-color:var(--brand);
 
-  --r-sm:4px; --r:8px; --r-lg:12px;
+  /* espaciado */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+  /* radios */
+  --r-sm:8px; --r:12px; --r-lg:14px; --r-pill:999px;
+  /* sombras suaves */
+  --sh-1:0 1px 2px rgba(27,42,74,.08),0 1px 1px rgba(27,42,74,.05);
+  --sh-2:0 6px 18px rgba(27,42,74,.12);
+  --sh-btn:0 1px 0 rgba(255,255,255,.25) inset,0 2px 6px rgba(163,37,17,.3);
 
-  --sans:"Archivo","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  /* tipografía: una sola sans redondeada; Silkscreen solo en números */
+  --sans:"Nunito","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
   --retro:"Silkscreen",ui-monospace,monospace;
-  --fs-xs:.75rem; --fs-sm:.85rem; --fs-md:.95rem; --fs-lg:1.1rem;
-  --fs-xl:clamp(1.25rem,1.05rem + 1vw,1.55rem);
+  --fs-xs:.75rem; --fs-sm:.875rem; --fs-md:1rem; --fs-lg:1.125rem;
+  --fs-xl:clamp(1.25rem,1.05rem + 1vw,1.5rem);
   --fs-2xl:clamp(1.5rem,1.2rem + 1.5vw,2rem);
+  --tap:44px;
 
-  --ease:cubic-bezier(.2,.7,.3,1);
+  --ease:cubic-bezier(.2,.7,.3,1); --bounce:cubic-bezier(.34,1.56,.64,1);
   --t:150ms var(--ease);
 
   /* hexágonos de Kalos (cabeceras de payo y fondo del login) */
@@ -45,18 +55,22 @@
 /* Tema oscuro: por botón (data-theme) o por preferencia del sistema */
 :root[data-theme="dark"]{
   color-scheme: dark;
-  --bg:#0E1524; --surface:#17203A; --surface2:#1E2A48;
-  --line:#2D3B5F; --edge:#4B5E8C; --bar:#0A1020;
-  --txt:#E6ECF8; --muted:#9AA8C6; --dex:#8493B2; --title:#E6ECF8;
-  --accent:#C2371F; --accent-d:#A52D18; --red-soft:#3a1b18; --link:#6BB4E0;
+  --bg:#0B1226; --surface:#141E3A; --surface2:#1C2848;
+  --line:#2A3A62; --edge:#41568A; --bar:#080D1D;
+  --txt:#E8EDF9; --muted:#A3B0CC; --dex:#8F9DBD; --title:#F2F5FD;
+  --accent:#C2371F; --accent-d:#A52D18; --accent-l:#E04526; --red-soft:#3a1b18; --link:#7CBCE8;
+  --danger:#FF6FB5; --danger-d:#E0529A; --ok:#47C27E; --focus:#8CC8F0;
+  --sh-1:0 1px 2px rgba(0,0,0,.4); --sh-2:0 8px 22px rgba(0,0,0,.45);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme: dark;
-    --bg:#0E1524; --surface:#17203A; --surface2:#1E2A48;
-    --line:#2D3B5F; --edge:#4B5E8C; --bar:#0A1020;
-    --txt:#E6ECF8; --muted:#9AA8C6; --dex:#8493B2; --title:#E6ECF8;
-    --accent:#C2371F; --accent-d:#A52D18; --red-soft:#3a1b18; --link:#6BB4E0;
+    --bg:#0B1226; --surface:#141E3A; --surface2:#1C2848;
+  --line:#2A3A62; --edge:#41568A; --bar:#080D1D;
+  --txt:#E8EDF9; --muted:#A3B0CC; --dex:#8F9DBD; --title:#F2F5FD;
+  --accent:#C2371F; --accent-d:#A52D18; --accent-l:#E04526; --red-soft:#3a1b18; --link:#7CBCE8;
+  --danger:#FF6FB5; --danger-d:#E0529A; --ok:#47C27E; --focus:#8CC8F0;
+  --sh-1:0 1px 2px rgba(0,0,0,.4); --sh-2:0 8px 22px rgba(0,0,0,.45);
   }
 }
 
@@ -73,9 +87,9 @@ body{
 img{display:block}
 a{color:var(--link);text-decoration:underline;text-underline-offset:2px}
 button{font-family:inherit}
-:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:2px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
-h1,h2,h3,h4{color:var(--title);line-height:1.2;margin:0;font-stretch:115%}
+h1,h2,h3,h4{color:var(--title);line-height:1.2;margin:0;}
 h2{font-size:var(--fs-2xl);font-weight:800}
 h3{font-size:var(--fs-lg);font-weight:800}
 h4{font-size:var(--fs-md);font-weight:700}
@@ -86,12 +100,16 @@ h4{font-size:var(--fs-md);font-weight:700}
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:10px clamp(14px,4vw,24px);
   padding-top:calc(10px + env(safe-area-inset-top));
-  background:var(--bar);color:#fff;border-bottom:4px solid var(--brand);
-  position:sticky;top:0;z-index:30;
+  background:var(--bar);color:#fff;
+  position:sticky;top:0;z-index:30;box-shadow:var(--sh-2);margin-bottom:6px;
 }
+/* franja Pokéball: banda roja, línea y botón central (solo CSS) */
+.topbar::after{content:"";position:absolute;left:0;right:0;top:100%;height:6px;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,#fff 0 2.5px,#1b1b1b 2.5px 4px,transparent 4.2px),
+    linear-gradient(var(--brand) 0 3px,#1b1b1b 3px 4px,#fff 4px 6px)}
 .wrap{max-width:1280px;margin:0 auto;padding:clamp(16px,3vw,24px) clamp(14px,4vw,24px) 80px}
 .panel{display:none;margin-top:22px}
-.panel.active{display:block;animation:fade var(--t)}
+.panel.active{display:block;animation:panel-in .28s var(--ease)}
 @media (prefers-reduced-motion:reduce){.panel.active{animation:none}}
 
 /* ──────────────────────── 4) COMPONENTES ───────────────────── */
@@ -101,7 +119,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .brand .logo{width:32px;height:32px;flex:0 0 auto}
 .brand .logo.shake{animation:shake .6s var(--ease)}
 .brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0}
-.brand-text b{font-weight:800;font-stretch:125%;font-size:1.15rem;color:#fff}
+.brand-text b{font-weight:800;font-size:1.15rem;color:#fff}
 .brand-text small{font-weight:500;color:#A9B8D0;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .live-dot{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:0 0 auto;opacity:0;transition:opacity .3s;margin-left:2px}
 .live-dot.on{opacity:1;animation:pulse 1.2s var(--ease) 2}
@@ -112,97 +130,19 @@ h4{font-size:var(--fs-md);font-weight:700}
   border:2px solid #1b1b1b;position:relative}
 .pokeball::after{content:"";position:absolute;inset:38% 38%;background:#fff;border:1.5px solid #1b1b1b;border-radius:50%}
 
-/* --- Botones: físicos, se hunden al pulsar --- */
-.btn{appearance:none;border:2px solid var(--edge);background:var(--surface);color:var(--txt);
-  padding:8px 16px;border-radius:var(--r-sm);font-size:var(--fs-md);font-weight:700;cursor:pointer;
-  display:inline-flex;align-items:center;gap:8px;box-shadow:2px 2px 0 var(--edge);
-  transition:transform .06s,box-shadow .06s,background var(--t)}
-.btn svg{width:18px;height:18px}
-.btn:hover{background:var(--surface2)}
-.btn:active{transform:translate(2px,2px);box-shadow:none}
-.btn.primary{background:var(--accent);border-color:var(--edge);color:#fff}
-.btn.primary:hover{background:var(--accent-d)}
-.btn.danger{background:var(--danger);color:#fff}
-.btn.danger:hover{filter:brightness(.92)}
-.btn.ghost{background:transparent;border-color:var(--line);box-shadow:none}
-.btn.ghost:hover{background:var(--surface2);border-color:var(--edge)}
-.btn.ghost:active{transform:none}
-.btn.left{margin-right:auto}
-.btn.icon{padding:0;width:40px;height:40px;justify-content:center;background:transparent;border-color:var(--line);box-shadow:none}
-.btn.icon:active{transform:none}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-
-/* botones/chips sobre la barra oscura */
-.topbar .btn.ghost,.topbar .btn.icon,.topbar .me-chip{color:#fff;background:transparent;border-color:rgba(255,255,255,.35)}
-.topbar .btn.ghost:hover,.topbar .btn.icon:hover,.topbar .me-chip:hover{background:rgba(255,255,255,.12);border-color:#fff}
-
-/* --- Chip de usuario --- */
-.run-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.me-chip{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:var(--fs-md);
-  background:var(--surface);border:2px solid var(--line);padding:5px 12px;border-radius:var(--r-sm);color:var(--txt);cursor:pointer}
-.me-chip.small{font-size:var(--fs-sm);padding:4px 10px}
-.me-chip:hover{border-color:var(--edge)}
-.me-bar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:0 0 20px}
-.me-bar .primary{margin-left:auto}
-
-/* avatar del jugador (sprite redondo) o punto de color */
-.avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;image-rendering:pixelated;
-  background:var(--surface2);border:2px solid var(--edge);flex:0 0 auto;vertical-align:middle}
-.me-chip.small .avatar{width:22px;height:22px}
-.topbar .avatar{border-color:rgba(255,255,255,.6)}
-.avatar.photo,.favatar.photo{image-rendering:auto}
-.dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
-
-/* --- Pestañas de carpeta: la activa se funde con el contenido --- */
-.tabs{display:flex;gap:6px;margin:4px 0 0;padding:0 4px;border-bottom:2px solid var(--edge)}
-.tab{appearance:none;background:transparent;border:2px solid transparent;border-bottom:0;margin-bottom:-2px;
-  color:var(--muted);font:inherit;font-weight:700;font-size:var(--fs-md);padding:9px 18px;cursor:pointer;
-  border-radius:var(--r) var(--r) 0 0;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
-  transition:color var(--t),background var(--t)}
-.tab svg{width:20px;height:20px;flex:0 0 auto}
-.tab:hover{color:var(--txt);background:var(--surface2)}
-.tab.active,.tab[aria-selected="true"]{color:var(--title);background:var(--bg);border-color:var(--edge);
-  box-shadow:inset 0 4px 0 var(--brand)}
-
-/* --- Tarjeta de Pokémon --- */
-.list{display:flex;flex-direction:column;gap:10px}
-.mon{position:relative;display:flex;align-items:center;gap:12px;background:var(--surface);
-  border:1px solid var(--line);border-left:5px solid var(--line);border-radius:var(--r);padding:9px 12px;cursor:pointer;
-  transition:transform var(--t),box-shadow var(--t),border-color var(--t)}
-.mon:hover{border-color:var(--edge);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--edge)}
-.mon.team{border-left-color:var(--brand)}
-.mon.dead{border-left-color:var(--grave);background:var(--surface2)}
-.mon .sprite{width:56px;height:56px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--surface2);
-  border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
-.mon.dead .sprite{background:var(--bg)}
-.mon .sprite img{width:48px;height:48px;image-rendering:pixelated}
-.mon .info{min-width:0;flex:1}
-.mon .nick{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mon .sub{font-size:var(--fs-xs);color:var(--dex);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mon .dex{font-family:var(--retro);font-size:.62rem;color:var(--dex)}
-.lvl{font-family:var(--retro);font-size:.62rem;background:var(--surface2);border:1px solid var(--line);
-  border-radius:var(--r-sm);padding:3px 7px;color:var(--muted);flex:0 0 auto;white-space:nowrap}
-.state-mark{position:absolute;top:7px;right:9px;width:16px;height:16px;color:var(--muted)}
-.state-mark svg{width:100%;height:100%;display:block}
-.mon.dead .sprite img{filter:grayscale(1) brightness(.7);opacity:.85}
-.mon.dead .nick{color:var(--muted)}
-.mon.dead .state-mark{color:var(--grave)}
-
-/* botones de mover estado */
-.mon .moves{display:flex;gap:6px;flex:0 0 auto;opacity:0;transition:opacity var(--t)}
-.mon:hover .moves,.mon:focus-within .moves{opacity:1}
-.movebtn{appearance:none;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r-sm);
-  width:34px;height:34px;cursor:pointer;padding:0;display:grid;place-items:center;color:var(--muted);
-  transition:border-color var(--t),color var(--t),background var(--t)}
+/* --- Botones: un lenguaje. Primario = relleno rojo; resto planos/ghost --- */
+.btn,.chip,.movebtn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);
+  width:36px;height:36px;padding:0;display:grid;place-items:center;color:var(--muted)}
 .movebtn svg{width:18px;height:18px}
-.movebtn:hover{border-color:var(--accent);color:var(--accent);background:var(--surface2)}
+.movebtn:hover{border-color:var(--blue);color:var(--title);background:var(--surface2)}
+.movebtn:active{transform:scale(.92)}
 .mon.ro{cursor:default}
 .mon.ro:hover{transform:none;box-shadow:none;border-color:var(--line)}
 @media (hover:none){.mon .moves{opacity:1}}
 
 /* --- Columnas de Seguimiento --- */
 .columns{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.col{background:var(--surface);border:2px solid var(--edge);border-radius:var(--r-lg);padding:16px;min-height:140px}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:16px;min-height:140px}
 .col>h3{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:var(--fs-md)}
 .col>h3 svg{width:20px;height:20px;flex:0 0 auto;color:var(--muted)}
 .col.box{background:var(--surface2)}
@@ -215,7 +155,7 @@ h4{font-size:var(--fs-md);font-weight:700}
 .slot{width:34px;height:34px;border-radius:50%;border:2px dashed var(--line)}
 
 /* --- Tabla de Rutas --- */
-.routes-wrap{overflow-x:auto;border:2px solid var(--edge);border-radius:var(--r-lg);background:var(--surface);
+.routes-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);background:var(--surface);
   -webkit-overflow-scrolling:touch}
 table.routes{border-collapse:separate;border-spacing:0;width:100%;font-size:var(--fs-sm)}
 table.routes th,table.routes td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);
@@ -255,7 +195,7 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
   padding:2px;border-radius:var(--r-sm);transition:background var(--t)}
 .rmon:hover{background:color-mix(in srgb,var(--blue) 14%,transparent)}
 .rmon img{width:42px;height:42px;image-rendering:pixelated}
-.rmon em{font-style:normal;font-size:.65rem;color:var(--muted);max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmon em{font-style:normal;font-size:.75rem;color:var(--muted);max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rmon.dead{position:relative}
 .rmon.dead img{filter:grayscale(1) brightness(.7);opacity:.8}
 .rmon.dead em{color:var(--grave)}
@@ -265,16 +205,16 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 
 /* --- Payos (carnets de entrenador) --- */
 .friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
-.friend{position:relative;background:var(--surface);border:2px solid var(--edge);border-radius:var(--r-lg);
+.friend{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);
   cursor:pointer;transition:transform var(--t),box-shadow var(--t);padding:0 16px 16px}
-.friend:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--edge)}
+.friend:hover{transform:translateY(-3px);box-shadow:var(--sh-2)}
 .friend .fhead{margin:0 -16px 44px;height:60px;background:var(--fc,var(--brand));position:relative;
-  overflow:hidden;border-radius:10px 10px 0 0;border-bottom:2px solid var(--edge)}
+  overflow:hidden;border-radius:13px 13px 0 0}
 .friend .fhead::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.16}
 .friend .favatar{position:absolute;left:16px;top:30px;width:60px;height:60px;border-radius:50%;
   border:3px solid var(--surface);box-shadow:0 0 0 2px var(--edge);background:var(--surface2);object-fit:cover;image-rendering:pixelated}
 .friend .favatar.dot-av{display:grid;place-items:center}
-.friend .fname{font-weight:800;font-stretch:112%;font-size:var(--fs-lg);display:flex;align-items:center;gap:8px}
+.friend .fname{font-weight:800;font-size:var(--fs-lg);display:flex;align-items:center;gap:8px}
 .friend .fname .avatar,.friend .fname .dot{display:none}
 .friend .stats{display:flex;gap:16px;margin:6px 0 10px;color:var(--muted);font-size:var(--fs-sm)}
 .friend .stats b{color:var(--txt);font-size:1.05rem}
@@ -319,7 +259,7 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .grave-card .sprite{width:86px;height:86px;display:grid;place-items:center;border-radius:50%;
   background:color-mix(in srgb,var(--grave) 16%,var(--surface2))}
 .grave-card .sprite img{width:72px;height:72px;image-rendering:pixelated;filter:grayscale(1) brightness(.72)}
-.grave-card .gname{font-weight:800;font-stretch:112%;font-size:var(--fs-lg)}
+.grave-card .gname{font-weight:800;font-size:var(--fs-lg)}
 .grave-card .gmeta{font-size:var(--fs-xs);color:var(--muted)}
 .grave-card .gmeta b{color:var(--txt)}
 .grave-card .glvl{font-size:var(--fs-xs);font-weight:600;color:var(--muted);background:var(--surface);
@@ -329,10 +269,10 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .grave-card .epitaph.none{opacity:.7}
 
 /* --- Formularios --- */
-.card{background:var(--surface);border:2px solid var(--edge);border-radius:var(--r-lg);padding:clamp(18px,4vw,26px)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:clamp(18px,4vw,26px)}
 label{display:block;margin:14px 0 0;font-size:var(--fs-sm);font-weight:600;color:var(--muted)}
-input,select,textarea{width:100%;margin-top:6px;padding:10px 12px;background:var(--surface);color:var(--txt);
-  border:2px solid var(--line);border-radius:var(--r-sm);font-size:1rem;font-family:inherit;transition:border-color var(--t),box-shadow var(--t)}
+input,select,textarea{width:100%;margin-top:6px;padding:10px 12px;min-height:var(--tap);background:var(--surface);color:var(--txt);
+  border:1px solid var(--line);border-radius:var(--r);font-size:1rem;font-family:inherit;transition:border-color var(--t),box-shadow var(--t)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
 hr{border:none;border-top:1px solid var(--line);margin:20px 0}
 .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
@@ -341,8 +281,8 @@ hr{border:none;border-top:1px solid var(--line);margin:20px 0}
 .preview img.photo{image-rendering:auto;object-fit:cover}
 
 /* --- Modales --- */
-dialog{border:2px solid var(--edge);border-radius:var(--r-lg);background:var(--surface);color:var(--txt);
-  padding:0;max-width:460px;width:min(92vw,460px);box-shadow:6px 6px 0 var(--edge)}
+dialog{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);background:var(--surface);color:var(--txt);
+  padding:0;max-width:460px;width:min(92vw,460px);box-shadow:var(--sh-2)}
 dialog:modal{overscroll-behavior:contain}
 dialog::backdrop{background:rgba(14,21,36,.55);overflow:hidden;overscroll-behavior:contain}
 dialog[open]{animation:dialog-in .18s var(--ease)}
@@ -368,8 +308,8 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 /* --- Aviso (toast) --- */
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);
   display:flex;align-items:center;gap:10px;background:var(--surface);color:var(--txt);
-  border:2px solid var(--edge);border-left:6px solid var(--blue);padding:10px 16px;border-radius:var(--r-sm);
-  box-shadow:3px 3px 0 var(--edge);z-index:50;max-width:min(92vw,420px);font-weight:600;animation:toast-in .2s var(--ease)}
+  border:1px solid var(--line);border-left:6px solid var(--blue);padding:10px 16px;border-radius:var(--r-sm);
+  box-shadow:var(--sh-2);z-index:50;max-width:min(92vw,420px);font-weight:600;animation:toast-in .2s var(--ease)}
 .toast::before{content:"";width:18px;height:18px;flex:0 0 auto;background:var(--blue);
   -webkit-mask:var(--ic-info) center/contain no-repeat;mask:var(--ic-info) center/contain no-repeat}
 .toast.ok{border-left-color:var(--ok)}
@@ -394,7 +334,7 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 /* Login / registro */
 .gate{position:relative;display:grid;place-items:center;min-height:calc(100svh - 120px);isolation:isolate}
 .gate::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--hex);background-size:40px 68px;opacity:.07}
-.auth-card{width:min(100%,400px);text-align:center;box-shadow:6px 6px 0 var(--edge)}
+.auth-card{width:min(100%,400px);text-align:center;box-shadow:var(--sh-2)}
 .auth-card h2{margin-bottom:4px}
 .auth-card .logo-big{width:52px;height:52px;margin:0 auto 10px}
 .auth-card label{text-align:left}
@@ -411,6 +351,8 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 
 /* ─────────────────────────── 7) ANIMACIONES ────────────────── */
 @keyframes fade{from{opacity:0}}
+@keyframes panel-in{from{opacity:0;transform:translateY(8px)}}
+@keyframes bounce-in{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
 @keyframes shimmer{to{transform:translateX(100%)}}
 @keyframes toast-in{from{opacity:0;transform:translate(-50%,12px)}}
@@ -439,15 +381,17 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 
   /* pestañas → barra inferior fija tipo app */
   .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;padding:6px 4px calc(6px + env(safe-area-inset-bottom));
-    gap:0;background:var(--surface);border-bottom:0;border-top:2px solid var(--edge)}
-  .tab{flex:1;flex-direction:column;gap:2px;font-size:.65rem;padding:6px 1px;min-width:0;margin:0;border:0;border-radius:var(--r-sm)}
+    gap:0;overflow:visible;background:var(--surface);border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:0 -6px 18px rgba(0,0,0,.14)}
+  .tab{flex:1;flex-direction:column;justify-content:center;gap:2px;font-size:.75rem;padding:4px 1px;min-height:var(--tap);min-width:0;margin:0;border:0;border-radius:var(--r)}
   .tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tab.active,.tab[aria-selected="true"]{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);box-shadow:none}
-  .tab svg{width:21px;height:21px}
+  .tab.active,.tab[aria-selected="true"]{background:color-mix(in srgb,var(--blue) 18%,transparent);color:var(--title);box-shadow:inset 0 3px 0 var(--gold)}
+  .tab .ticon{width:26px;height:26px}
+  .btn,.chip,.me-chip,.menu-item{min-height:var(--tap)}
+  .btn.icon,.movebtn{width:var(--tap);height:var(--tap)}
   .wrap{padding-bottom:84px}
 
   /* modales → hoja inferior a pantalla completa */
-  dialog{max-width:100vw;width:100vw;margin:0;margin-top:auto;border-width:2px 0 0;border-radius:var(--r-lg) var(--r-lg) 0 0;
+  dialog{max-width:100vw;width:100vw;margin:0;margin-top:auto;border-width:1px 0 0;border-radius:var(--r-lg) var(--r-lg) 0 0;
     max-height:92svh;box-shadow:none}
   dialog[open]{animation:sheet-in .25s var(--ease)}
   #payoDialog{width:100vw;max-width:100vw;max-height:92svh}
@@ -466,13 +410,9 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 
 /* iconos: sprites de objetos de PokéAPI */
 .ticon,.iimg{width:28px;height:28px;object-fit:contain;image-rendering:pixelated;flex:0 0 auto}
-.tab .ticon{filter:grayscale(1);opacity:.6;transition:filter var(--t),opacity var(--t),transform var(--t)}
-.tab:hover .ticon,.tab.active .ticon,.tab[aria-selected="true"] .ticon{filter:none;opacity:1}
-.tab.active .ticon{transform:scale(1.1)}
 .movebtn .iimg{width:22px;height:22px}
 .empty-state .iimg{width:48px;height:48px;opacity:.7;filter:grayscale(.6)}
 .state-mark .iimg,.cross .iimg{width:24px;height:24px}
-@media (max-width:960px){.tab .ticon{width:26px;height:26px}}
 
 /* cambio de tema: una sola transición de la página entera */
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.25s}
@@ -483,13 +423,13 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .clock-toggle.on .online-dot{background:var(--ok);opacity:1;box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 30%,transparent)}
 .clock-card{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .clock-info{display:flex;align-items:center;gap:8px;font-size:var(--fs-lg)}
-@media (max-width:560px){.clock-toggle .clock-label{display:none}.clock-toggle{padding:0;width:40px;height:40px;justify-content:center}.clock-card .clock-toggle .clock-label{display:inline}.clock-card .clock-toggle{width:auto;padding:0 16px}}
+@media (max-width:560px){.clock-toggle .clock-label{display:none}.clock-toggle{padding:0;width:44px;height:44px;justify-content:center}.clock-card .clock-toggle .clock-label{display:inline}.clock-card .clock-toggle{width:auto;padding:0 16px}}
 
 /* misiones */
 .missions-head{display:flex;justify-content:flex-end;margin-bottom:14px}
 .mprogress{width:100%;display:flex;flex-direction:column;gap:6px;font-weight:700}
-.mprogress .bar{height:10px;border:2px solid var(--edge);border-radius:99px;background:var(--surface2);overflow:hidden}
-.mprogress .bar i{display:block;height:100%;background:var(--accent);transition:width .4s var(--ease)}
+.mprogress .bar{height:10px;border:1px solid var(--line);border-radius:99px;background:var(--surface2);overflow:hidden}
+.mprogress .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));transition:width .4s var(--ease)}
 .missions{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .mission{display:flex;flex-direction:column;gap:10px}
 .mission h3{margin:0;font-size:var(--fs-lg)}
@@ -503,7 +443,7 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .reward.locked svg{width:28px;height:28px;flex:0 0 auto}
 .reward.open{border-style:solid;border-color:var(--gold)}
 .reward.open .iimg{width:40px;height:40px}
-select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);border-radius:var(--r-sm);font-size:1rem;font-family:inherit;background:var(--surface);color:var(--txt)}
+select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:1rem;font-family:inherit;background:var(--surface);color:var(--txt)}
 
 /* Conectados: tu fichaje arriba (color propio), luego conectados y últimas conexiones */
 .clock-card{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));transition:background var(--t),border-color var(--t)}
@@ -528,7 +468,7 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);
 .theme-btn{gap:8px}
 .usermenu{position:relative}
 .menu{position:absolute;right:0;top:calc(100% + 8px);min-width:190px;background:var(--surface);color:var(--txt);
-  border:2px solid var(--edge);border-radius:var(--r);box-shadow:4px 4px 0 var(--edge);padding:6px;z-index:60}
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-2);padding:6px;z-index:60}
 .menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
 .menu-item{display:block;width:100%;text-align:left;appearance:none;background:transparent;border:0;color:inherit;
   font:inherit;font-weight:600;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer}
@@ -545,14 +485,6 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);
   .me-chip.small{padding:3px}
   .topbar{gap:8px}
 }
-/* iconos propios: contorno que hereda el color; el relleno .a se enciende en la pestaña activa */
-.tab svg{width:22px;height:22px}
-.tab svg .a{fill:currentColor;fill-opacity:0;transition:fill-opacity var(--t)}
-.tab:hover svg .a{fill-opacity:.12}
-.tab.active svg,.tab[aria-selected="true"] svg{color:var(--accent)}
-.tab.active svg .a,.tab[aria-selected="true"] svg .a{fill-opacity:.25}
-@media (max-width:960px){.tab svg{width:24px;height:24px}}
-
 /* centrado en escritorio: nada pegado a la izquierda con medio ancho vacío */
 .missions,.grave-wall,.friends{margin-inline:auto}
 .missions{max-width:1000px}
@@ -567,25 +499,26 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:2px solid var(--line);
 .routes-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-bottom:14px}
 .rprogress{flex:1 1 260px;display:flex;flex-direction:column;gap:6px;font-weight:600}
 .rprogress b{font-weight:800}
-.bar{height:10px;border:2px solid var(--edge);border-radius:99px;background:var(--surface2);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);transition:width .4s var(--ease)}
+.bar{height:10px;border:1px solid var(--line);border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));transition:width .4s var(--ease)}
 .bar.mini{height:6px;border-width:1px;width:100%}
 .rfilters{display:flex;flex-wrap:wrap;gap:8px}
-.chip{appearance:none;font:inherit;font-weight:700;font-size:var(--fs-sm);padding:6px 14px;border-radius:99px;cursor:pointer;
-  border:2px solid var(--line);background:var(--surface);color:var(--txt);transition:background var(--t),border-color var(--t)}
-.chip:hover{border-color:var(--edge)}
-.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip{font-weight:800;font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-4);min-height:36px;border-radius:var(--r-pill);
+  border:1px solid var(--line);background:transparent;color:var(--txt)}
+.chip:hover{border-color:var(--edge);background:var(--surface2)}
+.chip:active{transform:scale(.96)}
+.chip.on{background:color-mix(in srgb,var(--blue) 22%,var(--surface));border-color:var(--blue);color:var(--title)}
 .routes-wrap{max-height:calc(100svh - 270px);min-height:320px;overflow:auto}
-.rprog{font-weight:700;color:var(--muted);font-size:.7rem}
+.rprog{font-weight:700;color:var(--muted);font-size:.75rem}
 tr.zone th{background:var(--surface2);text-align:left;padding:0;position:sticky;left:0}
 .zbtn{appearance:none;display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:0;color:var(--title);
-  font:inherit;font-weight:800;font-stretch:112%;padding:8px 12px;cursor:pointer;text-align:left}
+  font:inherit;font-weight:800;padding:8px 12px;cursor:pointer;text-align:left}
 .zbtn:hover{background:color-mix(in srgb,var(--accent) 8%,transparent)}
 .zbtn .caret{width:1em;color:var(--muted)}
 .zprog{margin-left:auto;font-size:var(--fs-sm);color:var(--muted);font-weight:700}
 .rlabel.current{box-shadow:inset 4px 0 0 var(--accent)}
 .rlabel .here{color:var(--accent);font-weight:900;margin-right:6px}
-.cs{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.62rem;font-weight:700;line-height:1.1}
+.cs{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.75rem;font-weight:700;line-height:1.1}
 .cs svg{width:20px;height:20px}
 .cs em{font-style:normal}
 .cs.pending{color:var(--st-pending);opacity:.7}
@@ -608,7 +541,7 @@ td:not(.addable).c-pending .cs svg{display:none}
 td:not(.addable).c-pending .cs{opacity:.45}
 
 /* pestañas con sprites de objetos de PokéAPI: más legibles cuando están inactivas */
-.tab .ticon{filter:grayscale(.35);opacity:.85}
+.tab .ticon{filter:grayscale(.35);opacity:.85;transition:filter var(--t),opacity var(--t)}
 .tab:hover .ticon,.tab.active .ticon,.tab[aria-selected="true"] .ticon{filter:none;opacity:1}
 
 /* ───────── Banners de perfil ───────── */
@@ -616,7 +549,7 @@ td:not(.addable).c-pending .cs{opacity:.45}
 .banner::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.16;pointer-events:none}
 .banner .bart{position:absolute;right:6px;bottom:-10px;height:80px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.28))}
 .banner .btitle{position:absolute;left:12px;top:8px;max-width:calc(100% - 100px);padding:2px 9px;border-radius:99px;
-  background:rgba(0,0,0,.38);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  background:rgba(0,0,0,.38);color:#fff;font-size:.75rem;font-weight:800;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .friend .fhead.banner{height:84px;margin-bottom:44px;background:linear-gradient(120deg,var(--b1),var(--b2))}
 .friend .favatar{top:54px}
 .payo-banner{height:96px;margin:0 -24px;border-bottom:2px solid var(--edge)}
@@ -636,3 +569,8 @@ td:not(.addable).c-pending .cs{opacity:.45}
   white-space:normal;font-weight:600}
 .btile .bart{height:72px;bottom:-8px}
 @media (prefers-reduced-motion:reduce){.btile{transition:none}}
+
+/* movimiento reducido: sin rebotes ni transiciones largas */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
