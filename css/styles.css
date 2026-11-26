@@ -521,22 +521,23 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 @media (max-width:560px){.clock-toggle .clock-label{display:none}.clock-toggle{padding:0;width:44px;height:44px;justify-content:center}.clock-card .clock-toggle .clock-label{display:inline}.clock-card .clock-toggle{width:auto;padding:0 16px}}
 
 /* misiones */
-.missions-head{display:flex;justify-content:flex-end;margin-bottom:14px}
-.mprogress{width:100%;display:flex;flex-direction:column;gap:6px;font-weight:700}
+.missions-head{margin:0}
+.mprogress{min-width:min(280px,100%);display:flex;flex-direction:column;gap:6px;font-weight:700}
 .mprogress .bar{height:10px;border:1px solid var(--line);border-radius:99px;background:var(--surface2);overflow:hidden}
 .mprogress .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));transition:width .4s var(--ease)}
 .missions{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.mission{display:flex;flex-direction:column;gap:10px}
+.mission{display:flex;flex-direction:column;gap:var(--sp-3)}
 .mission h3{margin:0;font-size:var(--fs-lg)}
 .mission p{margin:0}
 .mission footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;flex-wrap:wrap;font-size:var(--fs-sm)}
-.mission.done{border-color:var(--ok)}
-.done-tag{font-weight:800;color:var(--ok)}
-.reward{display:flex;align-items:center;gap:12px;padding:10px 12px;border:2px dashed var(--line);border-radius:var(--r-sm);background:var(--surface2)}
+.mission.done{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 7%,var(--surface))}
+.done-tag{font-weight:800;color:var(--ok);display:inline-flex;align-items:center;gap:var(--sp-1)}
+.done-tag::before{content:"";width:16px;height:16px;background:currentColor;-webkit-mask:var(--ic-ok) center/contain no-repeat;mask:var(--ic-ok) center/contain no-repeat}
+.reward{display:flex;align-items:center;gap:12px;padding:var(--sp-3);border:1px dashed var(--edge);border-radius:var(--r);background:var(--surface2)}
 .reward small{display:block;color:var(--muted);font-size:var(--fs-sm)}
 .reward.locked{color:var(--muted)}
 .reward.locked svg{width:28px;height:28px;flex:0 0 auto}
-.reward.open{border-style:solid;border-color:var(--gold)}
+.reward.open{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--surface))}
 .reward.open .iimg{width:40px;height:40px}
 select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:1rem;font-family:inherit;background:var(--surface);color:var(--txt)}
 
@@ -589,7 +590,7 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);
 .missions{max-width:1000px}
 .grave-wall>.empty-state,.missions>.empty-state,.friends>.empty-state{grid-column:1/-1}
 .panel .empty-state{padding:36px 12px}
-#panel-misiones .missions-head,#panel-conectados>*{max-width:1000px;margin-inline:auto}
+#panel-misiones>.panel-head,#panel-conectados>*{max-width:1000px;margin-inline:auto}
 #panel-conectados .friends{max-width:1000px}
 
 /* ───────── Rutas ───────── */

@@ -20,17 +20,17 @@ export function renderMissions() {
   const mine = new Set(completions.filter((c) => c.user_id === S.user.id).map((c) => c.mission_id));
   const total = missions.length;
   $("missionsHead").innerHTML = S.isAdmin
-    ? `<button class="btn primary" id="newMissionBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Nueva misión</span></button>`
-    : `<div class="mprogress"><span><b>${mine.size}</b>/${total} completadas</span><div class="bar"><i style="width:${total ? (mine.size / total) * 100 : 0}%"></i></div></div>`;
+    ? `<button type="button" class="btn primary" id="newMissionBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Nueva misión</span></button>`
+    : `<div class="mprogress"><span><b>${mine.size}</b>/${total} completadas</span><div class="bar" role="progressbar" aria-label="Misiones completadas" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${mine.size}"><i style="width:${total ? (mine.size / total) * 100 : 0}%"></i></div></div>`;
   $("missionList").innerHTML = missions.map((m) => {
     const done = mine.has(m.id), rw = rewards.get(m.id);
     const n = completions.filter((c) => c.mission_id === m.id).length;
     const reward = rw
       ? `<div class="reward open">${rw.reward_item ? itemTag(rw.reward_item) : ""}<div><small>Recompensa</small><b>${esc(rw.reward_text)}</b></div></div>`
       : `<div class="reward locked">${LOCK}<div><small>Recompensa</small><b>Oculta hasta completar</b></div></div>`;
-    const action = S.isAdmin ? `<button class="btn ghost" data-edit="${esc(m.id)}">Editar</button>`
+    const action = S.isAdmin ? `<button type="button" class="btn ghost" data-edit="${esc(m.id)}">Editar</button>`
       : done ? `<span class="done-tag">Completada</span>`
-      : `<button class="btn primary" data-done="${esc(m.id)}">Marcar completada</button>`;
+      : `<button type="button" class="btn primary" data-done="${esc(m.id)}">Marcar completada</button>`;
     return `<article class="card mission${done ? " done" : ""}">
       <h3>${esc(m.title)}</h3>
       ${m.description ? `<p class="muted">${esc(m.description)}</p>` : ""}
