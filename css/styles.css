@@ -435,7 +435,7 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .switch a{font-weight:700}
 
 /* Perfil: tarjeta estrecha a la izquierda; medallas y banners apilados a la derecha */
-.profile-layout{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:var(--sp-5);max-width:1000px;margin-inline:auto;align-items:start}
+.profile-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-5);max-width:1000px;margin-inline:auto;align-items:start}
 #panel-perfil>.panel-head{max-width:1000px;margin-inline:auto}
 .profile-card{min-width:0;padding:var(--sp-4)}
 .profile-side{display:grid;gap:var(--sp-5);min-width:0}
@@ -750,7 +750,8 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 .profile-card{display:flex;flex-direction:column}
 .profile-card #profileForm{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:var(--sp-3)}
 .profile-card .form-actions{margin-top:auto}
-.profile-side{grid-template-rows:auto 1fr}
+.banner-card{grid-column:1/-1}
+.form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3)}
 .banner-card{display:flex;flex-direction:column}
 .banner-grid{flex:1;grid-auto-rows:minmax(84px,1fr)}
 .btile{height:auto;min-height:84px;display:flex;flex-direction:column;justify-content:flex-end}
@@ -772,4 +773,4 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 .smode{color:var(--muted);font-size:var(--fs-xs)}
 #themeToggle[aria-disabled]{opacity:.6}
 @media (prefers-reduced-motion:reduce){.stile{transition:none}.stile:hover{transform:none}}
-@media (max-width:760px){.profile-side{grid-template-rows:none}.skin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.form-row{grid-template-columns:minmax(0,1fr)}.skin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

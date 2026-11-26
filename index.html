@@ -215,18 +215,17 @@
             <h3>Tu perfil</h3>
             <p class="hours-row">Horas jugadas: <b id="pHours">0 min</b></p>
             <form id="profileForm">
-              <label>Nombre visible<input id="pName" maxlength="20" /></label>
-              <label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
-              <label>…o avatar por URL de imagen<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label>
+              <div class="form-row"><label>Nombre visible<input id="pName" maxlength="20" /></label>
+              <label>Tu frase<input id="pMotto" maxlength="40" placeholder="Ej. Nunca subestimes a un Magikarp" autocomplete="off" /></label></div>
+              <div class="form-row"><label>Avatar (Pokémon)<input id="pAvatar" list="pokeList" placeholder="Busca un Pokémon…" autocomplete="off" /></label>
+              <label>…o avatar por URL<input id="pAvatarUrl" type="url" placeholder="https://… (Google, Imgur…)" autocomplete="off" /></label></div>
               <div class="preview" id="avatarPreview"></div>
-              <label>Tu frase<input id="pMotto" maxlength="40" placeholder="Ej. Nunca subestimes a un Magikarp" autocomplete="off" /></label>
               <div class="form-actions">
                 <button type="button" class="btn ghost" id="pClear">Sin avatar</button>
                 <button type="submit" class="btn primary">Guardar perfil</button>
               </div>
             </form>
           </div>
-          <div class="profile-side">
           <div class="card medals-card">
             <div id="medalsEdit"></div>
           </div>
@@ -234,7 +233,6 @@
             <h3>Banner</h3>
             <p class="muted">Se ve en tu tarjeta de Payos junto a tu frase. Elige el que más te represente.</p>
             <div class="banner-grid" id="bannerGrid" role="radiogroup" aria-label="Banner"></div>
-          </div>
           </div>
           <div class="card skin-card">
             <h3>Tema de la web</h3>
