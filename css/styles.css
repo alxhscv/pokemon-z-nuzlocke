@@ -326,12 +326,13 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .medals-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px}
 .medal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .medal-tile{appearance:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;
-  background:var(--surface2);border:2px solid var(--line);border-radius:var(--r);color:var(--muted);
+  background:var(--surface2);border:1px solid var(--line);border-radius:var(--r);color:var(--muted);
   font:inherit;font-size:var(--fs-xs);font-weight:700;cursor:pointer;
   transition:transform .1s,border-color var(--t),background var(--t)}
 .medal-tile img{width:52px;height:52px;object-fit:contain;filter:grayscale(1);opacity:.35;transition:filter var(--t),opacity var(--t)}
 .medal-tile:hover{border-color:var(--edge)}
-.medal-tile.on{color:var(--txt);border-color:var(--edge);background:color-mix(in srgb,var(--gold) 22%,var(--surface))}
+.medal-tile:focus-visible{outline-offset:2px}
+.medal-tile.on{color:var(--txt);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);background:color-mix(in srgb,var(--gold) 22%,var(--surface))}
 .medal-tile.on img{filter:none;opacity:1}
 .medal-tile.just-on{animation:medal-pop .5s var(--ease)}
 
@@ -434,7 +435,8 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .switch a{font-weight:700}
 
 /* Perfil: formulario a la izquierda, medallas a la derecha */
-.profile-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:20px;align-items:start;max-width:960px}
+.profile-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:var(--sp-5);align-items:start;max-width:1000px;margin-inline:auto}
+#panel-perfil>.panel-head{max-width:1000px;margin-inline:auto}
 .profile-card{min-width:0}
 
 /* ────────────────────────── 6) UTILIDADES ──────────────────── */
@@ -665,13 +667,15 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 .payo-banner{height:96px;margin:0 -24px;border-bottom:2px solid var(--edge)}
 .payo-admin select{width:auto;margin:0;padding:8px 10px}
 .banner-card{grid-column:1/-1}
+.banner-card:has(.banner-grid:empty){display:none}   /* el admin no elige banner propio */
 .banner-card p{margin:2px 0 14px}
 .banner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
 .btile{appearance:none;position:relative;overflow:hidden;height:84px;padding:10px 12px;text-align:left;cursor:pointer;
-  border:2px solid var(--edge);border-radius:var(--r);font:inherit;transition:transform var(--t),box-shadow var(--t)}
-.btile:hover{transform:translateY(-2px);box-shadow:0 3px 0 var(--edge)}
-.btile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  border:1px solid var(--edge);border-radius:var(--r);font:inherit;box-shadow:var(--sh-1);transition:transform var(--t),box-shadow var(--t)}
+.btile:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.btile:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .btile.on{outline:3px solid var(--accent);outline-offset:2px}
+.btile.on:focus-visible{outline-color:var(--focus)}
 .btile.on::after{content:"✓";position:absolute;right:8px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--accent);
   color:#fff;display:grid;place-items:center;font-weight:900;font-size:.8rem;z-index:2}
 .btile .bname{position:relative;display:block;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.5)}
