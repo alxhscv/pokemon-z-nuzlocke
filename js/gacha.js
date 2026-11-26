@@ -11,11 +11,27 @@ const mon = (id) => byId.get(+id)?.es || `#${id}`;
 const rname = (r) => RAR[r]?.[0] || esc(r);
 const gcard = (pid, rar, extra = "", badge = "") => `<div class="gcard r-${esc(rar)}"${extra}>${badge}<img src="${sprite(pid)}" alt="" loading="lazy"><b>${esc(mon(pid))}</b><span class="rtag">${rname(rar)}</span></div>`;
 
-let last = [], busy = false;
+let last = [], busy = false, demo = false;
+
+const CAPS = `<span class="capsule" aria-hidden="true"></span>`;
+// tirada de prueba: solo en el navegador, no gasta monedas ni se guarda (la usa cualquiera para ver la animación)
+async function demoPull(n) {
+  if (busy) return;
+  busy = true; demo = true; renderGacha();
+  await new Promise((r) => setTimeout(r, 1500));
+  const ids = [...byId.keys()];
+  last = Array.from({ length: n }, () => {
+    let x = Math.random() * 100, rar = ORDER[0];
+    for (const r of ORDER) { if ((x -= RAR[r][1]) < 0) { rar = r; break; } }
+    return { pokemon_id: ids[Math.floor(Math.random() * ids.length)], rarity: rar };
+  });
+  if (last.some((p) => p.rarity === "legendario")) confetti();
+  busy = false; renderGacha();
+}
 
 async function pull(n) {
   if (busy) return;
-  busy = true; renderGacha();
+  busy = true; demo = false; renderGacha();
   try {
     last = await pullGacha(n);
     if (last.some((p) => p.rarity === "legendario")) confetti();
@@ -42,11 +58,14 @@ export function renderGacha() {
     </form>
     <div class="table-wrap"><table class="rank-table"><caption class="sr-only">Saldos</caption><thead><tr><th scope="col">Jugador</th><th scope="col" class="num">Monedas</th></tr></thead>
     <tbody>${S.players.map((p) => `<tr><th scope="row" class="who">${playerIcon(p.profiles)}<span>${esc(p.profiles?.display_name || "???")}</span></th><td class="num">${S.wallets?.[p.user_id] ?? 0}</td></tr>`).join("")}</tbody></table></div></section>` : "";
-  const player = S.isAdmin ? `<p class="notice">El admin no tira. Usa el panel de monedas.</p>` : `<section class="card gacha-main">
-    <div class="wallet"><span class="coin" aria-hidden="true"></span><b>${coins}</b> monedas</div>
+  const player = `<section class="card gacha-main">
+    ${S.isAdmin ? "" : `<div class="wallet"><span class="coin" aria-hidden="true"></span><b>${coins}</b> monedas</div>
     <div class="gbtns"><button type="button" class="btn primary" id="g1"${can(1) ? "" : " disabled"}>Tirar x1 (${GACHA_COST})</button>
-    <button type="button" class="btn primary" id="g10"${can(10) ? "" : " disabled"}>Tirar x10 (${GACHA_COST * 10})</button></div>
-    <div class="reveal" aria-live="polite">${busy ? `<span class="muted">Girando…</span>` : last.length ? last.map((p, i) => gcard(p.pokemon_id, p.rarity, ` style="--i:${i}"`)).join("") : `<span class="muted">Tu última tirada aparecerá aquí.</span>`}</div></section>`;
+    <button type="button" class="btn primary" id="g10"${can(10) ? "" : " disabled"}>Tirar x10 (${GACHA_COST * 10})</button></div>`}
+    <div class="gbtns"><button type="button" class="btn" id="gd1"${busy ? " disabled" : ""}>Tirada gratis x1</button>
+    <button type="button" class="btn" id="gd10"${busy ? " disabled" : ""}>Tirada gratis x10</button></div>
+    <p class="muted">Las tiradas gratis son de prueba: no gastan monedas ni se guardan en tu colección.</p>
+    <div class="reveal" aria-live="polite">${busy ? CAPS : last.length ? last.map((p, i) => gcard(p.pokemon_id, p.rarity, ` style="--i:${i}"`)).join("") : `<span class="muted">Tu última tirada aparecerá aquí.</span>`}</div></section>`;
   box.innerHTML = `${ready ? "" : notReadyHTML()}${player}
     <h3 class="sect">Probabilidades</h3>
     <div class="table-wrap"><table class="rank-table"><caption class="sr-only">Probabilidades por rareza</caption><thead><tr><th scope="col">Rareza</th><th scope="col" class="num">Probabilidad</th></tr></thead>
@@ -58,6 +77,8 @@ export function renderGacha() {
     ${pulls.length ? `<ul class="battle-list">${pulls.slice(0, 15).map((p) => `<li><span class="bw"><b>${esc(nameOf(p.user_id))}</b></span><span class="vs">sacó</span><span class="rtag r-${esc(p.rarity)}">${esc(mon(p.pokemon_id))}</span><time class="when">${ago(p.created_at)}</time></li>`).join("")}</ul>` : `<div class="empty-state"><span>Nadie ha tirado todavía.</span></div>`}`;
   $("g1")?.addEventListener("click", () => pull(1));
   $("g10")?.addEventListener("click", () => pull(10));
+  $("gd1")?.addEventListener("click", () => demoPull(1));
+  $("gd10")?.addEventListener("click", () => demoPull(10));
   ["gUser", "gAmount"].forEach((id, i) => { if ($(id) && keep[i]) $(id).value = keep[i]; });
   $("gForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();

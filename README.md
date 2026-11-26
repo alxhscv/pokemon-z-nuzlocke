@@ -27,7 +27,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
    - **🏆 Ranking** — todos los usuarios con victorias, derrotas y % de victorias, y el registro de las **últimas batallas** (entre nosotros). **Solo el admin** registra o borra batallas: el ganador recibe +50 monedas y el perdedor +20.
-   - **🎰 Gacha** — gastas monedas (**100 por tirada**, x1 o x10) y consigues Pokémon para tu colección: Común 70 % · Raro 22 % · Épico 7 % · Legendario 1 %. El sorteo lo hace el servidor (no se puede trucar). El admin reparte o quita monedas; el admin no tira.
+   - **🎰 Gacha** — gastas monedas (**100 por tirada**, x1 o x10) y consigues Pokémon para tu colección: Común 70 % · Raro 22 % · Épico 7 % · Legendario 1 %. Hay además **tiradas gratis de prueba** (x1/x10, también para el admin): solo muestran la animación y las rarezas en el navegador, sin gastar monedas ni guardar nada. El sorteo real lo hace el servidor (no se puede trucar). El admin reparte o quita monedas; el admin no tira.
    - **🧑 Perfil** — eliges tu **banner** (26 temas: tipos, Kalos, Mega, Zygarde, shiny…; el admin puede cambiar el de cualquiera), escribes tu propia **frase** (máx. 40; se ve sobre tu banner en Payos), editas tu nombre y avatar y tus **medallas** (fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores), todo en una **sola columna centrada**. El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
