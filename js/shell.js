@@ -2,6 +2,7 @@ import { fillProfile } from "./perfil.js";
 import { loadMissions } from "./misiones.js";
 import { renderRanking } from "./ranking.js";
 import { renderGacha } from "./gacha.js";
+import { initCasino } from "./casino.js";
 import { $, toast } from "./core.js";
 
 // pestañas
@@ -15,7 +16,7 @@ export function selectTab(name) {
   if (name === "perfil") fillProfile();
   if (name === "misiones") loadMissions();
   if (name === "ranking") renderRanking();
-  if (name === "gacha") renderGacha();
+  if (name === "gacha") { initCasino(); renderGacha(); }
 }
 
 // tema claro/oscuro (botón + prefers-color-scheme por defecto)

@@ -1,0 +1,119 @@
+/* Gacha del Casino. Colores de rareza fijos (--c por elemento); el resto usa los tokens del tema. */
+@property --ac{syntax:"<color>";inherits:true;initial-value:#3b9cff}
+@property --ga{syntax:"<angle>";inherits:false;initial-value:0deg}
+
+.cg{display:grid;gap:var(--sp-3)}
+.cg-info{margin:0;color:var(--txt);line-height:1.6}
+.cg-chip{display:inline-block;padding:1px 8px;border-radius:var(--r-pill);border:1px solid var(--c);color:var(--txt);font-weight:700;font-size:.85em;white-space:nowrap}
+.cg-pity{display:flex;align-items:center;gap:var(--sp-3);font-weight:700}
+.cg-bar{flex:1;max-width:320px;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
+.cg-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));transition:width .4s}
+.cg-act{display:flex;gap:var(--sp-3);flex-wrap:wrap}
+.cg-pull{font-weight:800;min-width:150px}
+.cg-pull small{opacity:.85;margin-left:6px}.cg-pull small::before{content:"🪙 "}
+.cg-pull:disabled{opacity:.5;cursor:not-allowed}
+.cg-msg{margin:0;min-height:1.2em;color:var(--red);font-weight:700}
+.cg-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.cg-h{margin:var(--sp-2) 0 0}
+.cg-cnt{font-weight:400;opacity:.7;font-size:.8em}
+.cg-hist,.cg-inv,.cg-filters{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.cg-h-i{width:48px;height:48px;border-radius:var(--r-lg);border:2px solid var(--c);background:var(--surface);display:grid;place-items:center}
+.cg-h-i img{width:40px;height:40px;image-rendering:pixelated}
+.cg-empty{opacity:.7}
+.cg-f{padding:5px 14px;border:2px solid var(--c);border-radius:var(--r-pill);background:var(--surface);color:var(--txt);font-weight:700;cursor:pointer}
+.cg-f.on{background:var(--c);color:#111}
+.cg-it{position:relative;width:92px;padding:4px;text-align:center;border:2px solid var(--c);border-radius:var(--r-lg);background:var(--surface);font-size:.75rem}
+.cg-it img{width:64px;height:64px;image-rendering:pixelated}
+.cg-it span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cg-it em{position:absolute;top:2px;right:4px;font-style:normal;font-weight:800;font-size:.7rem}
+.cg-pull:focus-visible,.cg-f:focus-visible,.cg-skip:focus-visible,.cg-close:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* ---- overlay ---- */
+.cg-ov{position:fixed;inset:0;z-index:1000;color:#fff}
+.cg-stage{position:absolute;inset:0;overflow:hidden;background:rgba(8,8,18,.94);transition:background .3s}
+.cg-stage.cg-black{background:#000}
+.cg-bg,.cg-aura,.cg-fxl,.cg-slot,.cg-cv{position:absolute;inset:0}
+.cg-cv{width:100%;height:100%;pointer-events:none;z-index:2}
+.cg-aura{z-index:1;opacity:0;background:radial-gradient(circle at 50% 50%,var(--ac) 0,transparent 55%);transition:--ac .5s}
+.cg-aura.on{animation:cgCharge 1s ease-in forwards}
+@keyframes cgCharge{0%{opacity:0;transform:scale(.2)}30%{opacity:.6}100%{opacity:1;transform:scale(1.25)}}
+.cg-fxl{z-index:3;pointer-events:none}
+.cg-slot{z-index:4;display:grid;place-items:center;padding:var(--sp-4)}
+.cg-skip,.cg-close{position:absolute;z-index:10;bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:var(--r-pill);border:2px solid #fff;background:rgba(0,0,0,.6);color:#fff;font-weight:800;cursor:pointer}
+.cg-close{background:var(--red)}
+.cg-skip kbd{opacity:.7;font-size:.8em;margin-left:4px}
+
+/* flash, shake y efectos por tier */
+.cg-flash{position:absolute;inset:0;background:var(--f);animation:cgFlash .6s ease-out forwards}
+@keyframes cgFlash{from{opacity:.9}to{opacity:0}}
+.cg-sh1{animation:cgSh .08s linear 6}
+.cg-sh2{animation:cgSh .07s linear 10;--m:12px}
+.cg-sh1{--m:5px}
+@keyframes cgSh{25%{transform:translate(var(--m),calc(var(--m)*-.6))}50%{transform:translate(calc(var(--m)*-1),var(--m))}75%{transform:translate(calc(var(--m)*.6),calc(var(--m)*.6))}}
+.cg-ring{position:absolute;left:50%;top:50%;width:30vmin;height:30vmin;margin:-15vmin;border-radius:50%;border:4px solid var(--c);box-shadow:0 0 30px var(--c),inset 0 0 30px var(--c);animation:cgRing 1s ease-out forwards;opacity:0}
+@keyframes cgRing{from{opacity:1;transform:scale(.2)}to{opacity:0;transform:scale(3.2)}}
+.cg-crack{position:absolute;left:50%;top:50%;width:70vmax;height:3px;transform-origin:0 50%;transform:rotate(var(--a)) scaleX(0);background:linear-gradient(90deg,#fff,var(--c) 40%,transparent);box-shadow:0 0 14px var(--c);animation:cgCrack .45s ease-out forwards}
+@keyframes cgCrack{to{transform:rotate(var(--a)) scaleX(1)}}
+.cg-beam{position:absolute;left:50%;top:0;bottom:0;width:14vmin;margin-left:-7vmin;background:linear-gradient(90deg,transparent,#fff6c8,transparent);box-shadow:0 0 60px #ffc83a;animation:cgBeam 1.2s ease-out forwards;transform-origin:50% 50%}
+@keyframes cgBeam{0%{transform:scaleX(0);opacity:1}30%{transform:scaleX(1)}100%{transform:scaleX(2.5);opacity:0}}
+.cg-rays{position:absolute;left:50%;top:50%;width:200vmax;height:200vmax;margin:-100vmax;background:repeating-conic-gradient(rgba(255,200,58,.35) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 35%);mask:radial-gradient(circle,#000 0,transparent 35%);animation:cgSpin 6s linear infinite,cgFadeIn .5s}
+@keyframes cgSpin{to{transform:rotate(360deg)}}
+@keyframes cgFadeIn{from{opacity:0}}
+.cg-hole{position:absolute;left:50%;top:50%;width:24vmin;height:24vmin;margin:-12vmin;border-radius:50%;background:radial-gradient(circle,#fff 0,#fff 20%,#b04fff 45%,transparent 70%);animation:cgHole 2.4s ease-in forwards}
+@keyframes cgHole{0%{transform:scale(0)}60%{transform:scale(1)}85%{transform:scale(.3)}100%{transform:scale(5);opacity:0}}
+.cg-shard{position:absolute;background:linear-gradient(135deg,rgba(255,79,216,.55),rgba(79,200,255,.45));border:1px solid rgba(255,255,255,.6);animation:cgShard 1.8s ease-in forwards}
+@keyframes cgShard{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+.cg-glitch{animation:cgGlitch .12s steps(2) infinite}
+.cg-glitch .cg-bg{background:linear-gradient(90deg,rgba(255,0,80,.35),transparent 30%,rgba(0,220,255,.35))}
+@keyframes cgGlitch{0%{transform:translate(4px,0);filter:hue-rotate(0)}50%{transform:translate(-5px,2px);filter:hue-rotate(90deg) saturate(2)}100%{transform:translate(2px,-2px);filter:hue-rotate(-60deg)}}
+.cg-word{position:absolute;left:0;right:0;top:9%;text-align:center;font-weight:900;letter-spacing:.08em;line-height:1;z-index:5}
+.cg-word span{display:inline-block;opacity:0;animation:cgLetter .35s ease-out forwards}
+@keyframes cgLetter{from{opacity:0;transform:translateY(30px) scale(1.6)}to{opacity:1;transform:none}}
+.cg-w3{font-size:clamp(2rem,9vw,5rem);background:linear-gradient(180deg,#fff7c9,#ffc83a 45%,#8a5a00 55%,#ffe27a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px #ffb400)}
+.cg-w3 span{background:inherit;-webkit-background-clip:text;background-clip:text;color:transparent}
+.cg-w4{font-size:clamp(3rem,16vw,10rem);color:#fff;text-shadow:0 0 8px #fff,0 0 20px #ff4fd8,0 0 44px #ff4fd8,0 0 80px #b04fff;animation:cgNeon .15s steps(2) 6}
+@keyframes cgNeon{50%{opacity:.7}}
+
+/* ---- tarjetas ---- */
+.cg-pop{animation:cgPop .6s cubic-bezier(.2,1.4,.4,1)}
+.cg-p0{animation-name:cgBounce}
+@keyframes cgPop{from{opacity:0;transform:scale(.4)}}
+@keyframes cgBounce{0%{opacity:0;transform:scale(.5)}50%{transform:scale(1.12)}70%{transform:scale(.95)}100%{transform:scale(1)}}
+.cg-card{--rx:0deg;--ry:0deg;--gx:50%;--gy:50%;position:relative;width:min(240px,62vw);aspect-ratio:3/4.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:var(--r-lg);border:3px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 30%,#1b1b2b),#14141f);color:#fff;transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .12s;box-shadow:0 0 24px color-mix(in srgb,var(--c) 70%,transparent);overflow:hidden}
+.cg-card img{width:72%;aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
+.cg-card b{font-size:1.05rem;text-align:center;padding:0 6px}
+.cg-card i{font-style:normal;opacity:.7;font-size:.8rem}
+.cg-badge{position:absolute;top:8px;left:8px;padding:2px 10px;border-radius:var(--r-pill);background:var(--c);color:#111;font-size:.7rem;font-weight:800}
+.cg-glare{position:absolute;inset:0;pointer-events:none;opacity:0}
+.cg-t2 .cg-glare,.cg-t3 .cg-glare,.cg-t4 .cg-glare{opacity:.6;mix-blend-mode:color-dodge;background:radial-gradient(circle at var(--gx) var(--gy),rgba(255,255,255,.8),transparent 40%),linear-gradient(115deg,transparent 20%,rgba(255,0,200,.35),rgba(0,255,255,.35),rgba(255,255,0,.3),transparent 80%)}
+.cg-t3{animation:cgGlow 1.6s ease-in-out infinite alternate}
+@keyframes cgGlow{to{box-shadow:0 0 50px var(--c)}}
+.cg-t4{border:4px solid transparent;background:linear-gradient(#1b1030,#14101f) padding-box,conic-gradient(from var(--ga),#f44,#fb0,#ff4,#4f7,#4cf,#b4f,#f4d,#f44) border-box;animation:cgRb 3s linear infinite;box-shadow:0 0 40px rgba(255,79,216,.7)}
+@keyframes cgRb{to{--ga:360deg}}
+
+/* x10 */
+.cg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);width:min(940px,96vw);max-height:calc(100dvh - 110px);overflow:auto;padding:4px}
+.cg-flip{perspective:800px;aspect-ratio:3/4.2}
+.cg-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s}
+.cg-flip.on .cg-in{transform:rotateY(180deg)}
+.cg-back,.cg-front{position:absolute;inset:0;backface-visibility:hidden}
+.cg-back{display:grid;place-items:center;border-radius:var(--r-lg);border:3px solid #fff3;background:repeating-linear-gradient(45deg,#26264a 0 8px,#1b1b36 8px 16px);font-size:2rem;font-weight:900;color:#fff8}
+.cg-front{transform:rotateY(180deg)}
+.cg-front .cg-card{width:100%;height:100%;aspect-ratio:auto}
+.cg-hot .cg-back{animation:cgHot .4s ease-in-out infinite alternate;border-color:var(--c)}
+@keyframes cgHot{to{box-shadow:0 0 30px var(--c);transform:scale(1.06)}}
+@media (max-width:600px){
+  .cg-grid{gap:4px}
+  .cg-grid .cg-card b{font-size:.55rem;padding:0 2px}.cg-grid .cg-card i,.cg-grid .cg-badge{display:none}
+  .cg-grid .cg-card{border-width:2px}
+  .cg-pull{flex:1}
+}
+
+/* movimiento reducido: sin shake, flashes ni animaciones largas */
+@media (prefers-reduced-motion:reduce){
+  .cg-sh1,.cg-sh2,.cg-glitch,.cg-flash,.cg-t3,.cg-t4,.cg-rays,.cg-w4,.cg-hot .cg-back{animation:none!important}
+  .cg-pop,.cg-p0{animation:none}
+  .cg-aura.on{animation-duration:.4s!important}
+  .cg-in{transition:none}
+  .cg-card{transition:none}
+}

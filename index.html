@@ -18,6 +18,9 @@
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <link rel="stylesheet" href="css/styles.css?v=5" />
   <link rel="stylesheet" href="css/themes.css?v=2" />
+  <link rel="stylesheet" href="css/casino.css?v=1" />
+  <link rel="stylesheet" href="css/casino-gacha.css?v=1" />
+  <link rel="stylesheet" href="css/casino-bj.css?v=1" />
 </head>
 <body>
   <div id="splash">
@@ -185,7 +188,7 @@
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="gacha">
           <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/amulet-coin.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
-          <span>Gacha</span>
+          <span>Casino</span>
         </button>
         <button class="tab" role="tab" aria-selected="false" data-tab="perfil">
           <img class="ticon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" alt="" width="30" height="30" onerror="this.style.visibility='hidden'">
@@ -269,10 +272,23 @@
         <div id="rankingBody"></div>
       </div>
 
-      <!-- Gacha -->
-      <div class="panel" id="panel-gacha" role="tabpanel" aria-label="Gacha" tabindex="0">
-        <header class="panel-head"><h2>Gacha</h2><p class="muted">Gasta tus monedas y completa tu colección.</p></header>
-        <div id="gachaBody"></div>
+      <!-- Casino (antes Gacha) -->
+      <div class="panel" id="panel-gacha" role="tabpanel" aria-label="Casino" tabindex="0">
+        <header class="panel-head"><h2>Casino</h2><p class="muted">Monedas ficticias, solo para divertirse.</p></header>
+        <div class="cas-bar">
+          <div class="cas-bal" id="casBalBox" aria-live="polite"><span class="coin" aria-hidden="true"></span><b id="casBal">0</b> <span>monedas</span></div>
+          <button type="button" class="btn primary" id="casRecharge" hidden>Recarga gratis</button>
+          <button type="button" class="btn ghost" id="casMute" aria-label="Silenciar sonido" aria-pressed="false">🔊</button>
+          <button type="button" class="btn ghost" id="casReset" aria-label="Reiniciar saldo">Reiniciar</button>
+        </div>
+        <nav class="cas-tabs" role="tablist" aria-label="Juegos del casino">
+          <button type="button" role="tab" class="cas-tab active" aria-selected="true" data-cas="gacha">Gacha</button>
+          <button type="button" role="tab" class="cas-tab" aria-selected="false" data-cas="bj">Blackjack</button>
+          <button type="button" role="tab" class="cas-tab" aria-selected="false" data-cas="classic">Gacha clásico</button>
+        </nav>
+        <section id="casGacha" class="cas-view"></section>
+        <section id="casBj" class="cas-view" hidden></section>
+        <section id="casClassic" class="cas-view" hidden><div id="gachaBody"></div></section>
       </div>
 
       <!-- Perfil -->
@@ -376,6 +392,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=23"></script>
+  <script type="module" src="js/app.js?v=24"></script>
 </body>
 </html>

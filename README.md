@@ -27,7 +27,7 @@ una **tabla de rutas × jugadores** que muestra **qué capturó cada uno en cada
    - **⚰️ Cementerio** — muro global con **todos** los caídos (de todos): apodo, de quién era, nivel de
      muerte y su «último suspiro» (nota). Los tuyos se editan desde su lápida.
    - **🏆 Ranking** — todos los usuarios con victorias, derrotas y % de victorias, y el registro de las **últimas batallas** (entre nosotros). **Solo el admin** registra o borra batallas: el ganador recibe +50 monedas y el perdedor +20.
-   - **🎰 Gacha** — gastas monedas (**100 por tirada**, x1 o x10) y consigues Pokémon para tu colección: Común 70 % · Raro 22 % · Épico 7 % · Legendario 1 %. Hay además **tiradas gratis de prueba** (x1/x10, también para el admin): solo muestran la animación y las rarezas en el navegador, sin gastar monedas ni guardar nada. El sorteo real lo hace el servidor (no se puede trucar). El admin reparte o quita monedas; el admin no tira.
+   - **🎰 Casino** (antes Gacha) — tres vistas con **monedas ficticias locales** (1000 iniciales, en `localStorage`, botón Reiniciar y Recarga gratis con saldo 0; no tocan Supabase): **Gacha** (5 rarezas Común 60 % · Raro 25 % · Épico 10 % · Legendario 4 % · Mítico 1 %, x1 100 / x10 900 con Raro+ garantizado, pity de 50, colección con filtro y animaciones por rareza con sonido sintetizado y «Saltar»), **Blackjack** (6 barajas, 3:2, plantar en 17, doblar, dividir hasta 3 manos, seguro; atajos H/S/D/P) y **Gacha clásico** (el de antes: 100 monedas reales de Supabase, ranking de tiradas y tiradas gratis de prueba).
    - **🧑 Perfil** — eliges tu **banner** (26 temas: tipos, Kalos, Mega, Zygarde, shiny…; el admin puede cambiar el de cualquiera), escribes tu propia **frase** (máx. 40; se ve sobre tu banner en Payos), editas tu nombre y avatar y tus **medallas** (fichas con la imagen oficial; se activa cada una por separado, sin arrastrar las anteriores), todo en una **sola columna centrada**. El **color es fijo (rojo)** para todos. El **avatar** puede ser un Pokémon o una **URL de imagen** (Google, etc.).
 
    Todo se actualiza solo (Supabase Realtime). **Solo editas lo tuyo**.
@@ -64,6 +64,7 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 Inicio/               # splash.jpeg + splash.wav de la intro
 index.html            # una página (incluye la intro/telón inline) (login · app con 9 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/ranking/gacha/perfil)
 css/styles.css        # estilos (tema oscuro por defecto + claro, tokens CSS, estética Pokémon/Kalos)
+css/casino*.css       # estilos del Casino (armazón, gacha, blackjack)
 css/themes.css        # 16 temas de web completos (`html[data-skin]`: colores, radios, sombras y tipografía)
 js/config.js          # URL + anon key + ROUTE_ZONES/ROUTES (zonas y filas de Rutas) + MEDALS + BANNERS (temas de banner)
 js/app.js             # arranque: carga datos y conecta eventos
@@ -71,6 +72,7 @@ js/core.js            # estado compartido (S), cliente Supabase, helpers (esc, t
 js/shell.js           # pestañas, tema claro/oscuro, menú, skeletons
 js/auth.js            # login/registro, entrada a la run
 js/data.js            # reload(), realtime y render()
+js/casino.js · casino-wallet.js · casino-audio.js · casino-gacha.js · casino-bj.js · casino-bj-rules.js   # Casino: armazón, saldo local, sonido, gacha, blackjack y sus reglas puras (`selfTest()`)
 js/rutas.js · mons.js · payos.js · perfil.js · misiones.js · presence.js · dialog.js · ranking.js · gacha.js   # una pestaña/diálogo cada uno
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 .claude/agents/       # subagentes: pz-interfaz, pz-logica, pz-contenido (escriben) y pz-revisor (solo lectura, informe corto)
