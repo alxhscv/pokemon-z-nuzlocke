@@ -20,6 +20,22 @@
   <link rel="stylesheet" href="css/themes.css?v=2" />
 </head>
 <body>
+  <div id="splash" style="position:fixed;inset:0;z-index:99999;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px">
+    <img src="Inicio/splash.jpeg" alt="" style="max-width:60vmin;max-height:60vmin;animation:splash-beat .6667s ease-out infinite">
+    <small style="color:#aaa;font:600 14px Nunito,sans-serif">Pulsa K para saltar</small>
+  </div>
+  <style>@keyframes splash-beat{0%{transform:scale(1.18)}100%{transform:scale(1)}}</style>
+  <script>
+    (function(){
+      var el=document.getElementById('splash'),a=new Audio('Inicio/splash.wav'),t;
+      function end(){clearTimeout(t);a.pause();el.remove();removeEventListener('keydown',key)}
+      function key(e){if(e.key==='k'||e.key==='K')end()}
+      addEventListener('keydown',key);
+      t=setTimeout(end,10000);
+      // shortcut: el navegador puede bloquear el autoplay; se reintenta en la primera interacción
+      a.play().catch(function(){addEventListener('pointerdown',function(){a.play()},{once:true})});
+    })();
+  </script>
   <header class="topbar">
     <div class="brand">
       <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
