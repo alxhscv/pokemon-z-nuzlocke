@@ -707,11 +707,11 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 
 /* ───────── Banners de perfil ───────── */
 .banner{position:relative;overflow:hidden;background:linear-gradient(120deg,var(--b1),var(--b2));color:#fff}
-.banner::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.16;pointer-events:none}
+.banner::before{display:none}
 .banner .bart{position:absolute;right:6px;bottom:-10px;height:80px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.28))}
 .banner .btitle{position:absolute;left:12px;top:8px;max-width:calc(100% - 100px);padding:2px 9px;border-radius:99px;
   background:rgba(0,0,0,.38);color:#fff;font-size:.75rem;font-weight:800;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.friend .fhead.banner{height:84px;margin-bottom:44px;background:linear-gradient(120deg,var(--b1),var(--b2))}
+.friend .fhead.banner{height:84px;margin-bottom:44px}
 .friend .favatar{top:54px}
 .payo-banner{height:96px;margin:0 -24px;border-bottom:2px solid var(--edge)}
 .payo-admin select{width:auto;margin:0;padding:8px 10px}
@@ -979,16 +979,39 @@ input:focus,select:focus,textarea:focus{border-color:#1b1b1b;box-shadow:0 3px 0 
 ::-webkit-scrollbar-corner{background:var(--surface2)}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--shell) var(--surface2)}}
 
-/* ═════════ Banners: arte oficial, patrón de rayas y borde duro ═════════ */
-.banner,.friend .fhead.banner{background:radial-gradient(circle at 82% 75%,rgba(255,255,255,.45),transparent 52%),
-  repeating-linear-gradient(135deg,rgba(255,255,255,.09) 0 10px,transparent 10px 20px),linear-gradient(120deg,var(--b1),var(--b2));border-bottom:3px solid #1b1b1b}
-.banner::before{display:none}
-.banner .bart{height:104px;width:auto;right:4px;bottom:-16px;image-rendering:auto;filter:drop-shadow(3px 3px 0 rgba(0,0,0,.35))}
+/* ═════════ Banners: fondo propio por patrón (.bg-*), sprite pixel art y borde duro ═════════ */
+.banner{border-bottom:3px solid #1b1b1b}
+.banner[class*="bg-"]{background-image:radial-gradient(circle at 86% 80%,rgba(255,255,255,.38),transparent 48%),var(--pt),linear-gradient(var(--ba,120deg),var(--b1),var(--b2));
+  background-size:auto,var(--ps,auto),auto;background-position:0 0,var(--bp,0px) var(--bp,0px),0 0}
 .banner .btitle{border-radius:var(--r-sm);background:rgba(0,0,0,.62);border:2px solid #1b1b1b;padding:3px 9px;font-size:.75rem;letter-spacing:.03em}
-.payo-banner{height:104px;border-bottom:3px solid #1b1b1b}
-.btile{height:92px;border:var(--bw) solid #1b1b1b;border-radius:var(--r);box-shadow:0 3px 0 rgba(0,0,0,.4)}
-.btile .bart{height:100px;bottom:-14px}
+.payo-banner{border-bottom:3px solid #1b1b1b}
+.btile{border:var(--bw) solid #1b1b1b;border-radius:var(--r);box-shadow:0 3px 0 rgba(0,0,0,.4)}
 .btile .bname{display:inline-block;padding:2px 8px;border-radius:var(--r-sm);background:rgba(0,0,0,.6);border:2px solid #1b1b1b;font-size:.78rem;text-shadow:none}
 .btile.on::after{border-radius:var(--r-sm);background:var(--hl);color:#1b1b1b;border:2px solid #1b1b1b}
 .btile.on{outline:3px solid var(--hl);outline-offset:2px}
-.friend .fhead.banner .bart{height:92px;bottom:-12px}
+.bg-stripes{--pt:repeating-linear-gradient(135deg,rgba(255,255,255,.1) 0 10px,transparent 10px 20px);--ps:auto}
+.bg-dots{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%222.6%22 fill=%22%23fff%22 fill-opacity=%22.2%22/%3E%3C/svg%3E");--ps:16px 16px}
+.bg-hex{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2248%22%3E%3Cpath d=%22M14 1L27 8.5V23.5L14 31 1 23.5V8.5zM14 25L27 32.5V47.5M14 25L1 32.5V47.5%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:28px 48px}
+.bg-waves{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2216%22%3E%3Cpath d=%22M0 8Q10 0 20 8T40 8%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:40px 16px}
+.bg-rays{--pt:repeating-conic-gradient(from 0deg at 84% 110%,rgba(255,255,255,.16) 0 7deg,transparent 7deg 14deg);--ps:auto}
+.bg-checker{--pt:repeating-conic-gradient(rgba(255,255,255,.14) 0 25%,transparent 0 50%);--ps:24px 24px}
+.bg-stars{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22%3E%3Cpath d=%22M9 3l1.6 4.4L15 9l-4.4 1.6L9 15l-1.6-4.4L3 9l4.4-1.6zM27 21l1.2 3.3 3.3 1.2-3.3 1.2L27 30l-1.2-3.3-3.3-1.2 3.3-1.2z%22 fill=%22%23fff%22 fill-opacity=%22.2%22/%3E%3C/svg%3E");--ps:36px 36px}
+.bg-zigzag{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2212%22%3E%3Cpath d=%22M0 10L6 2l6 8 6-8 6 8%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:24px 12px}
+.bg-grid{--pt:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);--ps:18px 18px}
+.bg-diamonds{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22%3E%3Cpath d=%22M12 2L22 12 12 22 2 12z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:24px 24px}
+.bg-clouds{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2230%22%3E%3Cpath d=%22M10 24a6 6 0 010-12 8 8 0 0115-2 7 7 0 0112 4 5 5 0 010 10z%22 fill=%22%23fff%22 fill-opacity=%22.2%22/%3E%3C/svg%3E");--ps:60px 30px}
+.bg-bubbles{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Ccircle cx=%2210%22 cy=%2212%22 r=%226%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3Ccircle cx=%2229%22 cy=%2228%22 r=%229%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3Ccircle cx=%2232%22 cy=%229%22 r=%223%22 fill=%22%23fff%22 fill-opacity=%22.2%22/%3E%3C/svg%3E");--ps:40px 40px}
+.bg-scales{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2216%22%3E%3Cpath d=%22M0 16a12 12 0 0124 0M-12 8a12 12 0 0124 0M12 8a12 12 0 0124 0%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:24px 16px}
+.bg-bricks{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2216%22%3E%3Cpath d=%22M0 .5H32M0 8.5H32M.5 0V8M16.5 8V16%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:32px 16px}
+.bg-bolts{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2230%22 height=%2240%22%3E%3Cpath d=%22M17 2L6 22h8l-3 16 13-22h-8z%22 fill=%22%23fff%22 fill-opacity=%22.2%22/%3E%3C/svg%3E");--ps:30px 40px}
+.bg-leaves{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Cpath d=%22M6 26C6 12 14 6 26 6 26 20 18 26 6 26zM6 26L20 12%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:32px 32px}
+.bg-flames{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2236%22%3E%3Cpath d=%22M14 2C16 10 24 14 22 24c-1 6-5 9-8 10-6-1-10-6-9-12 1-5 4-6 5-10 2 2 3 4 4 6 1-4 1-9-1-16z%22 fill=%22%23fff%22 fill-opacity=%22.2%22/%3E%3C/svg%3E");--ps:28px 36px}
+.bg-plus{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22%3E%3Cpath d=%22M12 6v12M6 12h12%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:24px 24px}
+.bg-rain{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2226%22%3E%3Cpath d=%22M14 2L9 14M6 15L3 22%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22 stroke-linecap=%22round%22/%3E%3C/svg%3E");--ps:20px 26px}
+.bg-triangles{--pt:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2224%22%3E%3Cpath d=%22M14 3L25 21H3z%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.24%22 stroke-width=%222%22/%3E%3C/svg%3E");--ps:28px 24px}
+
+/* Payos: equipo y medallas siempre en una sola fila de 6 */
+.friend .team,.friend .medals-view{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.friend .team img,.friend .team .slot{width:100%;height:auto;aspect-ratio:1}
+.friend .medals-view .medal{width:100%;height:auto;aspect-ratio:1}
+.btile{justify-content:flex-start!important}

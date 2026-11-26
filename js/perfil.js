@@ -1,5 +1,5 @@
 import { BANNERS, SKINS } from "./config.js";
-import { $, BRAND, S, bannerImg, bannerOf, bannerVars, byId, byName, db, esc, isPhoto, sprite, toast } from "./core.js";
+import { $, BRAND, S, bannerCls, bannerImg, bannerOf, bannerVars, byId, byName, db, esc, isPhoto, sprite, toast } from "./core.js";
 import { saveMotto } from "./api.js";
 import { renderMedalsEdit } from "./payos.js";
 import { fillHours } from "./presence.js";
@@ -10,7 +10,7 @@ export function renderBannerGrid() {
   const grid = $("bannerGrid");
   if (!grid || !S.profile || S.isAdmin) return;
   const cur = bannerOf(S.profile).id;
-  grid.innerHTML = BANNERS.map((b) => `<button type="button" role="radio" aria-checked="${b.id === cur}" class="btile banner${b.id === cur ? " on" : ""}" data-b="${b.id}" style="${bannerVars(b)}" title="${esc(b.name)}">
+  grid.innerHTML = BANNERS.map((b) => `<button type="button" role="radio" aria-checked="${b.id === cur}" class="btile banner ${bannerCls(b)}${b.id === cur ? " on" : ""}" data-b="${b.id}" style="${bannerVars(b)}" title="${esc(b.name)}">
     ${bannerImg(b)}
     <span class="bname">${esc(b.name)}</span></button>`).join("");
   grid.querySelectorAll(".btile").forEach((t) => (t.onclick = () => setBanner(S.user.id, t.dataset.b)));

@@ -26,17 +26,16 @@ export function emptyState(st) {
 
 // banners de perfil
 export const bannerOf = (prof) => BANNERS.find((b) => b.id === prof?.banner) || BANNERS[0];
-// bolas dibujadas (los sprites de objeto son de 30 px y se ven borrosos en grande)
-const ball = (top, extra = "") => "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#fff" stroke="#1b1b1b" stroke-width="3"/><path d="M3 24a21 21 0 0142 0z" fill="${top}"/><path d="M3 24h42" stroke="#1b1b1b" stroke-width="3"/><circle cx="24" cy="24" r="7" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>${extra}</svg>`);
-const BALLS = { "poke-ball": ball("#E3350D"), "master-ball": ball("#7B2FBE", '<circle cx="13" cy="15" r="3.5" fill="#FF7AC8"/><circle cx="35" cy="15" r="3.5" fill="#FF7AC8"/>') };
-const art = (b, kind) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${kind}${b.shiny ? "shiny/" : ""}${b.pk}.png`;
-export const bannerArt = (b) => b.item ? (BALLS[b.item] || itemImg(b.item)) : art(b, "other/official-artwork/");
-// imagen del banner: arte oficial y, si no existe, el sprite pequeño
-export const bannerImg = (b) => `<img class="bart" src="${bannerArt(b)}" alt="" width="104" height="104" loading="lazy" onerror="${b.item ? "this.style.display='none'" : `this.onerror=function(){this.style.display='none'};this.src='${art(b, "")}'`}">`;
-export const bannerVars = (b) => `--b1:${b.c1};--b2:${b.c2}`;
+export const bannerArt = (b) => b.item ? itemImg(b.item)
+  : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.shiny ? "shiny/" : ""}${b.pk}.png`;
+export const bannerImg = (b) => `<img class="bart" src="${bannerArt(b)}" alt="" width="96" height="96" loading="lazy" onerror="this.style.display='none'">`;
+// patrón de fondo propio de cada banner (css: .bg-*); el ángulo y el desfase salen del id para que ninguno se parezca a otro
+const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+export const bannerCls = (b) => "bg-" + (b.pat || "stripes");
+export const bannerVars = (b) => `--b1:${b.c1};--b2:${b.c2};--ba:${[100, 120, 140, 160, 200, 225, 250, 300][hash(b.id) % 8]}deg;--bp:${hash(b.id) % 23}px`;
 export function bannerHTML(prof, cls = "fhead") {
   const b = bannerOf(prof);
-  return `<div class="${cls} banner" style="${bannerVars(b)}">${bannerImg(b)}${prof?.motto ? `<span class="btitle">${esc(prof.motto)}</span>` : ""}</div>`;
+  return `<div class="${cls} banner ${bannerCls(b)}" style="${bannerVars(b)}">${bannerImg(b)}${prof?.motto ? `<span class="btitle">${esc(prof.motto)}</span>` : ""}</div>`;
 }
 
 // color de jugador: ahora fijo (rojo) para todos
