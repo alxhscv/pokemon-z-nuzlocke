@@ -434,9 +434,9 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 .switch{margin-top:18px}
 .switch a{font-weight:700}
 
-/* Perfil: formulario a la izquierda, medallas a la derecha */
-.profile-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:var(--sp-5);align-items:start;max-width:1000px;margin-inline:auto}
-#panel-perfil>.panel-head{max-width:1000px;margin-inline:auto}
+/* Perfil: una sola columna centrada (formulario, medallas y banner apilados) */
+.profile-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-5);max-width:680px;margin-inline:auto}
+#panel-perfil>.panel-head{max-width:680px;margin-inline:auto}
 .profile-card{min-width:0}
 
 /* ────────────────────────── 6) UTILIDADES ──────────────────── */
@@ -464,9 +464,6 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 /* ─────────────────────────── 8) RESPONSIVE ─────────────────── */
 @media (max-width:960px){
   .columns{grid-template-columns:1fr}
-}
-@media (max-width:820px){
-  .profile-layout{grid-template-columns:1fr}
 }
 @media (max-width:640px){
   .panel-actions{width:100%}
