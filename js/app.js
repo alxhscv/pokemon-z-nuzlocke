@@ -11,6 +11,8 @@ let POKE = [];
 
 window.addEventListener("unhandledrejection", (e) => { e.preventDefault(); console.error(e.reason); toast("Algo ha fallado. Si se repite, recarga la página.", true); });
 init().catch((e) => { console.error(e); toast("No se pudo iniciar la web", true); });
+function showIntroState() { $("menuIntroName").textContent = localStorage.getItem("intro") === "0" ? "Desactivada" : "Activada"; }
+
 async function init() {
   POKE = await fetch("data/pokemon.json").then((r) => r.json()).catch(() => []);
   for (const p of POKE) { byId.set(p.id, p); byName.set(p.es.toLowerCase(), p.id); byName.set(p.en.toLowerCase(), p.id); }
@@ -26,10 +28,18 @@ function wireEvents() {
   $("authPass").onkeydown = $("authUser").onkeydown = (e) => { if (e.key === "Enter") doAuth(); };
   $("switchMode").onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
   $("authAvatar").oninput = updateAuthAvatarPreview;
+  showIntroState();
+  db.from("app_settings").select("value").eq("key", "intro_enabled").maybeSingle().then(({ data }) => { if (data) { localStorage.setItem("intro", data.value ? "1" : "0"); showIntroState(); } });
   $("logoutBtn").onclick = async () => { await stopPresence(true); db.auth.signOut(); };
   $("meChip").onclick = () => { if (!S.isAdmin) selectTab("perfil"); };
   $("userChip").onclick = (e) => { e.stopPropagation(); toggleMenu(); };
   $("menuProfile").onclick = () => { closeMenu(); selectTab("perfil"); };
+  $("menuIntro").onclick = async () => {
+    const on = localStorage.getItem("intro") === "0";   // el nuevo valor es el contrario del actual
+    const { error } = await db.from("app_settings").upsert({ key: "intro_enabled", value: on });
+    if (error) return toast("No se pudo cambiar la intro (¿ejecutaste supabase/intro.sql?)", true);
+    localStorage.setItem("intro", on ? "1" : "0"); showIntroState(); closeMenu();
+  };
   $("menuTheme").onclick = () => { closeMenu(); toggleTheme(); };
   document.addEventListener("click", (e) => { if (!e.target.closest(".usermenu")) closeMenu(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });

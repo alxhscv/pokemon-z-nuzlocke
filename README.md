@@ -36,7 +36,7 @@ La sesión se recuerda en el dispositivo (si caducó, se cierra sola y vuelve al
 rutas, al pulsar una de **tus** celdas se abre el registro con esa ruta ya puesta. Lo registrado con el
 botón «Registrar Pokémon» (sin ruta) aparece en una fila final **«Sin zona»**.
 
-**Pantalla de carga:** al abrir la web se muestra `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav` con brillos, destellos y estrellas durante 10 s; se salta con la tecla **K** (inline en `index.html`).
+**Pantalla de carga:** al abrir la web se muestra `Inicio/splash.jpeg` botando a 90 bpm con `Inicio/splash.wav` con brillos, destellos y estrellas durante 10 s; se salta con la tecla **K**. El **admin** la activa/desactiva para todos desde el menú de usuario (**Intro**; requiere ejecutar `supabase/intro.sql` una vez) (inline en `index.html`).
 
 **Estilo:** menú de consola. Paneles planos con borde marino de 2px y esquinas poco redondeadas, sombra dura solo en botones, fichas de payo y modales, acento rojo Pokéball, pestañas de carpeta, y el Cementerio como un muro de **lápidas**. Tipografía Archivo (ancho expandido en títulos) y Silkscreen solo para niveles y nº de Pokédex. Las **pestañas**, los botones de mover y los estados vacíos usan sprites de objetos de [PokéAPI/sprites](https://github.com/PokeAPI/sprites). En la cabecera, el usuario abre un **menú** (Mi perfil · Tema · Cerrar sesión).
 
@@ -76,6 +76,7 @@ data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (seguro de re-ejecutar: no borra datos; incluye checks e índices)
 supabase/gacha_ranking.sql # frase de perfil, monedas, gacha y batallas (tablas + RPC; seguro de re-ejecutar)
 supabase/pendiente.sql # routes.sql + banners.sql + gacha_ranking.sql juntos, para pegar de una vez (seguro de re-ejecutar)
+supabase/intro.sql    # tabla app_settings: interruptor de la intro (lectura pública, escribe el admin)
 supabase/banners.sql  # columna profiles.banner (temas de banner de perfil; seguro de re-ejecutar)
 supabase/routes.sql   # estados de ruta (sin encuentro / fallido) por jugador (seguro de re-ejecutar)
 supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible al completar; seguro de re-ejecutar)

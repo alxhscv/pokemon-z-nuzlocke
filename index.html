@@ -49,6 +49,11 @@
       var el=document.getElementById('splash'),a=new Audio('Inicio/splash.wav'),t;
       function end(){clearTimeout(t);a.pause();el.remove();removeEventListener('keydown',key)}
       function key(e){if(e.key==='k'||e.key==='K')end()}
+      var KEY='intro_enabled',URL='https://lrzpgufrsvwlkizrlmrt.supabase.co/rest/v1/app_settings?key=eq.'+KEY+'&select=value',AK='sb_publishable_flXeoN0iYEbt2UduG9azTw_qiufj8Q2';
+      // shortcut: el ajuste se lee de la caché local (instantáneo); la primera visita siempre ve la intro
+      var off;try{off=localStorage.getItem('intro')==='0'}catch(e){}
+      fetch(URL,{headers:{apikey:AK}}).then(function(r){return r.json()}).then(function(r){if(r[0])try{localStorage.setItem('intro',r[0].value?'1':'0')}catch(e){}}).catch(function(){});
+      if(off){el.remove();return}
       addEventListener('keydown',key);
       for(var i=0;i<30;i++){var st=document.createElement('span');st.className='sp-star';st.textContent=i%2?'✦':'✧';
         st.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;font-size:'+(12+Math.random()*28)+'px;--d:'+(.8+Math.random()*1.4)+'s;--t:'+Math.random()*2+'s';el.appendChild(st)}
@@ -87,6 +92,7 @@
         <div class="menu hidden" id="userMenu" role="menu">
           <button class="menu-item" role="menuitem" id="menuProfile">Mi perfil</button>
           <button class="menu-item" role="menuitem" id="menuTheme">Tema: <b id="menuThemeName">Oscuro</b></button>
+          <button class="menu-item hidden" role="menuitem" id="menuIntro">Intro: <b id="menuIntroName">…</b></button>
           <hr>
           <button class="menu-item danger" role="menuitem" id="logoutBtn">Cerrar sesión</button>
         </div>
@@ -345,6 +351,6 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/app.js?v=21"></script>
+  <script type="module" src="js/app.js?v=22"></script>
 </body>
 </html>

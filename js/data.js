@@ -60,6 +60,7 @@ export function onRealtime() {
 export function render() {
   $("userChip").innerHTML = `${playerIcon(S.profile)}<span class="uname">${esc(S.profile.display_name)}</span>`;
   $("menuProfile").classList.toggle("hidden", S.isAdmin);
+  $("menuIntro").classList.toggle("hidden", !S.isAdmin);
   $("meChip").innerHTML = `${playerIcon(S.profile)}${esc(S.profile.display_name)}`;
   renderRoutes();
   renderMyColumns();
