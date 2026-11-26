@@ -496,10 +496,10 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
 @media (max-width:640px) and (prefers-reduced-motion:reduce){dialog[open]{animation:none}}
 
 /* fichaje: punto conectado + lista de conectados + horas */
-.online-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;background:var(--muted);opacity:.5}
+.online-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;background:var(--dex)}
 .online-dot.on{background:var(--ok);opacity:1;box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
 .online-row{display:flex;flex-direction:row;align-items:center;gap:10px;cursor:default}
-.online-row .since{margin-left:auto;color:var(--muted);font-size:var(--fs-sm,.85rem);white-space:nowrap}
+.online-row .since{margin-left:auto;color:var(--muted);font-size:var(--fs-sm);white-space:normal;text-align:right}
 .hours-row{margin:0 0 12px;color:var(--muted)}
 .hours-row b{color:inherit;font-weight:800}
 
@@ -547,9 +547,13 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);
 .clock-big{font-family:var(--retro);font-size:2rem;font-variant-numeric:tabular-nums;letter-spacing:.04em;color:var(--ok)}
 .clock-toggle.on .clock-label{font-variant-numeric:tabular-nums}
 @media (max-width:560px){.clock-toggle.on:not(.clock-card .clock-toggle){width:auto;padding:0 10px}.clock-toggle.on .clock-label{display:inline;font-size:var(--fs-sm)}.clock-big{font-size:1.6rem}}
-.sect{margin:22px 0 10px;font-size:var(--fs-lg);display:flex;align-items:center;gap:8px}
-.online-row.off{opacity:.8}
-.online-row.off .fname{font-weight:600}
+.sect{margin:var(--sp-5) 0 var(--sp-3);font-size:var(--fs-lg);display:flex;align-items:center;gap:var(--sp-2)}
+.clock-card.card{padding:var(--sp-4) var(--sp-5)}
+/* filas de conectados: tarjeta compacta, no clicable (sin elevación ni puntero) */
+.friend.online-row{padding:var(--sp-3) var(--sp-4);min-height:var(--tap);flex-wrap:wrap}
+.friend.online-row:hover{transform:none;box-shadow:var(--sh-1)}
+.online-row .fname{min-width:0;overflow-wrap:anywhere}
+.online-row.off .fname{font-weight:600;color:var(--muted)}
 .online-row .since b{color:var(--ok);font-variant-numeric:tabular-nums}
 
 /* botón de fichar en la barra: «Fichar salida» + cronómetro */
