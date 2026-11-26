@@ -291,21 +291,25 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
 .friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
 .friend{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);
   cursor:pointer;transition:transform var(--t),box-shadow var(--t);padding:0 16px 16px}
-.friend:hover{transform:translateY(-3px);box-shadow:var(--sh-2)}
-.friend .fhead{margin:0 -16px 44px;height:60px;background:var(--fc,var(--brand));position:relative;
+.friend:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+@media (prefers-reduced-motion:reduce){.friend:hover{transform:none}}
+.friend .fhead{margin:0 -16px 44px;height:60px;background:var(--brand);position:relative;
   overflow:hidden;border-radius:13px 13px 0 0}
 .friend .fhead::before{content:"";position:absolute;inset:0;background:var(--hex);background-size:28px 48px;opacity:.16}
 .friend .favatar{position:absolute;left:16px;top:30px;width:60px;height:60px;border-radius:50%;
   border:3px solid var(--surface);box-shadow:0 0 0 2px var(--edge);background:var(--surface2);object-fit:cover;image-rendering:pixelated}
-.friend .favatar.dot-av{display:grid;place-items:center}
-.friend .fname{font-weight:800;font-size:var(--fs-lg);display:flex;align-items:center;gap:8px}
+.friend .favatar.dot-av{display:grid;place-items:center;background:var(--brand)}
+/* tarjeta clicable: botón invisible que la cubre (teclado y lector de pantalla) */
+.friend-open{position:absolute;inset:0;z-index:3;width:100%;background:none;border:0;padding:0;border-radius:var(--r-lg);cursor:pointer}
+.friend-open:focus-visible{outline-offset:3px}
+.friend .fname{font-weight:800;font-size:var(--fs-lg);display:flex;align-items:center;gap:var(--sp-2);min-width:0}
 .friend .fname .avatar,.friend .fname .dot{display:none}
 .friend .stats{display:flex;gap:16px;margin:6px 0 10px;color:var(--muted);font-size:var(--fs-sm)}
 .friend .stats b{color:var(--txt);font-size:1.05rem}
-.friend .stats .alive b{color:var(--accent)}
-.friend .stats .fallen{color:var(--grave)}
+.friend .stats .alive b{color:var(--ok)}
+.friend .stats .fallen b{color:var(--danger)}
 .friend .team{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
-.friend .team img{width:38px;height:38px;image-rendering:pixelated;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-sm)}
+.friend .team img{width:40px;height:40px;image-rendering:pixelated;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-sm)}
 .friend.me-card{outline:3px solid var(--brand);outline-offset:2px}
 
 /* --- Medallas (imágenes oficiales) --- */

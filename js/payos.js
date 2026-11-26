@@ -1,5 +1,5 @@
 import { MEDALS, BANNERS } from "./config.js";
-import { $, BRAND, S, SVG, avatarSrc, bannerHTML, bannerOf, byId, confetti, countMedals, db, emptyState, esc, hasMedal, isPhoto, medalImg, playerIcon, sprite, toast } from "./core.js";
+import { $, S, SVG, avatarSrc, bannerHTML, bannerOf, byId, confetti, countMedals, db, emptyState, esc, hasMedal, isPhoto, medalImg, playerIcon, sprite, toast } from "./core.js";
 import { presence } from "./presence.js";
 import { medalsHTML, monCard, monCardRO, wireMons } from "./mons.js";
 import { setBanner } from "./perfil.js";
@@ -17,12 +17,13 @@ export function renderPayos() {
       || `<span class="muted">Sin equipo</span>`;
     const av = avatarSrc(prof.avatar);
     const bigAv = av
-      ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot; style=&quot;background:${BRAND}&quot;></span>'">`
-      : `<span class="favatar dot-av" style="background:${BRAND}"></span>`;
-    return `<div class="friend ${pl.user_id === S.user.id ? "me-card" : ""}" data-user="${pl.user_id}" style="--fc:${BRAND}">
+      ? `<img class="favatar${isPhoto(prof.avatar) ? " photo" : ""}" src="${av}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;favatar dot-av&quot;></span>'">`
+      : `<span class="favatar dot-av"></span>`;
+    return `<div class="friend ${pl.user_id === S.user.id ? "me-card" : ""}" data-user="${pl.user_id}">
+      <button type="button" class="friend-open" aria-label="Ver perfil de ${esc(prof.display_name)}"></button>
       ${bannerHTML(prof)}
       ${bigAv}
-      <div class="fname"><span class="online-dot${presence.get(pl.user_id)?.online ? " on" : ""}" title="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}"></span>${esc(prof.display_name)}</div>
+      <div class="fname"><span class="online-dot${presence.get(pl.user_id)?.online ? " on" : ""}" role="img" aria-label="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}" title="${presence.get(pl.user_id)?.online ? "Conectado" : "Desconectado"}"></span>${esc(prof.display_name)}</div>
       <div class="stats">
         <span class="alive"><b>${es.length - dead}</b> vivos</span>
         <span class="fallen"><b>${dead}</b> caídos</span>
