@@ -27,6 +27,7 @@
       <div class="sp-box"><img src="Inicio/splash.jpeg" alt=""><i class="sp-shine"></i></div>
     </div>
     <div class="sp-curtain l"></div><div class="sp-curtain r"></div>
+    <button id="spGo" class="sp-go" aria-label="Abrir el telón"><b>▶</b><span class="f u">👇</span><span class="f d">👆</span><span class="f lf">👉</span><span class="f rt">👈</span></button>
   </div>
   <style>
     :root{--beat:.6667s}
@@ -51,6 +52,16 @@
     @keyframes sp-sweep{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
     @keyframes sp-hue{to{filter:hue-rotate(360deg) saturate(1.3)}}
     @keyframes sp-twinkle{0%,100%{opacity:0;transform:scale(0) rotate(0)}50%{opacity:1;transform:scale(1.4) rotate(180deg)}}
+    .sp-go{position:absolute;z-index:3;left:50%;top:50%;width:110px;height:110px;margin:-55px 0 0 -55px;border:6px solid #fff;border-radius:50%;background:#e3141f;color:#fff;font-size:44px;cursor:pointer;box-shadow:0 0 0 0 rgba(227,20,31,.7);animation:sp-pulse 1.4s ease-out infinite;transition:opacity .6s,transform .6s}
+    .sp-go.gone{opacity:0;transform:scale(1.6);pointer-events:none}
+    .sp-go .f{position:absolute;font-size:44px;line-height:1;left:50%;top:50%;margin:-22px 0 0 -22px;pointer-events:none}
+    .sp-go .u{animation:sp-u 1s ease-in-out infinite}.sp-go .d{animation:sp-d 1s ease-in-out infinite}
+    .sp-go .lf{animation:sp-l 1s ease-in-out infinite}.sp-go .rt{animation:sp-r 1s ease-in-out infinite}
+    @keyframes sp-pulse{to{box-shadow:0 0 0 45px rgba(227,20,31,0)}}
+    @keyframes sp-u{0%,100%{transform:translateY(-105px)}50%{transform:translateY(-82px)}}
+    @keyframes sp-d{0%,100%{transform:translateY(105px)}50%{transform:translateY(82px)}}
+    @keyframes sp-l{0%,100%{transform:translateX(-105px)}50%{transform:translateX(-82px)}}
+    @keyframes sp-r{0%,100%{transform:translateX(105px)}50%{transform:translateX(82px)}}
     @media (prefers-reduced-motion:reduce){#splash *,#splash{animation-duration:3s!important}}
   </style>
   <script>
@@ -69,10 +80,11 @@
       addEventListener('keydown',key);
       for(var i=0;i<30;i++){var st=document.createElement('span');st.className='sp-star';st.textContent=i%2?'✦':'✧';
         st.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;font-size:'+(12+Math.random()*28)+'px;--d:'+(.8+Math.random()*1.4)+'s;--t:'+Math.random()*2+'s';st0.appendChild(st)}
-      // el telón se abre y solo entonces aparece la intro y suena la música
-      setTimeout(function(){if(done)return;el.querySelectorAll('.sp-curtain').forEach(function(c){c.classList.add('open')});st0.classList.add('on');t=setTimeout(end,10000);
-      // shortcut: el navegador puede bloquear el autoplay; se reintenta en la primera interacción
-      a.play().catch(function(){['pointerdown','keydown','touchstart'].forEach(function(ev){addEventListener(ev,function f(){if(done)return;a.play().then(function(){['pointerdown','keydown','touchstart'].forEach(function(e2){removeEventListener(e2,f)})}).catch(function(){})})})});},900);
+      // el telón solo se abre con un clic: ese gesto es lo que permite que suene el audio
+      var go=document.getElementById('spGo');
+      go.onclick=function(){if(done)return;go.classList.add('gone');
+        el.querySelectorAll('.sp-curtain').forEach(function(c){c.classList.add('open')});st0.classList.add('on');
+        t=setTimeout(end,10000);a.play().catch(function(){})};
     })();
   </script>
   <header class="topbar">
