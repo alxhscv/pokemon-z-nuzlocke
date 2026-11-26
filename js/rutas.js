@@ -1,5 +1,5 @@
 import { ROUTES, ROUTE_ZONES } from "./config.js";
-import { $, BRAND, ROUTE_NORMS, S, byId, db, esc, normLoc, playerIcon, sprite, toast } from "./core.js";
+import { $, ROUTE_NORMS, S, byId, db, esc, normLoc, playerIcon, sprite, toast } from "./core.js";
 import { openDialog } from "./dialog.js";
 import { reload } from "./data.js";
 
@@ -34,19 +34,19 @@ export function renderRoutes() {
   // progreso del grupo + filtros
   const total = ROUTES.length, done = S.players.reduce((n, p) => n + routesDone(p.user_id), 0), max = S.players.length * total;
   const pct = max ? Math.round((done / max) * 100) : 0;
-  const chip = (k, l) => `<button class="chip${routeFilter === k ? " on" : ""}" data-rf="${k}">${l}</button>`;
-  $("routesBar").innerHTML = `<div class="rprogress"><span>Progreso del grupo <b>${pct}%</b></span><div class="bar"><i style="width:${pct}%"></i></div></div>
+  const chip = (k, l) => `<button type="button" class="chip${routeFilter === k ? " on" : ""}" data-rf="${k}" aria-pressed="${routeFilter === k}">${l}</button>`;
+  $("routesBar").innerHTML = `<div class="rprogress"><span>Progreso del grupo <b>${pct}%</b></span><div class="bar" role="progressbar" aria-label="Progreso del grupo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div></div>
     <div class="rfilters" role="group" aria-label="Filtros">${chip("all", "Todas")}${chip("pending", "Pendientes")}${chip("failed", "Fallidas")}
-    ${S.isAdmin ? "" : `<button class="chip${onlyMine ? " on" : ""}" data-mine="1">Solo mías</button>`}</div>`;
+    ${S.isAdmin ? "" : `<button type="button" class="chip${onlyMine ? " on" : ""}" data-mine="1" aria-pressed="${onlyMine}">Solo mías</button>`}</div>`;
   $("routesBar").querySelectorAll("[data-rf]").forEach((b) => (b.onclick = () => { routeFilter = b.dataset.rf; renderRoutes(); }));
   $("routesBar").querySelector("[data-mine]")?.addEventListener("click", () => { onlyMine = !onlyMine; renderRoutes(); });
 
-  const head = `<thead><tr><th class="rcorner">Ruta</th>${cols.map((pl) => {
+  const head = `<thead><tr><th scope="col" class="rcorner">Ruta</th>${cols.map((pl) => {
     const prof = pl.profiles || {};
     const mine = pl.user_id === S.user.id, d = routesDone(pl.user_id);
-    return `<th class="${mine ? "mine" : ""}" style="--me-col:${BRAND}">
+    return `<th scope="col" class="${mine ? "mine" : ""}">
       <div class="rhead"><span class="band"></span><div class="rhead-inner">${playerIcon(prof)}<span>${esc(prof.display_name || "???")}</span></div>
-      <small class="rprog">${d}/${total}</small><div class="bar mini"><i style="width:${total ? (d / total) * 100 : 0}%"></i></div></div></th>`;
+      <small class="rprog">${d}/${total}</small><div class="bar mini" aria-hidden="true"><i style="width:${total ? (d / total) * 100 : 0}%"></i></div></div></th>`;
   }).join("")}</tr></thead>`;
 
   const keep = (r) => {
@@ -62,20 +62,24 @@ export function renderRoutes() {
     if (!rows.length) return "";
     const open = !collapsedZones.has(zname);
     const zd = subject ? `<span class="zprog">${routesDone(subject, zroutes)}/${zroutes.length}</span>` : "";
-    const zhead = `<tr class="zone"><th colspan="${cols.length + 1}"><button type="button" class="zbtn" data-zone="${esc(zname)}" aria-expanded="${open}"><span class="caret">${open ? "▾" : "▸"}</span>${esc(zname)}${zd}</button></th></tr>`;
+    const zhead = `<tr class="zone"><th colspan="${cols.length + 1}"><button type="button" class="zbtn" data-zone="${esc(zname)}" aria-expanded="${open}"><span class="caret" aria-hidden="true">${open ? "▾" : "▸"}</span>${esc(zname)}${zd}</button></th></tr>`;
     if (!open) return zhead;
     return zhead + rows.map((route) => {
       const cells = cols.map((pl) => {
         const mine = pl.user_id === S.user.id;
         const { st, es } = cellState(pl.user_id, route);
+        const addable = mine || S.isAdmin;
         const content = st === "captured" ? es.map((e) => {
           const nm = e.nickname || byId.get(e.pokemon_id)?.es || "";
-          return `<span class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
-            <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></span>`;
-        }).join("") : `<span class="cs ${st}" title="${ST_LABEL[st]}">${ST_ICON[st]}<em>${ST_LABEL[st]}</em></span>`;
-        return `<td class="c-${st} ${mine || S.isAdmin ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content}</td>`;
+          const tag = addable ? `button type="button" aria-label="Editar ${esc(nm)}"` : "span";
+          return `<${tag} class="rmon ${e.status}" data-id="${e.id}" title="${esc(nm)}">
+            <img src="${sprite(e.pokemon_id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><em>${esc(nm)}</em></${addable ? "button" : "span"}>`;
+        }).join("") : addable
+          ? `<button type="button" class="cs ${st}" title="${ST_LABEL[st]}" aria-label="${esc(route) || "Sin zona"}: ${ST_LABEL[st]}">${ST_ICON[st]}<em>${ST_LABEL[st]}</em></button>`
+          : `<span class="cs ${st}" title="${ST_LABEL[st]}">${ST_ICON[st]}<em>${ST_LABEL[st]}</em></span>`;
+        return `<td class="c-${st} ${addable ? "addable" : ""}" data-route="${esc(route)}" data-user="${pl.user_id}">${content}</td>`;
       }).join("");
-      return `<tr><th class="rlabel${route === current ? " current" : ""}">${route === current ? '<span class="here" title="Tu siguiente ruta">›</span>' : ""}${esc(route) || "Sin zona"}</th>${cells}</tr>`;
+      return `<tr><th scope="row" class="rlabel${route === current ? " current" : ""}">${route === current ? '<span class="here" title="Tu siguiente ruta">›</span>' : ""}${esc(route) || "Sin zona"}</th>${cells}</tr>`;
     }).join("");
   }).join("");
 

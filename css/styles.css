@@ -18,7 +18,7 @@
   --line:#DDD6C5; --edge:#B9B09A; --bar:#1B2A4A;
   --txt:#1B2433; --muted:#4F5B70; --dex:#5E6A80; --title:#1B2A4A;
   --red-soft:#FBE4DF;
-  --ok:#2E8B57; --danger:#B0126B; --danger-d:#8E0F57; --link:#1F6FA0;   /* peligro = magenta, separado del rojo */
+  --ok:#1F7A47; --danger:#B0126B; --danger-d:#8E0F57; --link:#1F6FA0;   /* peligro = magenta, separado del rojo */
   --focus:#1F6FA0;
   --me-color:var(--brand);
 
@@ -130,15 +130,57 @@ h4{font-size:var(--fs-md);font-weight:700}
   border:2px solid #1b1b1b;position:relative}
 .pokeball::after{content:"";position:absolute;inset:38% 38%;background:#fff;border:1.5px solid #1b1b1b;border-radius:50%}
 
-/* --- Botones: un lenguaje. Primario = relleno rojo; resto planos/ghost --- */
-.btn,.chip,.movebtn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);
-  width:36px;height:36px;padding:0;display:grid;place-items:center;color:var(--muted)}
-.movebtn svg{width:18px;height:18px}
-.movebtn:hover{border-color:var(--blue);color:var(--title);background:var(--surface2)}
-.movebtn:active{transform:scale(.92)}
-.mon.ro{cursor:default}
-.mon.ro:hover{transform:none;box-shadow:none;border-color:var(--line)}
-@media (hover:none){.mon .moves{opacity:1}}
+/* --- Botones: un lenguaje. Primario = relleno rojo; peligro = magenta; resto planos/ghost --- */
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--txt);
+  padding:var(--sp-2) var(--sp-4);min-height:40px;border-radius:var(--r);font-size:var(--fs-md);font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:var(--sp-2);box-shadow:var(--sh-1);
+  transition:transform .06s,background var(--t),border-color var(--t)}
+.btn svg{width:18px;height:18px}
+.btn:hover{background:var(--surface2);border-color:var(--edge)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent-d);color:#fff;box-shadow:var(--sh-btn)}
+.btn.primary:hover{background:var(--accent-d)}
+.btn.danger{background:var(--danger);border-color:var(--danger-d);color:#fff}
+.btn.danger:hover{background:var(--danger-d)}
+:root[data-theme="dark"] .btn.danger{color:#26081a}   /* magenta claro: texto oscuro para contraste AA */
+.btn.ghost{background:transparent;box-shadow:none}
+.btn.left{margin-right:auto}
+.btn.icon{padding:0;width:40px;height:40px;justify-content:center;background:transparent;box-shadow:none}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* botones/chips sobre la barra oscura */
+.topbar .btn.ghost,.topbar .btn.icon,.topbar .me-chip{color:#fff;background:transparent;border-color:rgba(255,255,255,.35)}
+.topbar .btn.ghost:hover,.topbar .btn.icon:hover,.topbar .me-chip:hover{background:rgba(255,255,255,.12);border-color:#fff}
+.topbar :focus-visible{outline-color:#fff}
+
+/* --- Chip de usuario --- */
+.run-info{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;justify-content:flex-end}
+.me-chip{display:inline-flex;align-items:center;gap:var(--sp-2);font-family:inherit;font-weight:700;font-size:var(--fs-md);
+  background:var(--surface);border:1px solid var(--line);padding:5px var(--sp-3);border-radius:var(--r-pill);color:var(--txt);cursor:pointer}
+.me-chip.small{font-size:var(--fs-sm);padding:4px 10px}
+.me-chip:hover{border-color:var(--edge)}
+
+/* avatar del jugador (sprite redondo) o punto de color */
+.avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;image-rendering:pixelated;
+  background:var(--surface2);border:2px solid var(--edge);flex:0 0 auto;vertical-align:middle}
+.me-chip.small .avatar{width:22px;height:22px}
+.topbar .avatar{border-color:rgba(255,255,255,.6)}
+.avatar.photo,.favatar.photo{image-rendering:auto}
+.dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+
+/* --- Pestañas: subrayado de la activa --- */
+.tabs{display:flex;gap:var(--sp-1);margin:var(--sp-2) 0 0;padding:0 var(--sp-1);border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:700;
+  padding:var(--sp-2) var(--sp-4);min-height:var(--tap);cursor:pointer;border-radius:var(--r) var(--r) 0 0;
+  display:inline-flex;align-items:center;gap:var(--sp-2);white-space:nowrap;transition:color var(--t),background var(--t)}
+.tab:hover{color:var(--txt);background:var(--surface2)}
+.tab.active,.tab[aria-selected="true"]{color:var(--title);border-bottom-color:var(--brand)}
+
+/* --- Cabecera común de panel: título + acciones --- */
+.panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-3) var(--sp-4);margin:0 0 var(--sp-4)}
+.panel-head h2{font-size:var(--fs-xl)}
+.panel-head .muted{flex:1 1 220px;margin:0}
+.panel-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3)}
 
 /* --- Columnas de Seguimiento --- */
 .columns{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -167,7 +209,7 @@ table.routes tbody tr:hover td{background:color-mix(in srgb,var(--blue) 7%,var(-
 /* cabecera (sticky arriba) */
 table.routes thead th{background:var(--surface2);position:sticky;top:0;z-index:2;border-bottom:2px solid var(--edge)}
 .rhead{display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;font-weight:700;min-width:72px}
-.rhead .band{position:absolute;top:0;left:0;right:0;height:4px;background:var(--me-col,var(--line))}
+.rhead .band{position:absolute;top:0;left:0;right:0;height:4px;background:var(--brand)}
 .rhead-inner{display:flex;align-items:center;gap:6px;padding-top:4px}
 thead th.mine{background:color-mix(in srgb,var(--brand) 14%,var(--surface2))}
 
@@ -195,7 +237,7 @@ td.addable .empty::after{content:"";position:absolute;inset:0;margin:auto;width:
   padding:2px;border-radius:var(--r-sm);transition:background var(--t)}
 .rmon:hover{background:color-mix(in srgb,var(--blue) 14%,transparent)}
 .rmon img{width:42px;height:42px;image-rendering:pixelated}
-.rmon em{font-style:normal;font-size:.75rem;color:var(--muted);max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmon em{font-style:normal;font-size:.75rem;color:var(--muted);text-align:center;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rmon.dead{position:relative}
 .rmon.dead img{filter:grayscale(1) brightness(.7);opacity:.8}
 .rmon.dead em{color:var(--grave)}
@@ -397,6 +439,9 @@ dialog menu{display:flex;gap:10px;justify-content:flex-end;padding:0;margin:22px
   #payoDialog{width:100vw;max-width:100vw;max-height:92svh}
   .toast{bottom:calc(78px + env(safe-area-inset-bottom))}   /* por encima de la barra de pestañas */
   .rlabel{min-width:92px;max-width:120px;font-size:var(--fs-xs)}
+  .routes-bar{padding:var(--sp-3)}
+  table.routes th,table.routes td{padding:var(--sp-1)}
+  .rhead{min-width:64px}
 }
 @media (max-width:640px) and (prefers-reduced-motion:reduce){dialog[open]{animation:none}}
 
@@ -494,9 +539,10 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);
 #panel-conectados .friends{max-width:1000px}
 
 /* ───────── Rutas ───────── */
-:root{--st-captured:#2E9B5E;--st-failed:#D8432C;--st-none:#C98A1B;--st-pending:var(--muted)}
-:root[data-theme="dark"]{--st-captured:#47C27E;--st-failed:#FF7A63;--st-none:#E8B04A}
-.routes-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-bottom:14px}
+:root{--st-captured:#1F7A47;--st-failed:var(--danger);--st-none:#8A5A00;--st-pending:var(--muted)}   /* AA sobre blanco; fallido = magenta */
+:root[data-theme="dark"]{--st-captured:#47C27E;--st-none:#E8B04A}
+.routes-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-3) var(--sp-5);margin-bottom:var(--sp-4);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--sp-3) var(--sp-4)}
 .rprogress{flex:1 1 260px;display:flex;flex-direction:column;gap:6px;font-weight:600}
 .rprogress b{font-weight:800}
 .bar{height:10px;border:1px solid var(--line);border-radius:99px;background:var(--surface2);overflow:hidden}
@@ -520,8 +566,14 @@ tr.zone th{background:var(--surface2);text-align:left;padding:0;position:sticky;
 .rlabel .here{color:var(--accent);font-weight:900;margin-right:6px}
 .cs{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.75rem;font-weight:700;line-height:1.1}
 .cs svg{width:20px;height:20px}
+/* casillas/mini-tarjetas clicables = <button>: objetivo >=44px y foco visible */
+button.cs,button.rmon{appearance:none;background:none;border:0;font:inherit;font-size:.75rem;font-weight:700;color:inherit;cursor:pointer}
+button.cs{min-width:var(--tap);min-height:var(--tap);justify-content:center;padding:var(--sp-1);border-radius:var(--r-sm)}
+button.cs.pending{color:var(--accent)}
+button.rmon{min-height:var(--tap)}
+button.cs:focus-visible,button.rmon:focus-visible{outline-offset:-3px}
 .cs em{font-style:normal}
-.cs.pending{color:var(--st-pending);opacity:.7}
+.cs.pending{color:var(--st-pending)}
 .cs.none{color:var(--st-none)}
 .cs.failed{color:var(--st-failed)}
 td.c-none{background:color-mix(in srgb,var(--st-none) 10%,var(--surface))}
@@ -538,7 +590,7 @@ td.addable.c-pending .cs svg{width:22px;height:22px}
 .cellopts .btn{justify-content:center}
 .cellopts .btn.sel{outline:3px solid var(--accent);outline-offset:2px}
 td:not(.addable).c-pending .cs svg{display:none}
-td:not(.addable).c-pending .cs{opacity:.45}
+td:not(.addable).c-pending .cs{color:var(--dex)}
 
 /* pestañas con sprites de objetos de PokéAPI: más legibles cuando están inactivas */
 .tab .ticon{filter:grayscale(.35);opacity:.85;transition:filter var(--t),opacity var(--t)}
@@ -569,6 +621,11 @@ td:not(.addable).c-pending .cs{opacity:.45}
   white-space:normal;font-weight:600}
 .btile .bart{height:72px;bottom:-8px}
 @media (prefers-reduced-motion:reduce){.btile{transition:none}}
+
+/* móvil: reglas que deben ir tras las de cada pantalla */
+@media (max-width:640px){
+  .routes-wrap{max-height:calc(100svh - 300px);min-height:280px;overscroll-behavior:contain}
+}
 
 /* movimiento reducido: sin rebotes ni transiciones largas */
 @media (prefers-reduced-motion:reduce){
