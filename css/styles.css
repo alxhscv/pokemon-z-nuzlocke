@@ -1,5 +1,5 @@
 /* ============================================================
-   Pokémon Z · Nuzlocke Tracker — hoja de estilos
+   PayoLocke Z — hoja de estilos
    Idea: menú de consola. Paneles planos con borde marino de 2px, esquinas poco
    redondeadas, sombra "dura" solo donde se pulsa. Acento rojo Pokéball.
    1) tokens  2) base  3) layout  4) componentes  5) pantallas  6) utilidades
@@ -632,7 +632,7 @@ select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);
 .topbar .btn:active,.topbar .me-chip:active{transform:translateY(2px);box-shadow:none}
 
 /* pestañas: botones de menú de juego, la activa lleva cursor ▶ y fondo amarillo */
-.tabs{gap:6px;padding:6px 0 0;border-bottom:3px solid var(--edge)}
+.tabs{gap:6px;padding:6px 0 0;border-bottom:3px solid var(--edge);flex-wrap:wrap;overflow:visible}   /* en escritorio las pestañas saltan de línea en vez de scroll */
 .tab{font-family:var(--sans);font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--txt);background:var(--surface);
   border:2px solid var(--edge);border-bottom:0;border-radius:var(--r) var(--r) 0 0;margin-bottom:-3px;padding:var(--sp-2) 10px;gap:6px}
 .tab:hover{background:var(--surface2);color:var(--txt)}
@@ -987,3 +987,11 @@ input:focus,select:focus,textarea:focus{border-color:#1b1b1b;box-shadow:0 3px 0 
 .skel{border:var(--bw) solid var(--edge);border-radius:var(--r)}
 .btn:focus-visible,.chip:focus-visible,.tab:focus-visible,.cas-tab:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .btn.primary:disabled,.btn:disabled{box-shadow:none;transform:none}
+
+/* barras de desplazamiento propias: cuadradas, de carcasa; aparecen solo si hay desbordamiento (overflow:auto) */
+::-webkit-scrollbar{width:14px;height:14px}
+::-webkit-scrollbar-track{background:var(--surface2);border-left:2px solid var(--edge);border-top:2px solid var(--edge)}
+::-webkit-scrollbar-thumb{background:var(--shell);border:2px solid #1b1b1b;box-shadow:inset 0 0 0 2px #fff3}
+::-webkit-scrollbar-thumb:hover{background:var(--led-y)}
+::-webkit-scrollbar-corner{background:var(--surface2)}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--shell) var(--surface2)}}

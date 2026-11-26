@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Pokémon Z · Nuzlocke Tracker</title>
+  <title>PayoLocke Z</title>
   <meta name="description" content="Seguimiento del Nuzlocke compartido de Pokémon Z: qué captura cada uno en cada ruta, en tiempo real." />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Ccircle cx=%2224%22 cy=%2224%22 r=%2222%22 fill=%22%23fff%22 stroke=%22%231b1b1b%22 stroke-width=%223%22/%3E%3Cpath d=%22M2.5 24a21.5 21.5 0 0143 0z%22 fill=%22%23E3350D%22/%3E%3Cpath d=%22M2.5 24h43%22 stroke=%22%231b1b1b%22 stroke-width=%223%22/%3E%3Cpath d=%22M13 12h22v6L22 30h13v6H13v-6l13-12H13z%22 fill=%22%23FFD23F%22 stroke=%22%231b1b1b%22 stroke-width=%222.6%22 stroke-linejoin=%22miter%22/%3E%3C/svg%3E" />
   <meta name="theme-color" content="#1B2A4A" />
 
   <!-- Tema (evita parpadeo: aplica data-theme antes de pintar) -->
@@ -16,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pixelify+Sans:wght@400..700&family=Silkscreen&display=swap" />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
-  <link rel="stylesheet" href="css/styles.css?v=10" />
+  <link rel="stylesheet" href="css/styles.css?v=11" />
   <link rel="stylesheet" href="css/themes.css?v=3" />
   <link rel="stylesheet" href="css/casino.css?v=1" />
   <link rel="stylesheet" href="css/casino-gacha.css?v=1" />
@@ -94,14 +95,14 @@
     <div class="brand">
 <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
         <circle cx="24" cy="24" r="22" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
-        <circle cx="24" cy="24" r="15" fill="var(--lens)" stroke="#1b1b1b" stroke-width="3"/>
-        <path d="M15 22a9 9 0 019-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"/>
-        <rect x="17" y="27" width="3" height="3" fill="#fff" opacity=".7"/>
+        <path d="M2.5 24a21.5 21.5 0 0143 0z" fill="#E3350D"/>
+        <path d="M2.5 24h43" stroke="#1b1b1b" stroke-width="3"/>
+        <path d="M13 12h22v6L22 30h13v6H13v-6l13-12H13z" fill="#FFD23F" stroke="#1b1b1b" stroke-width="2.6" stroke-linejoin="miter"/>
       </svg>
       <span class="leds" aria-hidden="true"><i class="led r"></i><i class="led y live-dot" id="liveDot"></i><i class="led g"></i></span>
       <span class="brand-text">
-        <b>Nuzlocke&nbsp;Z</b>
-        <small id="runName">Pokémon Z Tracker</small>
+        <b>PayoLocke&nbsp;Z</b>
+        <small id="runName">Nuzlocke Tracker</small>
       </span>
     </div>
 
@@ -133,9 +134,10 @@
       <div class="auth-scene">
         <h1 class="auth-logo"><svg class="logo-big" viewBox="0 0 48 48" aria-hidden="true">
           <circle cx="24" cy="24" r="22" fill="#fff" stroke="#1b1b1b" stroke-width="3"/>
-          <circle cx="24" cy="24" r="15" fill="var(--lens)" stroke="#1b1b1b" stroke-width="3"/>
-          <path d="M15 22a9 9 0 019-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"/>
-        </svg><span>Pokémon Z</span></h1>
+        <path d="M2.5 24a21.5 21.5 0 0143 0z" fill="#E3350D"/>
+        <path d="M2.5 24h43" stroke="#1b1b1b" stroke-width="3"/>
+        <path d="M13 12h22v6L22 30h13v6H13v-6l13-12H13z" fill="#FFD23F" stroke="#1b1b1b" stroke-width="2.6" stroke-linejoin="miter"/>
+        </svg><span>PayoLocke Z</span></h1>
         <p class="dlgbox prof"><span class="typed">¡Bienvenido al mundo de Pokémon Z! Tu aventura Nuzlocke empieza aquí.</span><i class="more" aria-hidden="true">▼</i></p>
         <div class="dlgbox auth-card">
           <h2 id="authTitle">Continuar partida</h2>

@@ -1,4 +1,4 @@
-# Pokémon Z · Nuzlocke Tracker
+# PayoLocke Z · Nuzlocke Tracker de Pokémon Z
 
 Web para seguir **un Nuzlocke compartido** del fan game **Pokémon Z**
 de [LostieFan Games](https://lostiefangames.blogspot.com/p/pokemon-z.html): todo el grupo juega **la
