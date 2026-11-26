@@ -774,3 +774,7 @@ td:not(.addable).c-pending .cs{color:var(--dex)}
 #themeToggle[aria-disabled]{opacity:.6}
 @media (prefers-reduced-motion:reduce){.stile{transition:none}.stile:hover{transform:none}}
 @media (max-width:760px){.form-row{grid-template-columns:minmax(0,1fr)}.skin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.skin-pick{display:flex;flex-direction:column;gap:4px;cursor:default}
+.skin-pick select{width:100%;font:inherit}
+.banner-card,.skin-card{grid-column:1/-1}

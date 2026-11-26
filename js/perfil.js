@@ -40,6 +40,7 @@ export function applySkin(id) {
   } catch (e) {}
   applyThemeIcon();
   renderSkinGrid();
+  const sel = $("skinSelect"); if (sel) sel.value = sk.id;
 }
 export function renderSkinGrid() {
   const grid = $("skinGrid");
@@ -49,6 +50,16 @@ export function renderSkinGrid() {
     <span class="sprev" aria-hidden="true"><i></i><b></b></span>
     <span class="sname">${esc(s.name)}</span><span class="smode">${s.mode === "light" ? "Claro" : s.mode === "dark" ? "Oscuro" : "Claro u oscuro"}</span></button>`).join("");
   grid.querySelectorAll(".stile").forEach((t) => (t.onclick = () => applySkin(t.dataset.s)));
+}
+
+// selector rápido en el menú de usuario (disponible en cualquier pestaña y en móvil)
+{
+  const sel = $("skinSelect");
+  if (sel) {
+    sel.innerHTML = SKINS.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
+    sel.value = skinOf();
+    sel.onchange = () => applySkin(sel.value);
+  }
 }
 
 // ===================== perfil =====================
