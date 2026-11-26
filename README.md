@@ -58,11 +58,17 @@ pestañas pasan a una **barra inferior fija** y los modales a **hoja inferior** 
 
 ```
 index.html            # una página (login · app con 7 pestañas: rutas/seguimiento/payos/conectados/misiones/cementerio/perfil)
-css/styles.css        # estilos (tema claro por defecto + oscuro, tokens CSS, estética Pokémon/Kalos)
-js/config.js          # URL + anon key + ROUTES (filas de la tabla) + MEDALS (nombre + imagen de cada medalla)
-js/app.js             # lógica (auth, run única, realtime, pestañas, rutas, payos, perfil, diálogos)
+css/styles.css        # estilos (tema oscuro por defecto + claro, tokens CSS, estética Pokémon/Kalos)
+js/config.js          # URL + anon key + ROUTE_ZONES/ROUTES (zonas y filas de Rutas) + MEDALS + BANNERS (temas de banner)
+js/app.js             # arranque: carga datos y conecta eventos
+js/core.js            # estado compartido (S), cliente Supabase, helpers (esc, toast, avatares, banners, medallas)
+js/shell.js           # pestañas, tema claro/oscuro, menú, skeletons
+js/auth.js            # login/registro, entrada a la run
+js/data.js            # reload(), realtime y render()
+js/rutas.js · mons.js · payos.js · perfil.js · misiones.js · presence.js · dialog.js   # una pestaña/diálogo cada uno
 data/pokemon.json     # 1025 Pokémon {id, es, en}
 supabase/schema.sql   # tablas + RLS + realtime + run única (seguro de re-ejecutar: no borra datos; incluye checks e índices)
+supabase/pendiente.sql # routes.sql + banners.sql juntos, para pegar de una vez (seguro de re-ejecutar)
 supabase/banners.sql  # columna profiles.banner (temas de banner de perfil; seguro de re-ejecutar)
 supabase/routes.sql   # estados de ruta (sin encuentro / fallido) por jugador (seguro de re-ejecutar)
 supabase/missions.sql # misiones: 3 tablas + RLS (la recompensa solo es legible al completar; seguro de re-ejecutar)
@@ -129,32 +135,39 @@ Autenticación gestionada por Supabase Auth (`auth.users`). Esquema propio en `p
 
 **Misiones**: `missions`, `mission_rewards` (recompensa, solo legible al completar o siendo admin) y `mission_completions` (una fila por jugador y misión).
 
-**Fichaje** (`supabase/presence.sql`; `clock_in`/`clock_ping`/`clock_out`): tabla `sessions(user_id, started_at, last_seen, ended_at)`, una sesión abierta por usuario. Solo se escribe con `clock_ping()` (latido cada 30 s) y `clock_out()` (al cerrar sesión); `presence_summary()` devuelve horas totales, si está conectado y desde cuándo. Lectura para autenticados, sin escritura directa.
+**Fichaje** (`supabase/presence.sql`): tabla `sessions(user_id, started_at, last_seen, ended_at)`, una sesión abierta por usuario. Solo se escribe con `clock_in()` (fichar entrada), `clock_ping()` (latido cada 30 s mientras estás fichado) y `clock_out()` (salida); `presence_summary()` devuelve horas totales, si está conectado y desde cuándo. Lectura para autenticados, sin escritura directa.
 
 ### Seguridad (RLS)
 Solo usuarios **autenticados**; el rol `anon` no tiene acceso.
 - **Lees** perfiles y la run; **lees** `players`/`entries` solo de la run de la que eres miembro
   (función `is_member()`).
-- **Escribes** solo lo tuyo: tu perfil, tu fila de `players`, tus `entries`. La run es fija (solo lectura).
+- **Escribes** solo lo tuyo: tu perfil (incluido el banner), tu fila de `players`, tus `entries`, tus casillas de `route_status` y tus `mission_completions`. La run es fija (solo lectura).
+- **Misiones:** solo el admin las crea; la recompensa (`mission_rewards`) solo se lee al completar la misión.
+- **Fichaje:** `sessions` es de solo lectura para usuarios; se escribe únicamente con las funciones `clock_*`.
 
 ---
 
 ## Puesta en marcha
 
 1. **Auth:** Supabase → *Authentication → Providers → Email*: activa *Email* y **desactiva "Confirm email"**.
-2. **Base de datos:** Supabase → *SQL Editor* → pega [`supabase/schema.sql`](supabase/schema.sql) → **Run**
-   (crea tablas, RLS, realtime y la run única).
+2. **Base de datos:** Supabase → *SQL Editor* → pega cada archivo y **Run**, en este orden (todos son seguros de re-ejecutar):
+   1. [`supabase/schema.sql`](supabase/schema.sql) — tablas, RLS, realtime y la run única.
+   2. [`supabase/admin.sql`](supabase/admin.sql) — permisos del admin (tras crear la cuenta `admin`).
+   3. [`supabase/presence.sql`](supabase/presence.sql) — fichaje.
+   4. [`supabase/missions.sql`](supabase/missions.sql) — misiones.
+   5. [`supabase/pendiente.sql`](supabase/pendiente.sql) — estados de ruta + banners (equivale a `routes.sql` + `banners.sql`).
+
+   Si falta alguno, la web sigue funcionando pero esa parte avisa de que hay que aplicar su SQL.
 3. **Credenciales:** en [`js/config.js`](js/config.js) (Project URL + anon key, públicas).
 4. **Publicar:** repo → *Settings → Pages → Branch `main` / root*. URL: `https://<usuario>.github.io/<repo>/`.
 
 ### Cuenta admin
 Usuario `admin` (email `admin@users.pokez`). **No aparece en ninguna lista** (no tiene fila en `players` ni
-perfil) y tiene su propia vista: solo las pestañas Rutas, Payos y Cementerio. Puede:
+perfil) y tiene su propia vista: sin Seguimiento ni Perfil, y sin fichar. Puede:
 - editar/mover/borrar **cualquier** Pokémon (desde la tabla de rutas, el cementerio o la ficha de un payo)
   y registrar Pokémon en la celda de cualquier jugador;
-- en la ficha de un payo: marcar sus **medallas**, **renombrarlo** y **eliminar su cuenta** (con todos sus Pokémon).
-
-Para el fichaje ejecuta **una vez** [`supabase/presence.sql`](supabase/presence.sql) (sin él la web funciona pero Conectados sale vacío y las horas a 0).
+- en la ficha de un payo: marcar sus **medallas**, **renombrarlo**, cambiarle el **banner** y **eliminar su cuenta** (con todos sus Pokémon);
+- crear, editar y borrar **misiones** (ve siempre las recompensas) y marcar casillas de Rutas por cualquiera.
 
 Los permisos reales están en la base de datos: ejecuta **una vez** [`supabase/admin.sql`](supabase/admin.sql)
 en Supabase → SQL Editor (después de crear la cuenta `admin`). Sin ese SQL, el admin entra pero no puede
@@ -162,8 +175,11 @@ editar lo de otros. La contraseña **no** está en el repo: se cambia desde Supa
 Quien registre la cuenta `admin` primero es el admin, por eso hay que crearla antes de abrir la web al grupo.
 
 ### Editar las rutas
-Las filas de la tabla de rutas están en `js/config.js → ROUTES` (lista ordenada y editable). Si alguien
+Las zonas y rutas están en `js/config.js → ROUTE_ZONES` (lista ordenada y editable; `ROUTES` se deriva de ella). Si alguien
 registra una zona que no esté en la lista, aparece igualmente al final de la tabla.
+
+### Editar los banners
+`js/config.js → BANNERS`: id, nombre, título, dos colores del degradado y el Pokémon (`pk`, con `shiny`) u objeto (`item`) de decoración. El primero es el de por defecto.
 
 ### Editar las medallas
 `js/config.js → MEDALS`: nombre e `img` (nº de [PokeAPI/sprites/badges](https://github.com/PokeAPI/sprites/tree/master/sprites/badges)).
@@ -188,7 +204,7 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 - **Rutas = borrador editable** (`config.js → ROUTES`): el fan game no publica tablas de encuentros
   fiables. Las zonas nuevas se añaden solas, así que no bloquea.
 - **Pokédex:** 9 generaciones completas (National Dex), no filtrada a los Pokémon concretos del juego.
-- **Fichaje manual:** `clock_in` abre sesión; latido cada 30 s solo mientras estás fichado. Cerrar sesión ficha la salida. Latido cada 30 s, 90 s sin latido = desconectado, así que la precisión es de ±30 s y cerrar la pestaña tarda hasta 90 s en notarse (cerrar sesión es inmediato). Las horas no cuentan si la pestaña está cerrada. El admin no ficha. El tiempo en vivo usa el reloj del navegador.
+- **Fichaje manual:** `clock_in` abre sesión y hay latido cada 30 s solo mientras estás fichado. 90 s sin latido = desconectado, así que la precisión es de ±30 s y cerrar la pestaña tarda hasta 90 s en notarse (cerrar sesión ficha la salida al instante). Las horas no cuentan con la pestaña cerrada. El admin no ficha. El tiempo en vivo usa el reloj del navegador.
 - **Sin histórico/undo:** editar o borrar es inmediato y definitivo.
 
 ---
@@ -196,11 +212,11 @@ python scripts/build_pokemon_json.py scripts/species_names.csv scripts/species.c
 ## Registro de arreglos
 
 - **Banners de perfil** con 26 temas y título visible en Payos (`supabase/banners.sql`; sin él la web funciona con el banner clásico).
-- **Fase 1 de rediseño:** cabecera móvil en una fila con menú de usuario (Salir dentro), tema con estado e icono, iconos de pestañas propios, contenido centrado, errores de promesas con aviso amable y Rutas con estados/zonas/progreso/filtros (`supabase/routes.sql`).
+- **Código en módulos:** `js/app.js` (960 líneas) se parte en módulos ES (`core`, `shell`, `auth`, `data`, `rutas`, `mons`, `payos`, `perfil`, `misiones`, `presence`, `dialog`); el estado compartido vive en `S` (`core.js`). Sin cambios de comportamiento.
+- **Fase 1 de rediseño:** cabecera móvil en una fila con menú de usuario (Salir dentro), tema con estado e icono, contenido centrado, errores de promesas con aviso amable y Rutas con estados/zonas/progreso/filtros (`supabase/routes.sql`).
 - **Fichaje manual y Misiones** (`supabase/missions.sql` y `supabase/presence.sql`).
 - **BD endurecida:** `schema.sql` ya no borra tablas; checks de `status`/`level`/`badges`, índices de claves foráneas y políticas con `(select auth.uid())`. 
-- **Iconos Pokémon** (sprites de objetos de PokéAPI) y **cambio de tema** con una sola transición de página (View Transitions; instantáneo si no hay soporte o `prefers-reduced-motion`).
-- **Fichaje:** pestaña Conectados, punto online en Payos y horas jugadas en el perfil (`presence.sql`).
+- **Iconos Pokémon** en las pestañas (sprites de objetos de PokéAPI; se probaron iconos SVG propios y se descartaron) y **cambio de tema** con una sola transición de página (View Transitions; instantáneo si no hay soporte o `prefers-reduced-motion`).
 - **Rediseño visual** (menos plantilla, más menú de juego): ver «Estilo». Nombre de ruta alineado a la izquierda y sin numeración de adorno; «Cayó a Nv.» ya no usa la fuente pixel (no tiene acentos).
 - **Cuenta admin** (oculta, edita todo y borra usuarios): ver «Cuenta admin».
 - El modal de un payo ahora se actualiza en vivo si cambian sus datos.
